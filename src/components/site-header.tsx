@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/cart-context";
 
 const navigation = [
@@ -15,14 +16,22 @@ export function SiteHeader() {
   const { itemCount, hydrated } = useCart();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-bark-200/70 bg-bark-50/90 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-6xl items-center gap-2 px-4 sm:gap-6 sm:px-6">
-        <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
-          <span aria-hidden className="text-xl sm:text-2xl">
+    <header className="sticky top-0 z-40 border-b border-white/60 bg-white/65 backdrop-blur-xl backdrop-saturate-150">
+      <div className="mx-auto flex h-16 max-w-6xl items-center gap-2 px-4 sm:gap-5 sm:px-6">
+        <Link
+          href="/"
+          className="group flex items-center gap-2 font-semibold tracking-tight"
+        >
+          <span
+            aria-hidden
+            className="flex h-8 w-8 items-center justify-center rounded-xl bg-leaf-100 text-base shadow-soft transition-transform duration-300 group-hover:-rotate-6 sm:h-9 sm:w-9 sm:text-xl"
+          >
             &#127807;
           </span>
           {/* The wordmark does not fit beside the nav and cart on the narrowest phones. */}
-          <span className="hidden text-base text-leaf-800 xs:inline sm:text-lg">Organics</span>
+          <span className="hidden font-display text-base text-bark-900 xs:inline sm:text-xl">
+            Organics
+          </span>
           <span className="sr-only xs:hidden">Organics</span>
         </Link>
 
@@ -35,22 +44,23 @@ export function SiteHeader() {
                 key={item.href}
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                className={`rounded-md px-2.5 py-2 transition-colors sm:px-3 ${
-                  active
-                    ? "bg-leaf-100 text-leaf-800"
-                    : "text-bark-600 hover:bg-bark-100 hover:text-bark-900"
+                className={`relative rounded-lg px-2.5 py-2 font-medium transition-colors sm:px-3 ${
+                  active ? "text-bark-900" : "text-bark-600 hover:text-bark-900"
                 }`}
               >
                 {item.label}
+                <span
+                  aria-hidden
+                  className={`absolute inset-x-2.5 -bottom-0.5 h-0.5 rounded-full bg-marigold-500 transition-transform duration-300 ${
+                    active ? "scale-x-100" : "scale-x-0"
+                  }`}
+                />
               </Link>
             );
           })}
         </nav>
 
-        <Link
-          href="/cart"
-          className="ml-auto inline-flex shrink-0 items-center gap-2 rounded-full bg-marigold-500 px-3.5 py-2 text-sm font-medium text-bark-900 transition-colors hover:bg-marigold-400 sm:px-4"
-        >
+        <Button as={Link} href="/cart" size="sm" className="ml-auto shrink-0">
           Cart
           <span
             aria-hidden
@@ -61,7 +71,7 @@ export function SiteHeader() {
           <span className="sr-only">
             {hydrated ? `${itemCount} items in cart` : "cart"}
           </span>
-        </Link>
+        </Button>
       </div>
     </header>
   );

@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { ProductCard } from "@/components/product-card";
+import { Button } from "@/components/ui/button";
 import { getCategories, getProducts, getRegions } from "@/lib/products";
 
 export const dynamic = "force-dynamic";
@@ -35,10 +36,10 @@ function Chip({ href, active, children }: { href: string; active: boolean; child
     <Link
       href={href}
       aria-current={active ? "true" : undefined}
-      className={`rounded-full border px-4 py-1.5 text-sm transition-colors ${
+      className={`rounded-full px-4 py-1.5 text-sm font-medium ring-1 transition-all duration-200 hover:-translate-y-0.5 ${
         active
-          ? "border-leaf-600 bg-leaf-100 text-leaf-800"
-          : "border-bark-200 bg-white text-bark-600 hover:border-leaf-300"
+          ? "bg-bark-900 text-bark-50 ring-bark-900 shadow-soft"
+          : "bg-white/70 text-bark-600 ring-bark-200 backdrop-blur hover:text-bark-900 hover:ring-marigold-400"
       }`}
     >
       {children}
@@ -69,7 +70,7 @@ export default async function ProductsPage({ searchParams }: PageProps<"/product
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-      <h1 className="text-3xl font-semibold">
+      <h1 className="font-display text-3xl sm:text-4xl">
         {activeCategory?.name ?? "All produce"}
         {filters.region ? <span className="text-bark-600"> from {filters.region}</span> : null}
       </h1>
@@ -89,14 +90,11 @@ export default async function ProductsPage({ searchParams }: PageProps<"/product
           maxLength={100}
           placeholder="Search produce or region"
           aria-label="Search produce or region"
-          className="w-full rounded-full border border-bark-200 bg-white px-4 py-2"
+          className="w-full rounded-full border border-bark-200 bg-white/80 px-5 py-2.5 shadow-soft backdrop-blur transition-[border-color,box-shadow] placeholder:text-bark-600/55 focus:border-marigold-400 focus:outline-none focus:ring-4 focus:ring-marigold-400/25"
         />
-        <button
-          type="submit"
-          className="rounded-full bg-leaf-700 px-5 py-2 text-sm font-medium text-white hover:bg-leaf-800"
-        >
+        <Button type="submit" variant="dark">
           Search
-        </button>
+        </Button>
       </form>
 
       <nav aria-label="Categories" className="mt-6 flex flex-wrap items-center gap-2">
@@ -134,18 +132,27 @@ export default async function ProductsPage({ searchParams }: PageProps<"/product
       ) : null}
 
       {products.length === 0 ? (
-        <div className="mt-10 rounded-2xl border border-dashed border-bark-200 bg-white p-10 text-center">
-          <p className="text-bark-600">Nothing matches those filters yet.</p>
+        <div className="glass mt-10 animate-rise rounded-3xl p-12 text-center">
+          <span aria-hidden className="text-5xl">
+            {"\u{1F50D}"}
+          </span>
+          <p className="mt-4 font-display text-xl">Nothing matches those filters</p>
           {isFiltered ? (
-            <Link href="/products" className="mt-3 inline-block text-sm text-leaf-700 underline">
+            <Button as={Link} href="/products" variant="secondary" className="mt-5">
               Clear all filters
-            </Link>
+            </Button>
           ) : null}
         </div>
       ) : (
         <div className="mt-8 grid gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
+          {products.map((product, index) => (
+            <div
+              key={product.id}
+              style={{ animationDelay: `${Math.min(index, 8) * 55}ms` }}
+              className="animate-rise"
+            >
+              <ProductCard product={product} />
+            </div>
           ))}
         </div>
       )}

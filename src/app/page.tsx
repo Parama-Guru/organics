@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { ProductCard } from "@/components/product-card";
+import { Button } from "@/components/ui/button";
 import { getCategories, getFeaturedProducts } from "@/lib/products";
 
 // The catalog lives in Postgres, which is not reachable while the Docker image builds.
@@ -26,32 +27,31 @@ export default async function HomePage() {
           <p className="inline-flex items-center gap-2 rounded-full bg-marigold-500 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-bark-900">
             Certified organic
           </p>
-          <h1 className="mt-4 max-w-2xl text-3xl font-semibold leading-tight xs:text-4xl sm:text-5xl">
+          <h1 className="mt-4 max-w-2xl font-display text-4xl leading-[1.08] xs:text-5xl sm:text-6xl">
             Real food, grown the <span className="text-marigold-400">slow way</span>.
           </h1>
-          <p className="mt-4 max-w-xl text-bark-100">
+          <p className="mt-5 max-w-xl text-lg text-bark-100">
             We buy direct from certified organic farms and deliver within hours of harvest. No
             synthetic pesticides, no waxes, no cold-storage months.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link
-              href="/products"
-              className="inline-block rounded-full bg-marigold-500 px-6 py-3 font-medium text-bark-900 transition-all duration-200 hover:-translate-y-0.5 hover:bg-marigold-400"
-            >
+            <Button as={Link} href="/products" size="lg">
               Shop the harvest
-            </Link>
-            <Link
+            </Button>
+            <Button
+              as={Link}
               href="/products?region=Nilgiris"
-              className="inline-block rounded-full border-2 border-white/70 px-6 py-3 font-medium text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-white hover:text-bark-900"
+              size="lg"
+              variant="onDark"
             >
               Browse by region
-            </Link>
+            </Button>
           </div>
         </div>
       </section>
 
       <section className="mt-14">
-        <h2 className="text-2xl font-semibold">
+        <h2 className="font-display text-2xl sm:text-3xl">
           Shop by category
           <span aria-hidden className="ml-3 inline-block h-1 w-12 rounded-full bg-marigold-500" />
         </h2>
@@ -61,9 +61,17 @@ export default async function HomePage() {
               key={category.id}
               href={`/products?category=${category.slug}`}
               style={{ animationDelay: `${index * 60}ms` }}
-              className="animate-rise rounded-2xl border border-bark-200/70 bg-white p-5 transition-all duration-200 hover:-translate-y-1 hover:border-marigold-400 hover:shadow-lg"
+              className="group animate-rise rounded-3xl border border-white/70 bg-white/70 p-5 shadow-soft backdrop-blur-md transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-1.5 hover:border-marigold-400/70 hover:shadow-lift"
             >
-              <h3 className="font-medium">{category.name}</h3>
+              <h3 className="flex items-center justify-between gap-2 font-display text-lg">
+                {category.name}
+                <span
+                  aria-hidden
+                  className="text-marigold-500 opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100"
+                >
+                  &rarr;
+                </span>
+              </h3>
               {category.description ? (
                 <p className="mt-1 text-sm text-bark-600">{category.description}</p>
               ) : null}
@@ -74,7 +82,7 @@ export default async function HomePage() {
 
       <section className="mt-14">
         <div className="flex items-baseline justify-between gap-4">
-          <h2 className="text-2xl font-semibold">
+          <h2 className="font-display text-2xl sm:text-3xl">
             This week&apos;s pick
             <span aria-hidden className="ml-3 inline-block h-1 w-12 rounded-full bg-leaf-500" />
           </h2>

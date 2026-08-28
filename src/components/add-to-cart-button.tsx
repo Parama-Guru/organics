@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import { useCart, type CartLine } from "@/lib/cart-context";
 
 type Props = {
@@ -16,27 +17,31 @@ export function AddToCartButton({ product, inStock, className = "" }: Props) {
 
   if (!inStock) {
     return (
-      <button
-        type="button"
-        disabled
-        className={`rounded-full bg-bark-100 px-4 py-2 text-sm font-medium text-bark-600 ${className}`}
-      >
+      <Button type="button" variant="secondary" size="sm" disabled className={className}>
         Out of stock
-      </button>
+      </Button>
     );
   }
 
   return (
-    <button
+    <Button
       type="button"
+      size="sm"
+      aria-live="polite"
       onClick={() => {
         addItem(product);
         setAdded(true);
         window.setTimeout(() => setAdded(false), 1500);
       }}
-      className={`rounded-full bg-marigold-500 px-4 py-2 text-sm font-medium text-bark-900 transition-colors hover:bg-marigold-400 ${className}`}
+      className={`${added ? "bg-leaf-600 text-white hover:bg-leaf-600" : ""} ${className}`}
     >
-      {added ? "Added" : "Add to cart"}
-    </button>
+      {added ? (
+        <>
+          <span aria-hidden>&#10003;</span> Added
+        </>
+      ) : (
+        "Add to cart"
+      )}
+    </Button>
   );
 }

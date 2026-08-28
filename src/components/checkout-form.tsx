@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { Button } from "@/components/ui/button";
+import { Field } from "@/components/ui/field";
 import { useCart } from "@/lib/cart-context";
 import { formatMoney } from "@/lib/money";
 
@@ -81,26 +83,25 @@ export function CheckoutForm({ deliveryFeeCents, freeDeliveryThresholdCents }: P
 
   return (
     <form onSubmit={handleSubmit} className="mt-8 grid gap-8 lg:grid-cols-[1fr_20rem]">
-      <div className="grid min-w-0 gap-4 rounded-2xl border border-bark-200/70 bg-white p-5 sm:grid-cols-2">
+      <div className="glass grid min-w-0 animate-rise gap-4 rounded-3xl p-6 sm:grid-cols-2">
         {fields.map((field) => (
-          <label
+          <Field
             key={field.name}
-            className={`text-sm ${field.name.startsWith("address") ? "sm:col-span-2" : ""}`}
-          >
-            <span className="font-medium">{field.label}</span>
-            <input
-              name={field.name}
-              type={"type" in field ? field.type : "text"}
-              autoComplete={field.autoComplete}
-              required={field.required}
-              maxLength={200}
-              className="mt-1 w-full rounded-md border border-bark-200 px-3 py-2"
-            />
-          </label>
+            label={field.label}
+            name={field.name}
+            type={"type" in field ? field.type : "text"}
+            autoComplete={field.autoComplete}
+            required={field.required}
+            maxLength={200}
+            className={field.name.startsWith("address") ? "sm:col-span-2" : ""}
+          />
         ))}
 
         {error ? (
-          <p role="alert" className="sm:col-span-2 rounded-md bg-red-50 p-3 text-sm text-red-700">
+          <p
+            role="alert"
+            className="animate-pop rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 sm:col-span-2"
+          >
             {error}
           </p>
         ) : null}
@@ -108,8 +109,8 @@ export function CheckoutForm({ deliveryFeeCents, freeDeliveryThresholdCents }: P
 
       {/* min-w-0: grid items default to min-width:auto, so a long product name in
           the summary below would otherwise widen the whole column past the viewport. */}
-      <aside className="h-fit min-w-0 rounded-2xl border border-bark-200/70 bg-white p-5">
-        <h2 className="font-semibold">Summary</h2>
+      <aside className="glass h-fit min-w-0 animate-rise rounded-3xl p-6 lg:sticky lg:top-24">
+        <h2 className="font-display text-lg">Summary</h2>
 
         <ul className="mt-3 space-y-1 text-sm text-bark-600">
           {lines.map((line) => (
@@ -143,13 +144,9 @@ export function CheckoutForm({ deliveryFeeCents, freeDeliveryThresholdCents }: P
           Totals are recalculated on the server from live catalog prices before the order is saved.
         </p>
 
-        <button
-          type="submit"
-          disabled={submitting}
-          className="mt-5 w-full rounded-full bg-marigold-500 px-5 py-3 text-sm font-medium text-bark-900 hover:bg-marigold-400 disabled:opacity-60"
-        >
+        <Button type="submit" size="lg" disabled={submitting} className="mt-5 w-full">
           {submitting ? "Placing order…" : "Place order"}
-        </button>
+        </Button>
       </aside>
     </form>
   );

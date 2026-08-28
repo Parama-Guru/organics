@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Fraunces, Manrope } from "next/font/google";
 
 import { loadConfig } from "@conf/config";
 import { SiteFooter } from "@/components/site-footer";
@@ -6,6 +7,20 @@ import { SiteHeader } from "@/components/site-header";
 import { CartProvider } from "@/lib/cart-context";
 
 import "./globals.css";
+
+// next/font self-hosts these at build time, so the CSP stays `font-src 'self'`.
+const display = Fraunces({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-display-family",
+  axes: ["SOFT", "WONK"],
+});
+
+const body = Manrope({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-body-family",
+});
 
 export function generateMetadata(): Metadata {
   const { app } = loadConfig();
@@ -32,7 +47,10 @@ export function generateMetadata(): Metadata {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className="h-full antialiased">
+    <html
+      lang="en"
+      className={`${display.variable} ${body.variable} h-full antialiased`}
+    >
       <body className="flex min-h-full flex-col">
         <CartProvider>
           <a

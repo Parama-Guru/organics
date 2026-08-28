@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { Button } from "@/components/ui/button";
 import { formatMoney } from "@/lib/money";
 import { prisma } from "@/lib/prisma";
 
@@ -44,12 +45,19 @@ export default async function OrderPage({ params }: PageProps<"/orders/[orderNum
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6">
-      <div className="rounded-2xl border border-leaf-200 bg-leaf-50 p-6">
-        <h1 className="text-2xl font-semibold text-leaf-800">Thank you — your order is in.</h1>
+      <div className="glass animate-rise rounded-3xl p-8 text-center">
+        <span aria-hidden className="text-5xl">
+          {"\u{1F33F}"}
+        </span>
+        <h1 className="mt-4 font-display text-2xl text-leaf-800">
+          Thank you — your order is in.
+        </h1>
         <p className="mt-2 text-sm text-bark-600">
           Confirmation sent to {maskEmail(order.email)}. Keep this reference safe.
         </p>
-        <p className="mt-4 font-mono text-lg">{order.orderNumber}</p>
+        <p className="mt-4 inline-block rounded-full bg-bark-900 px-5 py-2 font-mono text-lg text-marigold-50">
+          {order.orderNumber}
+        </p>
       </div>
 
       <dl className="mt-6 grid grid-cols-1 gap-4 text-sm xs:grid-cols-2 sm:grid-cols-3">
@@ -69,7 +77,7 @@ export default async function OrderPage({ params }: PageProps<"/orders/[orderNum
         </div>
       </dl>
 
-      <ul className="mt-6 divide-y divide-bark-200/70 rounded-2xl border border-bark-200/70 bg-white">
+      <ul className="glass mt-6 divide-y divide-bark-200/60 overflow-hidden rounded-3xl">
         {order.items.map((item) => (
           <li key={item.id} className="flex justify-between gap-4 p-4 text-sm">
             <span>
@@ -99,12 +107,9 @@ export default async function OrderPage({ params }: PageProps<"/orders/[orderNum
         </div>
       </dl>
 
-      <Link
-        href="/products"
-        className="mt-8 inline-block rounded-full bg-marigold-500 px-5 py-3 text-sm font-medium text-bark-900 hover:bg-marigold-600"
-      >
+      <Button as={Link} href="/products" size="lg" className="mt-8">
         Continue shopping
-      </Link>
+      </Button>
     </div>
   );
 }

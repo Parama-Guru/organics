@@ -31,15 +31,23 @@
   --color-bark-900: #1f3a5f;
 
   --font-sans:
-    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
-    sans-serif;
+    var(--font-body-family), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-display:
+    var(--font-display-family), ui-serif, Georgia, "Times New Roman", serif;
 
-  /* Tailwind's smallest default is 40rem. 22rem is where the header stops
-     overflowing with the wordmark shown (measured: needs 312px of content). */
-  --breakpoint-xs: 22rem;
+  /* Layered, warm-tinted shadows read as depth; flat grey ones look cheap. */
+  --shadow-soft: 0 1px 2px rgb(31 58 95 / 0.04), 0 4px 12px rgb(31 58 95 / 0.06);
+  --shadow-lift: 0 2px 4px rgb(31 58 95 / 0.05), 0 12px 28px rgb(31 58 95 / 0.12);
+  --shadow-glass: 0 1px 0 rgb(255 255 255 / 0.5) inset, 0 8px 32px rgb(31 58 95 / 0.10);
+
+  /* Tailwind's smallest default is 40rem. 24rem is where the header has real
+     slack with the wordmark shown (measured: negative slack at 23rem). */
+  --breakpoint-xs: 24rem;
 
   --animate-rise: rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-fade-in: fade-in 0.45s ease-out both;
+  --animate-pop: pop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
 @keyframes rise {
@@ -62,6 +70,17 @@
   }
 }
 
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 :root {
   color-scheme: light;
 }
@@ -71,12 +90,51 @@ body {
   color: var(--color-bark-900);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  /* Warm light behind the whole page so flat sections still feel lit. */
+  background-image:
+    radial-gradient(38rem 38rem at 12% -8%, rgb(236 147 70 / 0.10), transparent 60%),
+    radial-gradient(34rem 34rem at 92% 4%, rgb(75 143 94 / 0.10), transparent 62%);
+  background-attachment: fixed;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  letter-spacing: -0.015em;
 }
 
 /* Keep keyboard focus clearly visible for accessibility. */
 :focus-visible {
   outline: 2px solid var(--color-leaf-600);
   outline-offset: 2px;
+}
+
+@utility glass {
+  background-color: rgb(255 255 255 / 0.62);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  border: 1px solid rgb(255 255 255 / 0.65);
+  box-shadow: var(--shadow-glass);
+}
+
+/* For glass sitting on the dark indigo hero. */
+@utility glass-dark {
+  background-color: rgb(255 255 255 / 0.10);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid rgb(255 255 255 / 0.22);
+}
+
+/* Browsers without backdrop-filter get an opaque panel instead of unreadable text. */
+@supports not (backdrop-filter: blur(1px)) {
+  .glass {
+    background-color: rgb(255 255 255 / 0.96);
+  }
+  .glass-dark {
+    background-color: rgb(31 58 95 / 0.86);
+  }
 }
 
 /* iOS Safari zooms the whole page when a focused control is under 16px.

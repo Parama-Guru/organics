@@ -31,35 +31,47 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
-      <Link href="/products" className="text-sm text-leaf-700 hover:underline">
-        &larr; Back to shop
+      <Link
+        href="/products"
+        className="inline-flex items-center gap-1.5 text-sm font-medium text-bark-600 transition-colors hover:text-bark-900"
+      >
+        <span aria-hidden>&larr;</span> Back to shop
       </Link>
 
       <div className="mt-6 grid animate-rise gap-8 sm:grid-cols-2">
         <ProductGallery images={product.images} name={product.name} emoji={product.emoji} />
 
         <div>
-          <p className="text-xs uppercase tracking-wide text-leaf-700">
+          <p className="text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-leaf-700">
             {product.category.name}
             {product.region ? (
               <span className="text-bark-600"> &middot; grown in {product.region}</span>
             ) : null}
           </p>
-          <h1 className="mt-2 text-2xl font-semibold break-words sm:text-3xl">{product.name}</h1>
+          <h1 className="mt-2 font-display text-3xl leading-tight break-words sm:text-4xl">
+            {product.name}
+          </h1>
 
           <p className="mt-4 text-bark-600">{product.description}</p>
 
-          <p className="mt-6 text-2xl font-semibold">{formatMoney(product.priceCents)}</p>
-          <p className="text-sm text-bark-600">per {product.unit}</p>
+          <div className="mt-6 flex items-end gap-3">
+            <p className="font-display text-3xl leading-none">
+              {formatMoney(product.priceCents)}
+            </p>
+            <p className="pb-1 text-sm text-bark-600">per {product.unit}</p>
+          </div>
 
-          <p className={`mt-3 text-sm ${inStock ? "text-leaf-700" : "text-bark-600"}`}>
+          <p
+            className={`mt-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
+              inStock ? "bg-leaf-100 text-leaf-800" : "bg-bark-100 text-bark-600"
+            }`}
+          >
             {inStock ? `${product.stock} in stock` : "Currently unavailable"}
           </p>
 
           <AddToCartButton
             className="mt-6"
-            inStock={inStock}
-            product={{
+            inStock={inStock}            product={{
               productId: product.id,
               slug: product.slug,
               name: product.name,
