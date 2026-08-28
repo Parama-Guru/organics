@@ -1,31 +1,34 @@
 import type { Metadata } from "next";
 
+import { loadConfig } from "@conf/config";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { CartProvider } from "@/lib/cart-context";
 
 import "./globals.css";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+export function generateMetadata(): Metadata {
+  const { app } = loadConfig();
 
-export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
-  title: {
-    default: "Organics — Certified organic groceries, delivered",
-    template: "%s | Organics",
-  },
-  description:
-    "Certified organic fruit, vegetables, dairy and pantry staples sourced direct from farms and delivered fresh.",
-  openGraph: {
-    title: "Organics — Certified organic groceries, delivered",
+  return {
+    metadataBase: new URL(app.site_url),
+    title: {
+      default: `${app.name} — Certified organic groceries, delivered`,
+      template: `%s | ${app.name}`,
+    },
     description:
-      "Certified organic fruit, vegetables, dairy and pantry staples sourced direct from farms.",
-    url: siteUrl,
-    siteName: "Organics",
-    type: "website",
-  },
-  robots: { index: true, follow: true },
-};
+      "Certified organic fruit, vegetables, dairy and pantry staples sourced direct from farms and delivered fresh.",
+    openGraph: {
+      title: `${app.name} — Certified organic groceries, delivered`,
+      description:
+        "Certified organic fruit, vegetables, dairy and pantry staples sourced direct from farms.",
+      url: app.site_url,
+      siteName: app.name,
+      type: "website",
+    },
+    robots: { index: true, follow: true },
+  };
+}
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (

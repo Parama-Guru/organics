@@ -34,6 +34,9 @@ yarn-error.log*
 .env*
 !.env.example
 
+# app config - conf/config.yaml holds real secrets; only the template is tracked
+/conf/config.yaml
+
 # vercel
 .vercel
 

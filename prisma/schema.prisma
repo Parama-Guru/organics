@@ -7,8 +7,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Category {
@@ -32,6 +33,7 @@ model Product {
   unit        String
   imageUrl    String?
   emoji       String?
+  region      String?
   stock       Int         @default(0)
   isActive    Boolean     @default(true)
   isFeatured  Boolean     @default(false)
@@ -44,6 +46,7 @@ model Product {
   @@index([categoryId])
   @@index([slug])
   @@index([isActive, isFeatured])
+  @@index([region])
 }
 
 enum OrderStatus {

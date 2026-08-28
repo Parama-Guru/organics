@@ -11,9 +11,9 @@ export default async function HomePage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6">
-      <section className="mt-10 overflow-hidden rounded-3xl bg-leaf-700 px-6 py-14 text-white sm:px-12">
-        <p className="text-sm uppercase tracking-widest text-leaf-200">Certified organic</p>
-        <h1 className="mt-3 max-w-2xl text-4xl font-semibold leading-tight sm:text-5xl">
+      <section className="mt-10 overflow-hidden rounded-3xl bg-leaf-700 px-5 py-10 text-white sm:px-12 sm:py-14">
+        <p className="text-sm uppercase tracking-widest text-leaf-100">Certified organic</p>
+        <h1 className="mt-3 max-w-2xl text-3xl font-semibold leading-tight xs:text-4xl sm:text-5xl">
           Real food, grown the slow way.
         </h1>
         <p className="mt-4 max-w-xl text-leaf-100">
@@ -22,7 +22,7 @@ export default async function HomePage() {
         </p>
         <Link
           href="/products"
-          className="mt-8 inline-block rounded-full bg-white px-6 py-3 font-medium text-leaf-800 transition-colors hover:bg-leaf-50"
+          className="mt-8 inline-block rounded-full bg-marigold-500 px-6 py-3 font-medium text-bark-900 transition-colors hover:bg-marigold-400"
         >
           Shop the harvest
         </Link>
@@ -60,7 +60,7 @@ export default async function HomePage() {
             sample produce.
           </p>
         ) : (
-          <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-5 grid gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {featured.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}

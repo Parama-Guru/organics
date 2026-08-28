@@ -26,10 +26,12 @@ services:
       - key: NEXT_PUBLIC_SITE_URL
         sync: false
       - key: NEXT_PUBLIC_CURRENCY
-        value: USD
+        value: INR
+      - key: NEXT_PUBLIC_LOCALE
+        value: en-IN
       - key: DELIVERY_FEE_CENTS
-        value: "499"
+        value: "4900"
       - key: FREE_DELIVERY_THRESHOLD_CENTS
-        value: "5000"
+        value: "49900"
       - key: RUN_MIGRATIONS
         value: "true"

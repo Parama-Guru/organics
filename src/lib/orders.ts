@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 
-import { serverEnv } from "./env";
+import { loadConfig } from "@conf/config";
+
 import { prisma } from "./prisma";
 import type { CreateOrderInput } from "./validation";
 
@@ -31,8 +32,10 @@ function mergeItems(items: CreateOrderInput["items"]): Map<string, number> {
 }
 
 export function calculateDelivery(subtotalCents: number): number {
-  const { DELIVERY_FEE_CENTS, FREE_DELIVERY_THRESHOLD_CENTS } = serverEnv();
-  return subtotalCents >= FREE_DELIVERY_THRESHOLD_CENTS ? 0 : DELIVERY_FEE_CENTS;
+  const { commerce } = loadConfig();
+  return subtotalCents >= commerce.free_delivery_threshold_cents
+    ? 0
+    : commerce.delivery_fee_cents;
 }
 
 export async function createOrder(input: CreateOrderInput) {

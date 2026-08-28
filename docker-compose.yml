@@ -20,15 +20,16 @@ services:
       context: .
       args:
         NEXT_PUBLIC_SITE_URL: http://localhost:3000
-        NEXT_PUBLIC_CURRENCY: USD
+        NEXT_PUBLIC_CURRENCY: INR
+        NEXT_PUBLIC_LOCALE: en-IN
     depends_on:
       db:
         condition: service_healthy
     environment:
       DATABASE_URL: postgresql://organics:organics@db:5432/organics?schema=public
       NEXT_PUBLIC_SITE_URL: http://localhost:3000
-      DELIVERY_FEE_CENTS: "499"
-      FREE_DELIVERY_THRESHOLD_CENTS: "5000"
+      DELIVERY_FEE_CENTS: "4900"
+      FREE_DELIVERY_THRESHOLD_CENTS: "49900"
       RUN_MIGRATIONS: "true"
     ports:
       - "3000:3000"

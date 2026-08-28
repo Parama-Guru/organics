@@ -1,27 +1,40 @@
 @import "tailwindcss";
 
 @theme {
-  --color-leaf-50: #f2f9f0;
-  --color-leaf-100: #e0f0dc;
-  --color-leaf-200: #c2e1ba;
-  --color-leaf-300: #96cb8b;
-  --color-leaf-400: #66ad58;
-  --color-leaf-500: #458f39;
-  --color-leaf-600: #33722b;
-  --color-leaf-700: #2a5a25;
-  --color-leaf-800: #244821;
-  --color-leaf-900: #1e3c1d;
+  /* Leaf — produce accents and active states. */
+  --color-leaf-50: #eaf3ec;
+  --color-leaf-100: #d5e8db;
+  --color-leaf-200: #b3d6bd;
+  --color-leaf-300: #8bbe99;
+  --color-leaf-400: #66a578;
+  --color-leaf-500: #4b8f5e;
+  --color-leaf-600: #3d784e;
+  --color-leaf-700: #326241;
+  --color-leaf-800: #2a5136;
+  --color-leaf-900: #22422c;
 
-  --color-bark-50: #f7f6f3;
-  --color-bark-100: #ebe8e1;
-  --color-bark-200: #d9d4c8;
-  --color-bark-600: #6b6355;
-  --color-bark-800: #3a352d;
-  --color-bark-900: #26231d;
+  /* Marigold — primary calls to action only. Too low-contrast for body text. */
+  --color-marigold-50: #fdf0e2;
+  --color-marigold-100: #fadfc4;
+  --color-marigold-400: #ee9e5c;
+  --color-marigold-500: #e98a3c;
+  --color-marigold-600: #cf6f1c;
+
+  /* Warm neutrals with indigo ink. `bark` is the surface/text ramp. */
+  --color-bark-50: #faf7f2;
+  --color-bark-100: #f1ece3;
+  --color-bark-200: #ded6ca;
+  --color-bark-600: #55637a;
+  --color-bark-800: #2c4666;
+  --color-bark-900: #1f3a5f;
 
   --font-sans:
     ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
     sans-serif;
+
+  /* Tailwind's smallest default is 40rem. 22rem is where the header stops
+     overflowing with the wordmark shown (measured: needs 312px of content). */
+  --breakpoint-xs: 22rem;
 }
 
 :root {
@@ -39,4 +52,14 @@ body {
 :focus-visible {
   outline: 2px solid var(--color-leaf-600);
   outline-offset: 2px;
+}
+
+/* iOS Safari zooms the whole page when a focused control is under 16px.
+   Kept in the base layer so a utility class can still override it. */
+@layer base {
+  input,
+  select,
+  textarea {
+    font-size: 1rem;
+  }
 }

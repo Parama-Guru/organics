@@ -19,13 +19,19 @@ FROM base AS builder
 
 # NEXT_PUBLIC_* values are inlined at build time, so they must arrive as build args.
 ARG NEXT_PUBLIC_SITE_URL=http://localhost:3000
-ARG NEXT_PUBLIC_CURRENCY=USD
+ARG NEXT_PUBLIC_CURRENCY=INR
+ARG NEXT_PUBLIC_LOCALE=en-IN
+ARG NEXT_PUBLIC_SUPABASE_URL=
+ARG NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 
 # DATABASE_URL only has to be syntactically valid here; `prisma generate` never connects.
 ENV NODE_ENV=production \
     BUILD_STANDALONE=true \
     NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL \
     NEXT_PUBLIC_CURRENCY=$NEXT_PUBLIC_CURRENCY \
+    NEXT_PUBLIC_LOCALE=$NEXT_PUBLIC_LOCALE \
+    NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL \
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY \
     DATABASE_URL=postgresql://build:build@127.0.0.1:5432/build
 
 COPY --from=deps /app/node_modules ./node_modules
@@ -51,6 +57,11 @@ COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/prisma ./node_modules/prisma
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma/engines ./node_modules/@prisma/engines
+
+# The config is read at runtime from ./conf, relative to the working directory.
+# conf/config.yaml is excluded by .dockerignore, so this is the template only:
+# every secret in it resolves from an injected environment variable.
+COPY --from=builder --chown=nextjs:nodejs /app/conf ./conf
 
 COPY --chown=nextjs:nodejs docker-entrypoint.sh ./docker-entrypoint.sh
 RUN chmod +x ./docker-entrypoint.sh

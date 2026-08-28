@@ -1,0 +1,63 @@
+# =============================================================================
+# Organics — application configuration (single source of truth).
+#
+#   conf/config.example.yaml   tracked in git. No secrets: ${VAR} references only.
+#   conf/config.yaml           gitignored. Real local values. Copy this file.
+#
+# Load order: $CONFIG_PATH -> conf/config.yaml -> conf/config.example.yaml
+#
+# "${VAR}" and "${VAR:-fallback}" are expanded from the process environment, so
+# hosted deployments (Render, Vercel, docker compose) keep injecting plain env
+# vars while this file stays the only place that describes the shape.
+#
+# NOT here on purpose: the listen host/port. Next.js takes those from HOSTNAME
+# and PORT before any application code runs, so a value here would be a lie.
+# =============================================================================
+
+app:
+  name: "Organics"
+  env: "${APP_ENV:-dev}" # dev | prod
+  site_url: "${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}"
+  currency: "${NEXT_PUBLIC_CURRENCY:-INR}" # ISO 4217, inlined into the client bundle
+  locale: "${NEXT_PUBLIC_LOCALE:-en-IN}" # digit grouping: en-IN = 12,34,567
+
+database:
+  # System of record. Anything transactional or money-shaped lives here:
+  # accounts, catalog, stock, orders, payments, and PostGIS "farmers near me".
+  postgres:
+    # Transaction-mode pooler (port 6543, `?pgbouncer=true`). Use this for the app:
+    # serverless instances open far more connections than Postgres allows directly.
+    url: "${DATABASE_URL}"
+    # Session-mode pooler (port 5432). Prisma Migrate needs a real session because
+    # a transaction-mode pooler cannot hold advisory locks or run DDL reliably.
+    direct_url: "${DIRECT_URL:-}"
+
+  # Secondary store for schema-loose, high-write data that a relational table
+  # models badly: per-category produce attributes (variety, harvest date,
+  # grading, certificates), buyer<->farmer messages, and activity logs.
+  # Never the source of truth for stock or money.
+  mongodb:
+    uri: "${MONGODB_URI:-}"
+    database: "${MONGODB_DATABASE:-organics}"
+
+redis:
+  # Enable to move rate limiting off in-process memory (required once more than
+  # one instance runs). Ignored while disabled.
+  enabled: false
+  url: "${REDIS_URL:-}"
+
+# Auth and storage. The Postgres behind it is configured under database.postgres.
+supabase:
+  url: "${NEXT_PUBLIC_SUPABASE_URL:-}"
+  # sb_publishable_... — inlined into the client bundle on purpose. Row Level
+  # Security is what protects the data, so RLS must be on for every table.
+  publishable_key: "${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:-}"
+  # sb_secret_... — bypasses RLS entirely. Server-only. Never add this to the
+  # `env` block in next.config.ts.
+  secret_key: "${SUPABASE_SECRET_KEY:-}"
+  # Public signing keys, for verifying a Supabase JWT without calling the API.
+  jwks_url: "${SUPABASE_JWKS_URL:-}"
+
+commerce:
+  delivery_fee_cents: "${DELIVERY_FEE_CENTS:-4900}" # flat fee, minor units (paise) — never floats
+  free_delivery_threshold_cents: "${FREE_DELIVERY_THRESHOLD_CENTS:-49900}"

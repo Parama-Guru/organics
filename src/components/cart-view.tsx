@@ -23,7 +23,7 @@ export function CartView({ deliveryFeeCents, freeDeliveryThresholdCents }: Props
         <p className="text-bark-600">Your basket is empty.</p>
         <Link
           href="/products"
-          className="mt-4 inline-block rounded-full bg-leaf-700 px-5 py-2 text-sm font-medium text-white hover:bg-leaf-800"
+          className="mt-4 inline-block rounded-full bg-marigold-500 px-5 py-2 text-sm font-medium text-bark-900 hover:bg-marigold-600"
         >
           Browse produce
         </Link>
@@ -38,12 +38,12 @@ export function CartView({ deliveryFeeCents, freeDeliveryThresholdCents }: Props
     <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_20rem]">
       <ul className="divide-y divide-bark-200/70 rounded-2xl border border-bark-200/70 bg-white">
         {lines.map((line) => (
-          <li key={line.productId} className="flex items-center gap-4 p-4">
+          <li key={line.productId} className="flex flex-wrap items-center gap-x-4 gap-y-3 p-4">
             <span aria-hidden className="text-3xl">
               {line.emoji ?? "\u{1F331}"}
             </span>
 
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0 flex-1 basis-40 break-words">
               <Link href={`/products/${line.slug}`} className="font-medium hover:underline">
                 {line.name}
               </Link>
@@ -52,30 +52,33 @@ export function CartView({ deliveryFeeCents, freeDeliveryThresholdCents }: Props
               </p>
             </div>
 
-            <label className="flex items-center gap-2 text-sm">
-              <span className="sr-only">Quantity for {line.name}</span>
-              <input
-                type="number"
-                min={1}
-                max={50}
-                value={line.quantity}
-                onChange={(event) => setQuantity(line.productId, Number(event.target.value))}
-                className="w-16 rounded-md border border-bark-200 px-2 py-1 text-center"
-              />
-            </label>
+            {/* Full width so the controls wrap onto their own row on phones. */}
+            <div className="flex w-full items-center gap-4 sm:w-auto">
+              <label className="flex items-center gap-2 text-sm">
+                <span className="sr-only">Quantity for {line.name}</span>
+                <input
+                  type="number"
+                  min={1}
+                  max={50}
+                  value={line.quantity}
+                  onChange={(event) => setQuantity(line.productId, Number(event.target.value))}
+                  className="h-10 w-16 rounded-md border border-bark-200 px-2 text-center"
+                />
+              </label>
 
-            <p className="w-20 text-right font-medium tabular-nums">
-              {formatMoney(line.priceCents * line.quantity)}
-            </p>
+              <p className="ml-auto w-20 text-right font-medium tabular-nums sm:ml-0">
+                {formatMoney(line.priceCents * line.quantity)}
+              </p>
 
-            <button
-              type="button"
-              onClick={() => removeItem(line.productId)}
-              className="text-sm text-bark-600 underline hover:text-bark-900"
-            >
-              Remove
-              <span className="sr-only"> {line.name}</span>
-            </button>
+              <button
+                type="button"
+                onClick={() => removeItem(line.productId)}
+                className="shrink-0 py-2 text-sm text-bark-600 underline hover:text-bark-900"
+              >
+                Remove
+                <span className="sr-only"> {line.name}</span>
+              </button>
+            </div>
           </li>
         ))}
       </ul>
@@ -106,7 +109,7 @@ export function CartView({ deliveryFeeCents, freeDeliveryThresholdCents }: Props
 
         <Link
           href="/checkout"
-          className="mt-5 block rounded-full bg-leaf-700 px-5 py-3 text-center text-sm font-medium text-white hover:bg-leaf-800"
+          className="mt-5 block rounded-full bg-marigold-500 px-5 py-3 text-center text-sm font-medium text-bark-900 hover:bg-marigold-600"
         >
           Checkout
         </Link>

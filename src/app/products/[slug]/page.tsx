@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -34,16 +35,29 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
       </Link>
 
       <div className="mt-6 grid gap-8 sm:grid-cols-2">
-        <div
-          aria-hidden
-          className="flex h-64 items-center justify-center rounded-3xl bg-leaf-50 text-8xl"
-        >
-          {product.emoji ?? "\u{1F331}"}
+        <div className="relative flex h-48 items-center justify-center overflow-hidden rounded-3xl bg-leaf-50 text-7xl sm:h-64 sm:text-8xl">
+          {product.imageUrl ? (
+            <Image
+              src={product.imageUrl}
+              alt={product.name}
+              fill
+              priority
+              sizes="(max-width: 640px) 100vw, 50vw"
+              className="object-cover"
+            />
+          ) : (
+            <span aria-hidden>{product.emoji ?? "\u{1F331}"}</span>
+          )}
         </div>
 
         <div>
-          <p className="text-xs uppercase tracking-wide text-leaf-700">{product.category.name}</p>
-          <h1 className="mt-2 text-3xl font-semibold">{product.name}</h1>
+          <p className="text-xs uppercase tracking-wide text-leaf-700">
+            {product.category.name}
+            {product.region ? (
+              <span className="text-bark-600"> &middot; grown in {product.region}</span>
+            ) : null}
+          </p>
+          <h1 className="mt-2 text-2xl font-semibold break-words sm:text-3xl">{product.name}</h1>
 
           <p className="mt-4 text-bark-600">{product.description}</p>
 

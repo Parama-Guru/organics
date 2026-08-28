@@ -81,7 +81,7 @@ export function CheckoutForm({ deliveryFeeCents, freeDeliveryThresholdCents }: P
 
   return (
     <form onSubmit={handleSubmit} className="mt-8 grid gap-8 lg:grid-cols-[1fr_20rem]">
-      <div className="grid gap-4 rounded-2xl border border-bark-200/70 bg-white p-5 sm:grid-cols-2">
+      <div className="grid min-w-0 gap-4 rounded-2xl border border-bark-200/70 bg-white p-5 sm:grid-cols-2">
         {fields.map((field) => (
           <label
             key={field.name}
@@ -106,16 +106,18 @@ export function CheckoutForm({ deliveryFeeCents, freeDeliveryThresholdCents }: P
         ) : null}
       </div>
 
-      <aside className="h-fit rounded-2xl border border-bark-200/70 bg-white p-5">
+      {/* min-w-0: grid items default to min-width:auto, so a long product name in
+          the summary below would otherwise widen the whole column past the viewport. */}
+      <aside className="h-fit min-w-0 rounded-2xl border border-bark-200/70 bg-white p-5">
         <h2 className="font-semibold">Summary</h2>
 
         <ul className="mt-3 space-y-1 text-sm text-bark-600">
           {lines.map((line) => (
             <li key={line.productId} className="flex justify-between gap-3">
-              <span className="truncate">
+              <span className="min-w-0 truncate">
                 {line.name} &times; {line.quantity}
               </span>
-              <span className="tabular-nums">
+              <span className="shrink-0 tabular-nums">
                 {formatMoney(line.priceCents * line.quantity)}
               </span>
             </li>
@@ -144,7 +146,7 @@ export function CheckoutForm({ deliveryFeeCents, freeDeliveryThresholdCents }: P
         <button
           type="submit"
           disabled={submitting}
-          className="mt-5 w-full rounded-full bg-leaf-700 px-5 py-3 text-sm font-medium text-white hover:bg-leaf-800 disabled:opacity-60"
+          className="mt-5 w-full rounded-full bg-marigold-500 px-5 py-3 text-sm font-medium text-bark-900 hover:bg-marigold-600 disabled:opacity-60"
         >
           {submitting ? "Placing order…" : "Place order"}
         </button>

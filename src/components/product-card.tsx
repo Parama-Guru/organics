@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import { AddToCartButton } from "@/components/add-to-cart-button";
@@ -9,18 +10,33 @@ export function ProductCard({ product }: { product: ProductSummary }) {
 
   return (
     <article className="flex flex-col overflow-hidden rounded-2xl border border-bark-200/70 bg-white transition-shadow hover:shadow-md">
+      {/* Decorative duplicate of the title link, so it is kept out of the a11y tree. */}
       <Link
         href={`/products/${product.slug}`}
-        className="flex h-36 items-center justify-center bg-leaf-50 text-5xl"
+        className="relative flex h-36 items-center justify-center overflow-hidden bg-leaf-50 text-5xl"
         aria-hidden
+        tabIndex={-1}
       >
-        {product.emoji ?? "\u{1F331}"}
+        {product.imageUrl ? (
+          <Image
+            src={product.imageUrl}
+            alt=""
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            className="object-cover"
+          />
+        ) : (
+          (product.emoji ?? "\u{1F331}")
+        )}
       </Link>
 
       <div className="flex flex-1 flex-col gap-2 p-4">
-        <p className="text-xs uppercase tracking-wide text-leaf-700">{product.category.name}</p>
+        <p className="text-xs uppercase tracking-wide text-leaf-700">
+          {product.category.name}
+          {product.region ? <span className="text-bark-600"> &middot; {product.region}</span> : null}
+        </p>
 
-        <h3 className="font-medium leading-snug">
+        <h3 className="font-medium leading-snug break-words">
           <Link href={`/products/${product.slug}`} className="hover:underline">
             {product.name}
           </Link>

@@ -52,7 +52,7 @@ export default async function OrderPage({ params }: PageProps<"/orders/[orderNum
         <p className="mt-4 font-mono text-lg">{order.orderNumber}</p>
       </div>
 
-      <dl className="mt-6 grid grid-cols-2 gap-4 text-sm">
+      <dl className="mt-6 grid grid-cols-1 gap-4 text-sm xs:grid-cols-2 sm:grid-cols-3">
         <div>
           <dt className="text-bark-600">Status</dt>
           <dd className="font-medium">{order.status}</dd>
@@ -101,7 +101,7 @@ export default async function OrderPage({ params }: PageProps<"/orders/[orderNum
 
       <Link
         href="/products"
-        className="mt-8 inline-block rounded-full bg-leaf-700 px-5 py-3 text-sm font-medium text-white hover:bg-leaf-800"
+        className="mt-8 inline-block rounded-full bg-marigold-500 px-5 py-3 text-sm font-medium text-bark-900 hover:bg-marigold-600"
       >
         Continue shopping
       </Link>
