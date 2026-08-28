@@ -34,7 +34,7 @@ export function AddToCartButton({ product, inStock, className = "" }: Props) {
         setAdded(true);
         window.setTimeout(() => setAdded(false), 1500);
       }}
-      className={`rounded-full bg-marigold-500 px-4 py-2 text-sm font-medium text-bark-900 transition-colors hover:bg-marigold-600 ${className}`}
+      className={`rounded-full bg-marigold-500 px-4 py-2 text-sm font-medium text-bark-900 transition-colors hover:bg-marigold-400 ${className}`}
     >
       {added ? "Added" : "Add to cart"}
     </button>

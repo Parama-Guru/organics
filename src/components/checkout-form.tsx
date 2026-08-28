@@ -146,7 +146,7 @@ export function CheckoutForm({ deliveryFeeCents, freeDeliveryThresholdCents }: P
         <button
           type="submit"
           disabled={submitting}
-          className="mt-5 w-full rounded-full bg-marigold-500 px-5 py-3 text-sm font-medium text-bark-900 hover:bg-marigold-600 disabled:opacity-60"
+          className="mt-5 w-full rounded-full bg-marigold-500 px-5 py-3 text-sm font-medium text-bark-900 hover:bg-marigold-400 disabled:opacity-60"
         >
           {submitting ? "Placing order…" : "Place order"}
         </button>

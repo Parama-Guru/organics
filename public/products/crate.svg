@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Produce crate">
+  <rect width="800" height="600" fill="#faf7f2"/>
+  <circle cx="640" cy="120" r="150" fill="#fdf0e2"/>
+  <circle cx="150" cy="500" r="180" fill="#eaf3ec"/>
+  <rect x="170" y="300" width="460" height="200" rx="24" fill="#e98a3c"/>
+  <rect x="170" y="300" width="460" height="52" rx="24" fill="#cf6f1c"/>
+  <circle cx="300" cy="290" r="72" fill="#4b8f5e"/>
+  <circle cx="410" cy="270" r="88" fill="#3d784e"/>
+  <circle cx="520" cy="292" r="70" fill="#66a578"/>
+  <rect x="210" y="380" width="150" height="14" rx="7" fill="#faf7f2" opacity="0.65"/>
+  <rect x="210" y="416" width="96" height="14" rx="7" fill="#faf7f2" opacity="0.45"/>
+</svg>

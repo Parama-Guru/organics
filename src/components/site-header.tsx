@@ -49,7 +49,7 @@ export function SiteHeader() {
 
         <Link
           href="/cart"
-          className="ml-auto inline-flex shrink-0 items-center gap-2 rounded-full bg-marigold-500 px-3.5 py-2 text-sm font-medium text-bark-900 transition-colors hover:bg-marigold-600 sm:px-4"
+          className="ml-auto inline-flex shrink-0 items-center gap-2 rounded-full bg-marigold-500 px-3.5 py-2 text-sm font-medium text-bark-900 transition-colors hover:bg-marigold-400 sm:px-4"
         >
           Cart
           <span

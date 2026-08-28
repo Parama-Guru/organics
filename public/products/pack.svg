@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Retail pack">
+  <rect width="800" height="600" fill="#eaf3ec"/>
+  <circle cx="120" cy="110" r="120" fill="#d5e8db"/>
+  <rect x="250" y="140" width="300" height="360" rx="28" fill="#faf7f2" stroke="#1f3a5f" stroke-width="10"/>
+  <rect x="250" y="140" width="300" height="96" rx="28" fill="#1f3a5f"/>
+  <rect x="286" y="176" width="150" height="18" rx="9" fill="#fdf0e2"/>
+  <circle cx="400" cy="330" r="82" fill="#e98a3c"/>
+  <path d="M400 254c44 34 60 80 48 130-44 10-84-12-102-54-12-32-4-56 54-76z" fill="#4b8f5e"/>
+  <rect x="292" y="440" width="216" height="16" rx="8" fill="#ded6ca"/>
+  <rect x="292" y="470" width="140" height="16" rx="8" fill="#ded6ca"/>
+</svg>

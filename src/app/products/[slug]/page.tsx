@@ -1,8 +1,9 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { AddToCartButton } from "@/components/add-to-cart-button";
+import { BookingPanel } from "@/components/booking-panel";
+import { ProductGallery } from "@/components/product-gallery";
 import { formatMoney } from "@/lib/money";
 import { getProductBySlug } from "@/lib/products";
 
@@ -34,21 +35,8 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
         &larr; Back to shop
       </Link>
 
-      <div className="mt-6 grid gap-8 sm:grid-cols-2">
-        <div className="relative flex h-48 items-center justify-center overflow-hidden rounded-3xl bg-leaf-50 text-7xl sm:h-64 sm:text-8xl">
-          {product.imageUrl ? (
-            <Image
-              src={product.imageUrl}
-              alt={product.name}
-              fill
-              priority
-              sizes="(max-width: 640px) 100vw, 50vw"
-              className="object-cover"
-            />
-          ) : (
-            <span aria-hidden>{product.emoji ?? "\u{1F331}"}</span>
-          )}
-        </div>
+      <div className="mt-6 grid animate-rise gap-8 sm:grid-cols-2">
+        <ProductGallery images={product.images} name={product.name} emoji={product.emoji} />
 
         <div>
           <p className="text-xs uppercase tracking-wide text-leaf-700">
@@ -82,6 +70,13 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
           />
         </div>
       </div>
+
+      <BookingPanel
+        productId={product.id}
+        productName={product.name}
+        unit={product.unit}
+        farmer={product.farmer}
+      />
     </div>
   );
 }

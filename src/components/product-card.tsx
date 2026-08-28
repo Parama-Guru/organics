@@ -9,7 +9,7 @@ export function ProductCard({ product }: { product: ProductSummary }) {
   const inStock = product.stock > 0;
 
   return (
-    <article className="flex flex-col overflow-hidden rounded-2xl border border-bark-200/70 bg-white transition-shadow hover:shadow-md">
+    <article className="group flex flex-col overflow-hidden rounded-2xl border border-bark-200/70 bg-white transition-all duration-300 hover:-translate-y-1 hover:border-marigold-400 hover:shadow-lg">
       {/* Decorative duplicate of the title link, so it is kept out of the a11y tree. */}
       <Link
         href={`/products/${product.slug}`}
@@ -23,7 +23,7 @@ export function ProductCard({ product }: { product: ProductSummary }) {
             alt=""
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-cover"
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
           (product.emoji ?? "\u{1F331}")
@@ -43,6 +43,12 @@ export function ProductCard({ product }: { product: ProductSummary }) {
         </h3>
 
         <p className="line-clamp-2 text-sm text-bark-600">{product.description}</p>
+
+        {product.farmer ? (
+          <p className="text-xs text-bark-600">
+            Listed by <span className="font-medium text-bark-900">{product.farmer.farmName}</span>
+          </p>
+        ) : null}
 
         <div className="mt-auto flex items-center justify-between gap-3 pt-3">
           <div>

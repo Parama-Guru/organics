@@ -23,7 +23,7 @@ export function CartView({ deliveryFeeCents, freeDeliveryThresholdCents }: Props
         <p className="text-bark-600">Your basket is empty.</p>
         <Link
           href="/products"
-          className="mt-4 inline-block rounded-full bg-marigold-500 px-5 py-2 text-sm font-medium text-bark-900 hover:bg-marigold-600"
+          className="mt-4 inline-block rounded-full bg-marigold-500 px-5 py-2 text-sm font-medium text-bark-900 hover:bg-marigold-400"
         >
           Browse produce
         </Link>
@@ -109,7 +109,7 @@ export function CartView({ deliveryFeeCents, freeDeliveryThresholdCents }: Props
 
         <Link
           href="/checkout"
-          className="mt-5 block rounded-full bg-marigold-500 px-5 py-3 text-center text-sm font-medium text-bark-900 hover:bg-marigold-600"
+          className="mt-5 block rounded-full bg-marigold-500 px-5 py-3 text-center text-sm font-medium text-bark-900 hover:bg-marigold-400"
         >
           Checkout
         </Link>

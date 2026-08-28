@@ -24,29 +24,113 @@ model Category {
   @@index([slug])
 }
 
+// A farmer only becomes visible to shoppers at VERIFIED; everything else hides
+// their listings. Mirrors Amazon's "seller account is approved before listings
+// go live" rule.
+enum FarmerStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  SUSPENDED
+}
+
+model Farmer {
+  id             String       @id @default(cuid())
+  slug           String       @unique
+  contactName    String
+  farmName       String
+  phone          String
+  email          String       @unique
+  region         String
+  about          String?
+  photoUrl       String?
+  status         FarmerStatus @default(PENDING)
+  // Evidence captured at signup and checked by an admin before VERIFIED.
+  govtIdLast4    String?
+  certificateUrl String?
+  verifiedAt     DateTime?
+  reviewNote     String?
+  products       Product[]
+  enquiries      Enquiry[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([status])
+  @@index([region])
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  alt       String?
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([productId, position])
+}
+
 model Product {
-  id          String      @id @default(cuid())
+  id          String         @id @default(cuid())
   name        String
-  slug        String      @unique
+  slug        String         @unique
   description String
   priceCents  Int
   unit        String
   imageUrl    String?
   emoji       String?
   region      String?
-  stock       Int         @default(0)
-  isActive    Boolean     @default(true)
-  isFeatured  Boolean     @default(false)
+  stock       Int            @default(0)
+  isActive    Boolean        @default(true)
+  isFeatured  Boolean        @default(false)
+  // Null means the shop sells it itself (Amazon's 1P); set means a farmer lists
+  // it and the listing inherits that farmer's verification state (3P).
+  farmerId    String?
+  farmer      Farmer?        @relation(fields: [farmerId], references: [id], onDelete: Restrict)
   categoryId  String
-  category    Category    @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  category    Category       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  images      ProductImage[]
   orderItems  OrderItem[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  enquiries   Enquiry[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
 
   @@index([categoryId])
   @@index([slug])
   @@index([isActive, isFeatured])
   @@index([region])
+  @@index([farmerId])
+}
+
+enum EnquiryStatus {
+  NEW
+  CONTACTED
+  CONFIRMED
+  CANCELLED
+}
+
+// The "call the farmer and book it" path, kept separate from Order so the cart
+// checkout and the direct booking never share state.
+model Enquiry {
+  id            String        @id @default(cuid())
+  reference     String        @unique
+  productId     String
+  product       Product       @relation(fields: [productId], references: [id], onDelete: Restrict)
+  farmerId      String?
+  farmer        Farmer?       @relation(fields: [farmerId], references: [id], onDelete: SetNull)
+  customerName  String
+  phone         String
+  email         String?
+  quantity      Int
+  preferredDate DateTime?
+  note          String?
+  status        EnquiryStatus @default(NEW)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([farmerId, status])
+  @@index([productId])
 }
 
 enum OrderStatus {
