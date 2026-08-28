@@ -1,0 +1,38 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: organics
+      POSTGRES_PASSWORD: organics
+      POSTGRES_DB: organics
+    ports:
+      - "5432:5432"
+    volumes:
+      - organics-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U organics -d organics"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_SITE_URL: http://localhost:3000
+        NEXT_PUBLIC_CURRENCY: USD
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://organics:organics@db:5432/organics?schema=public
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      DELIVERY_FEE_CENTS: "499"
+      FREE_DELIVERY_THRESHOLD_CENTS: "5000"
+      RUN_MIGRATIONS: "true"
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
+volumes:
+  organics-db:
