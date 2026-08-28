@@ -42,6 +42,10 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // `next dev` and `next build` otherwise share .next, and leftover production
+  // assets get served in dev with no error — a stale stylesheet looks like the
+  // edit simply did nothing. Separate directories make that impossible.
+  distDir: isDev ? ".next-dev" : ".next",
   // Only the Docker image needs the standalone bundle; Vercel builds without it.
   output: process.env.BUILD_STANDALONE === "true" ? "standalone" : undefined,
   // The browser cannot read conf/config.yaml, so the public values it needs are
@@ -70,14 +74,6 @@ const nextConfig: NextConfig = {
           },
         ]
       : [],
-  },
-  turbopack: {
-    rules: {
-      "*.css": {
-        loaders: ["@tailwindcss/turbopack"],
-        as: "*.css",
-      },
-    },
   },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];

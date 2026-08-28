@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // `next dev` builds here (see distDir in next.config.ts) and its generated
+    // types are not lint-clean.
+    ".next-dev/**",
   ]),
 ]);
 
