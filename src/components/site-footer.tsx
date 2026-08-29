@@ -13,7 +13,7 @@ export function SiteFooter() {
           </p>
         </div>
         <p className="inline-flex items-center gap-2 justify-self-start rounded-full bg-leaf-100 px-4 py-2 text-sm font-medium text-leaf-800 sm:justify-self-end">
-          <span aria-hidden>&#128666;</span> Free delivery on larger baskets
+          <span aria-hidden>&#9742;</span> Buy direct from the farm
         </p>
       </div>
       <div className="mx-auto max-w-6xl border-t border-bark-200/50 px-4 py-4 text-sm sm:px-6">

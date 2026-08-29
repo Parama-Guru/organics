@@ -57,7 +57,3 @@ supabase:
   secret_key: "${SUPABASE_SECRET_KEY:-}"
   # Public signing keys, for verifying a Supabase JWT without calling the API.
   jwks_url: "${SUPABASE_JWKS_URL:-}"
-
-commerce:
-  delivery_fee_cents: "${DELIVERY_FEE_CENTS:-4900}" # flat fee, minor units (paise) — never floats
-  free_delivery_threshold_cents: "${FREE_DELIVERY_THRESHOLD_CENTS:-49900}"

@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { AddToCartButton } from "@/components/add-to-cart-button";
+import { Button } from "@/components/ui/button";
 import { formatMoney } from "@/lib/money";
 import type { ProductSummary } from "@/lib/products";
 
@@ -67,17 +67,9 @@ export function ProductCard({ product }: { product: ProductSummary }) {
             <p className="mt-1 text-xs text-bark-600">per {product.unit}</p>
           </div>
 
-          <AddToCartButton
-            inStock={inStock}
-            product={{
-              productId: product.id,
-              slug: product.slug,
-              name: product.name,
-              priceCents: product.priceCents,
-              unit: product.unit,
-              emoji: product.emoji,
-            }}
-          />
+          <Button as={Link} href={`/products/${product.slug}`} size="sm">
+            {inStock ? "Contact" : "View"}
+          </Button>
         </div>
       </div>
     </article>

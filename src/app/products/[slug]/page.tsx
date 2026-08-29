@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { AddToCartButton } from "@/components/add-to-cart-button";
 import { BookingPanel } from "@/components/booking-panel";
 import { ProductGallery } from "@/components/product-gallery";
+import { Button } from "@/components/ui/button";
 import { formatMoney } from "@/lib/money";
 import { getProductBySlug } from "@/lib/products";
 
@@ -69,17 +69,10 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
             {inStock ? `${product.stock} in stock` : "Currently unavailable"}
           </p>
 
-          <AddToCartButton
-            className="mt-6"
-            inStock={inStock}            product={{
-              productId: product.id,
-              slug: product.slug,
-              name: product.name,
-              priceCents: product.priceCents,
-              unit: product.unit,
-              emoji: product.emoji,
-            }}
-          />
+          <Button as="a" href="#contact" size="lg" className="mt-6">
+            {product.farmer ? `Contact ${product.farmer.farmName}` : "Contact us to order"}
+            <span aria-hidden>&darr;</span>
+          </Button>
         </div>
       </div>
 

@@ -51,10 +51,6 @@ services:
         value: INR
       - key: NEXT_PUBLIC_LOCALE
         value: en-IN
-      - key: DELIVERY_FEE_CENTS
-        value: "4900"
-      - key: FREE_DELIVERY_THRESHOLD_CENTS
-        value: "49900"
       # docker-entrypoint.sh runs `prisma migrate deploy` before starting.
       - key: RUN_MIGRATIONS
         value: "true"

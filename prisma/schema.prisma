@@ -94,7 +94,6 @@ model Product {
   categoryId  String
   category    Category       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   images      ProductImage[]
-  orderItems  OrderItem[]
   enquiries   Enquiry[]
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
@@ -118,8 +117,8 @@ enum EnquiryStatus {
   CANCELLED
 }
 
-// The "call the farmer and book it" path, kept separate from Order so the cart
-// checkout and the direct booking never share state.
+// The "call the farmer and book it" path. Buyers arrange and pay off-platform;
+// this only records the request so the farmer can follow it up.
 model Enquiry {
   id            String        @id @default(cuid())
   reference     String        @unique
@@ -138,50 +137,5 @@ model Enquiry {
   updatedAt     DateTime      @updatedAt
 
   @@index([farmerId, status])
-  @@index([productId])
-}
-
-enum OrderStatus {
-  PENDING
-  PAID
-  SHIPPED
-  DELIVERED
-  CANCELLED
-}
-
-model Order {
-  id            String      @id @default(cuid())
-  orderNumber   String      @unique
-  email         String
-  customerName  String
-  addressLine1  String
-  addressLine2  String?
-  city          String
-  postalCode    String
-  country       String
-  status        OrderStatus @default(PENDING)
-  subtotalCents Int
-  deliveryCents Int
-  totalCents    Int
-  items         OrderItem[]
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-
-  @@index([email])
-  @@index([status])
-}
-
-model OrderItem {
-  id             String  @id @default(cuid())
-  orderId        String
-  order          Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productId      String
-  product        Product @relation(fields: [productId], references: [id], onDelete: Restrict)
-  quantity       Int
-  // Snapshots keep historical orders correct when the catalog changes.
-  unitPriceCents Int
-  productName    String
-
-  @@index([orderId])
   @@index([productId])
 }

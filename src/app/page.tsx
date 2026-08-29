@@ -31,20 +31,15 @@ export default async function HomePage() {
             Real food, grown the <span className="text-marigold-400">slow way</span>.
           </h1>
           <p className="mt-5 max-w-xl text-lg text-bark-100">
-            We buy direct from certified organic farms and deliver within hours of harvest. No
-            synthetic pesticides, no waxes, no cold-storage months.
+            Every farm here is verified before its produce is listed. Find what you want, then
+            call the farmer directly and arrange it yourself. No middleman, no markup.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button as={Link} href="/products" size="lg">
-              Shop the harvest
+              Browse produce
             </Button>
-            <Button
-              as={Link}
-              href="/products?region=Nilgiris"
-              size="lg"
-              variant="onDark"
-            >
-              Browse by region
+            <Button as={Link} href="/farmers" size="lg" variant="onDark">
+              Meet the farmers
             </Button>
           </div>
         </div>

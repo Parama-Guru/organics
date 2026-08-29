@@ -1,8 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { getProducts } from "@/lib/products";
+import { productQuerySchema } from "@/lib/product-query-schema";
 import { clientKeyFromHeaders, rateLimit } from "@/lib/rate-limit";
-import { productQuerySchema } from "@/lib/validation";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +26,7 @@ export async function GET(request: NextRequest) {
 
   const products = await getProducts({
     categorySlug: parsed.data.category,
+    region: parsed.data.region,
     search: parsed.data.search,
     limit: parsed.data.limit,
   });

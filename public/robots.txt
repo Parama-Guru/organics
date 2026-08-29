@@ -1,6 +1,3 @@
 User-agent: *
 Allow: /
-Disallow: /cart
-Disallow: /checkout
-Disallow: /orders/
 Disallow: /api/

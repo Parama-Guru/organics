@@ -54,13 +54,6 @@ const configSchema = z
         jwks_url: z.string().default(""),
       })
       .prefault({}),
-    commerce: z
-      .object({
-        // Coerced: a "${VAR}" expansion always arrives as a string.
-        delivery_fee_cents: z.coerce.number().int().min(0).default(4900),
-        free_delivery_threshold_cents: z.coerce.number().int().min(0).default(49900),
-      })
-      .prefault({}),
   })
   .check((ctx) => {
     if (ctx.value.redis.enabled && !ctx.value.redis.url) {

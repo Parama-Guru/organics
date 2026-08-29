@@ -60,7 +60,7 @@ export function BookingPanel({ productId, productName, unit, farmer }: Props) {
   }
 
   return (
-    <section className="glass mt-10 rounded-3xl p-6">
+    <section id="contact" className="glass mt-10 scroll-mt-24 rounded-3xl p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <h2 className="font-display text-xl">Buy direct from {sellerName}</h2>
