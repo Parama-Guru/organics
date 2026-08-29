@@ -22,6 +22,7 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Skip API routes, Next internals, and anything with a file extension (public assets).
-  matcher: ["/((?!api|_next|.*\\.).*)"],
+  // Skip API routes, the staff-only /admin tree (it has no locale), Next
+  // internals, and anything with a file extension (public assets).
+  matcher: ["/((?!api|admin|_next|.*\\.).*)"],
 };

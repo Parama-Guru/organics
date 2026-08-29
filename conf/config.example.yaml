@@ -57,3 +57,15 @@ supabase:
   secret_key: "${SUPABASE_SECRET_KEY:-}"
   # Public signing keys, for verifying a Supabase JWT without calling the API.
   jwks_url: "${SUPABASE_JWKS_URL:-}"
+
+# Staff-only farm verification area at /admin. Not linked from the site and
+# disallowed in robots.txt. Leave password_hash empty and the whole tree 404s,
+# so a deployment is never accidentally left open.
+admin:
+  # scrypt hash, as `scrypt:<salt>:<key>`. Generate with `npm run admin:hash`.
+  # Never store the passphrase itself, here or anywhere else.
+  password_hash: "${ADMIN_PASSWORD_HASH:-}"
+  # >=32 chars of randomness that signs the admin session cookie. Rotating it
+  # signs everyone out immediately.
+  session_secret: "${ADMIN_SESSION_SECRET:-}"
+  session_ttl_minutes: 480

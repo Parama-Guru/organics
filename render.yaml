@@ -37,6 +37,14 @@ services:
       - key: SUPABASE_JWKS_URL
         sync: false
 
+      # ---- staff-only /admin. Leave ADMIN_PASSWORD_HASH unset and the whole
+      # tree 404s, so the area is never live before you mean it to be.
+      # Generate both with `npm run admin:hash`.
+      - key: ADMIN_PASSWORD_HASH
+        sync: false
+      - key: ADMIN_SESSION_SECRET
+        sync: false
+
       # ---- derived, so the URL does not have to be known before the first deploy
       - key: NEXT_PUBLIC_SITE_URL
         fromService:

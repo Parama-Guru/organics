@@ -29,6 +29,10 @@ services:
       DATABASE_URL: postgresql://organics:organics@db:5432/organics?schema=public
       NEXT_PUBLIC_SITE_URL: http://localhost:3000
       RUN_MIGRATIONS: "true"
+      # Unset by default, so /admin 404s until you generate a pair with
+      # `npm run admin:hash` and export them before `docker compose up`.
+      ADMIN_PASSWORD_HASH: "${ADMIN_PASSWORD_HASH:-}"
+      ADMIN_SESSION_SECRET: "${ADMIN_SESSION_SECRET:-}"
     ports:
       - "3000:3000"
     restart: unless-stopped

@@ -54,6 +54,16 @@ const configSchema = z
         jwks_url: z.string().default(""),
       })
       .prefault({}),
+    admin: z
+      .object({
+        // scrypt hash of the admin passphrase, as `scrypt:<salt-hex>:<key-hex>`.
+        // Empty disables the admin area entirely, so a fresh deploy is never open.
+        password_hash: z.string().default(""),
+        // Signs the admin session cookie. Rotating it logs everyone out.
+        session_secret: z.string().default(""),
+        session_ttl_minutes: z.number().int().min(5).max(10_080).default(480),
+      })
+      .prefault({}),
   })
   .check((ctx) => {
     if (ctx.value.redis.enabled && !ctx.value.redis.url) {
@@ -73,6 +83,29 @@ const configSchema = z
         input: ctx.value.supabase.publishable_key,
         path: ["supabase", "publishable_key"],
         message: "looks like a secret key — use the sb_publishable_ key here",
+      });
+    }
+
+    // A hash with no signing secret would mean unsigned session cookies, i.e.
+    // anyone could forge one. Refuse to start half-configured.
+    if (ctx.value.admin.password_hash && ctx.value.admin.session_secret.length < 32) {
+      ctx.issues.push({
+        code: "custom",
+        input: ctx.value.admin.session_secret,
+        path: ["admin", "session_secret"],
+        message: "must be at least 32 characters when admin.password_hash is set",
+      });
+    }
+
+    if (
+      ctx.value.admin.password_hash &&
+      !/^scrypt:[0-9a-f]{32}:[0-9a-f]{128}$/.test(ctx.value.admin.password_hash)
+    ) {
+      ctx.issues.push({
+        code: "custom",
+        input: ctx.value.admin.password_hash,
+        path: ["admin", "password_hash"],
+        message: "must be a scrypt hash — generate it with `npm run admin:hash`",
       });
     }
   });
