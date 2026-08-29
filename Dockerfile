@@ -14,6 +14,20 @@ FROM base AS deps
 COPY package.json package-lock.json ./
 RUN npm ci
 
+# ---- migrator ---------------------------------------------------------------
+# The Prisma CLI pulls in 33 packages (@prisma/config alone brings c12, effect,
+# empathic...). Copying hand-picked directories out of the build stage misses
+# them and fails at runtime with MODULE_NOT_FOUND, so npm resolves the closure
+# here in an empty project instead. The version is read from package.json so the
+# CLI can never drift from the generated client.
+FROM base AS migrator
+WORKDIR /version
+COPY package.json ./
+RUN node -p "require('./package.json').devDependencies.prisma" > /tmp/prisma-version
+WORKDIR /migrator
+RUN npm init -y > /dev/null \
+    && npm install --no-audit --no-fund "prisma@$(cat /tmp/prisma-version)"
+
 # ---- build ------------------------------------------------------------------
 FROM base AS builder
 
@@ -53,10 +67,11 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
-# Schema, migrations and the Prisma CLI, so `migrate deploy` can run on startup.
+# Schema, migrations and a self-contained Prisma CLI, so `migrate deploy` can run
+# on startup. Kept out of ./node_modules so it cannot shadow the traced client
+# that the standalone bundle ships.
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma/engines ./node_modules/@prisma/engines
+COPY --from=migrator --chown=nextjs:nodejs /migrator/node_modules ./.migrate/node_modules
 
 # The config is read at runtime from ./conf, relative to the working directory.
 # conf/config.yaml is excluded by .dockerignore, so this is the template only:
