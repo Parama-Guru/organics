@@ -1,38 +1,30 @@
 import { FarmerApplicationForm } from "@/components/farmer-application-form";
 import { Badge } from "@/components/ui/badge";
+import { getDictionary } from "@/lib/i18n/server";
 
-export const metadata = {
-  title: "Sell with us",
-  description:
-    "Apply to list your certified organic produce on Organics. Every farm is verified before its listings go live.",
-};
+export async function generateMetadata() {
+  const t = await getDictionary();
+  return { title: t.meta.sellTitle, description: t.meta.sellDescription };
+}
 
-const steps = [
-  {
-    title: "Apply",
-    body: "Tell us about the farm, what you grow and how it is certified.",
-  },
-  {
-    title: "We verify",
-    body: "We check your details and call you. Nothing is listed until this passes.",
-  },
-  {
-    title: "List and sell",
-    body: "Your produce appears in the shop, and buyers can call or book you directly.",
-  },
-];
+export default async function SellPage() {
+  const t = await getDictionary();
 
-export default function SellPage() {
+  const steps = [
+    { title: t.sell.step1Title, body: t.sell.step1Body },
+    { title: t.sell.step2Title, body: t.sell.step2Body },
+    { title: t.sell.step3Title, body: t.sell.step3Body },
+  ];
+
   return (
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
-      <Badge tone="marigold">For farmers</Badge>
+      <Badge tone="marigold">{t.sell.badge}</Badge>
       <h1 className="mt-4 font-display text-4xl leading-tight sm:text-5xl">
-        Sell what you grow, <span className="text-marigold-600">without a middleman</span>.
+        {t.sell.titleLead}
+        <span className="text-marigold-600">{t.sell.titleAccent}</span>
+        {t.sell.titleTail}
       </h1>
-      <p className="mt-4 max-w-2xl text-lg text-bark-600">
-        We list certified organic farms only. Buyers see your farm name, your region and your
-        phone number, and can book straight from the product page.
-      </p>
+      <p className="mt-4 max-w-2xl text-lg text-bark-600">{t.sell.intro}</p>
 
       <ol className="mt-10 grid gap-4 sm:grid-cols-3">
         {steps.map((step, index) => (
@@ -54,7 +46,7 @@ export default function SellPage() {
       </ol>
 
       <h2 className="mt-14 font-display text-2xl">
-        Apply to list
+        {t.sell.applyHeading}
         <span aria-hidden className="ml-3 inline-block h-1 w-12 rounded-full bg-marigold-500" />
       </h2>
       <FarmerApplicationForm />

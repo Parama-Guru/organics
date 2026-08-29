@@ -32,32 +32,45 @@ function slugify(farmName: string): string {
 
 export async function POST(request: NextRequest) {
   if (!isSameOrigin(request)) {
-    return NextResponse.json({ error: "Cross-origin requests are not allowed." }, { status: 403 });
+    return NextResponse.json(
+      { code: "forbidden_origin", error: "Cross-origin requests are not allowed." },
+      { status: 403 },
+    );
   }
 
   const limit = rateLimit(`farmer-apply:${clientKeyFromHeaders(request.headers)}`, 3, 3_600_000);
   if (!limit.allowed) {
     return NextResponse.json(
-      { error: "Too many applications from this address. Please try again later." },
+      {
+        code: "rate_limited",
+        error: "Too many applications from this address. Please try again later.",
+      },
       { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } },
     );
   }
 
   if (Number(request.headers.get("content-length") ?? 0) > MAX_BODY_BYTES) {
-    return NextResponse.json({ error: "Request body is too large." }, { status: 413 });
+    return NextResponse.json(
+      { code: "body_too_large", error: "Request body is too large." },
+      { status: 413 },
+    );
   }
 
   let body: unknown;
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "Request body must be valid JSON." }, { status: 400 });
+    return NextResponse.json(
+      { code: "invalid_json", error: "Request body must be valid JSON." },
+      { status: 400 },
+    );
   }
 
   const parsed = farmerApplicationSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
       {
+        code: "invalid_fields",
         error: "Please check the highlighted details.",
         fields: Object.keys(z.flattenError(parsed.error).fieldErrors),
       },

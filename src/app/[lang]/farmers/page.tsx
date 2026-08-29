@@ -3,34 +3,36 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getVerifiedFarmers } from "@/lib/farmers";
+import { format, localePath } from "@/lib/i18n/config";
+import { getDictionary, getLocale } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = {
-  title: "Our farmers",
-  description:
-    "The verified organic farms behind the shop, listed with their region and what they grow.",
-};
+export async function generateMetadata() {
+  const t = await getDictionary();
+  return { title: t.meta.farmersTitle, description: t.meta.farmersDescription };
+}
 
 export default async function FarmersPage() {
-  const farmers = await getVerifiedFarmers();
+  const [farmers, locale, t] = await Promise.all([
+    getVerifiedFarmers(),
+    getLocale(),
+    getDictionary(),
+  ]);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
       <Badge tone="leaf">
-        <span aria-hidden>&#10003;</span> Every farm verified
+        <span aria-hidden>&#10003;</span> {t.farmers.everyFarmVerified}
       </Badge>
-      <h1 className="mt-4 font-display text-4xl sm:text-5xl">Our farmers</h1>
-      <p className="mt-3 max-w-2xl text-bark-600">
-        We check each farm&apos;s details before a single listing goes live. Call them directly, or
-        book from any product page.
-      </p>
+      <h1 className="mt-4 font-display text-4xl sm:text-5xl">{t.farmers.title}</h1>
+      <p className="mt-3 max-w-2xl text-bark-600">{t.farmers.intro}</p>
 
       {farmers.length === 0 ? (
         <div className="glass mt-10 rounded-3xl p-12 text-center">
-          <p className="font-display text-xl">No farms listed yet</p>
-          <Button as={Link} href="/sell" className="mt-5">
-            Apply to list your farm
+          <p className="font-display text-xl">{t.farmers.none}</p>
+          <Button as={Link} href={localePath(locale, "/sell")} className="mt-5">
+            {t.farmers.applyToList}
           </Button>
         </div>
       ) : (
@@ -38,7 +40,7 @@ export default async function FarmersPage() {
           {farmers.map((farmer, index) => (
             <Link
               key={farmer.id}
-              href={`/farmers/${farmer.slug}`}
+              href={localePath(locale, `/farmers/${farmer.slug}`)}
               style={{ animationDelay: `${index * 60}ms` }}
               className="group animate-rise rounded-3xl border border-white/70 bg-white/70 p-6 shadow-soft backdrop-blur-md transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-1.5 hover:border-marigold-400/70 hover:shadow-lift"
             >
@@ -52,14 +54,19 @@ export default async function FarmersPage() {
                 <Badge tone="leaf">{farmer.region}</Badge>
               </div>
 
-              <h2 className="mt-4 font-display text-xl">{farmer.farmName}</h2>
+              <h2 className="mt-4 font-display text-xl break-words">{farmer.farmName}</h2>
               <p className="text-sm text-bark-600">{farmer.contactName}</p>
               {farmer.about ? (
                 <p className="mt-3 line-clamp-3 text-sm text-bark-600">{farmer.about}</p>
               ) : null}
 
               <p className="mt-4 border-t border-bark-200/60 pt-3 text-sm font-medium">
-                {farmer._count.products} listing{farmer._count.products === 1 ? "" : "s"}
+                {format(
+                  farmer._count.products === 1
+                    ? t.farmers.listingCount
+                    : t.farmers.listingCountPlural,
+                  { count: farmer._count.products },
+                )}
                 <span
                   aria-hidden
                   className="ml-2 inline-block text-marigold-500 transition-transform duration-300 group-hover:translate-x-1"
@@ -73,12 +80,12 @@ export default async function FarmersPage() {
       )}
 
       <section className="glass mt-14 flex flex-wrap items-center justify-between gap-4 rounded-3xl p-8">
-        <div>
-          <h2 className="font-display text-2xl">Grow organic produce?</h2>
-          <p className="mt-1 text-bark-600">Apply to list your farm here.</p>
+        <div className="min-w-0">
+          <h2 className="font-display text-2xl">{t.farmers.growOrganic}</h2>
+          <p className="mt-1 text-bark-600">{t.farmers.applyHere}</p>
         </div>
-        <Button as={Link} href="/sell" size="lg">
-          Sell with us
+        <Button as={Link} href={localePath(locale, "/sell")} size="lg">
+          {t.nav.sell}
         </Button>
       </section>
     </div>

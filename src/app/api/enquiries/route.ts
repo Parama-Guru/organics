@@ -24,32 +24,45 @@ function isSameOrigin(request: NextRequest): boolean {
 
 export async function POST(request: NextRequest) {
   if (!isSameOrigin(request)) {
-    return NextResponse.json({ error: "Cross-origin requests are not allowed." }, { status: 403 });
+    return NextResponse.json(
+      { code: "forbidden_origin", error: "Cross-origin requests are not allowed." },
+      { status: 403 },
+    );
   }
 
   const limit = rateLimit(`enquiry:${clientKeyFromHeaders(request.headers)}`, 5, 600_000);
   if (!limit.allowed) {
     return NextResponse.json(
-      { error: "Too many booking requests from this address. Please try again shortly." },
+      {
+        code: "rate_limited",
+        error: "Too many booking requests from this address. Please try again shortly.",
+      },
       { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } },
     );
   }
 
   if (Number(request.headers.get("content-length") ?? 0) > MAX_BODY_BYTES) {
-    return NextResponse.json({ error: "Request body is too large." }, { status: 413 });
+    return NextResponse.json(
+      { code: "body_too_large", error: "Request body is too large." },
+      { status: 413 },
+    );
   }
 
   let body: unknown;
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "Request body must be valid JSON." }, { status: 400 });
+    return NextResponse.json(
+      { code: "invalid_json", error: "Request body must be valid JSON." },
+      { status: 400 },
+    );
   }
 
   const parsed = enquirySchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
       {
+        code: "invalid_fields",
         error: "Please check the highlighted details.",
         fields: Object.keys(z.flattenError(parsed.error).fieldErrors),
       },
@@ -67,12 +80,19 @@ export async function POST(request: NextRequest) {
   });
 
   if (!product) {
-    return NextResponse.json({ error: "That product is no longer available." }, { status: 404 });
+    return NextResponse.json(
+      { code: "product_unavailable", error: "That product is no longer available." },
+      { status: 404 },
+    );
   }
 
   if (input.quantity > product.stock) {
     return NextResponse.json(
-      { error: `Only ${product.stock} left. Please reduce the quantity.` },
+      {
+        code: "insufficient_stock",
+        available: product.stock,
+        error: `Only ${product.stock} left. Please reduce the quantity.`,
+      },
       { status: 409 },
     );
   }

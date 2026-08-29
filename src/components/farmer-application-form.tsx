@@ -4,8 +4,12 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Field, TextareaField } from "@/components/ui/field";
+import { useI18n } from "@/lib/i18n/client";
+import { apiErrorMessage } from "@/lib/i18n/api-error";
+import { format } from "@/lib/i18n/config";
 
 export function FarmerApplicationForm() {
+  const { t } = useI18n();
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,13 +31,13 @@ export function FarmerApplicationForm() {
       const result = await response.json();
 
       if (!response.ok) {
-        setError(result.error ?? "We could not send that application.");
+        setError(apiErrorMessage(t, result));
         setBadFields(result.fields ?? []);
         return;
       }
       setDone(true);
     } catch {
-      setError("Network error. Please try again.");
+      setError(t.errors.network);
     } finally {
       setSubmitting(false);
     }
@@ -45,40 +49,59 @@ export function FarmerApplicationForm() {
         <span aria-hidden className="text-5xl">
           {"\u{1F33E}"}
         </span>
-        <h2 className="mt-4 font-display text-2xl">Application received</h2>
-        <p className="mx-auto mt-2 max-w-md text-bark-600">
-          We check every farm before its listings go live, so nothing appears in the shop yet.
-          Expect a call on the number you gave us within a few working days.
-        </p>
+        <h2 className="mt-4 font-display text-2xl">{t.application.doneTitle}</h2>
+        <p className="mx-auto mt-2 max-w-md text-bark-600">{t.application.doneBody}</p>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="glass mt-8 grid animate-rise gap-4 rounded-3xl p-6 sm:grid-cols-2">
-      <Field label="Farm name" name="farmName" required maxLength={120} autoComplete="organization" />
-      <Field label="Your name" name="contactName" required maxLength={120} autoComplete="name" />
-      <Field label="Email" name="email" type="email" required maxLength={200} autoComplete="email" />
+    <form
+      onSubmit={handleSubmit}
+      className="glass mt-8 grid animate-rise gap-4 rounded-3xl p-6 sm:grid-cols-2"
+    >
       <Field
-        label="Phone"
+        label={t.application.farmName}
+        name="farmName"
+        required
+        maxLength={120}
+        autoComplete="organization"
+      />
+      <Field
+        label={t.application.contactName}
+        name="contactName"
+        required
+        maxLength={120}
+        autoComplete="name"
+      />
+      <Field
+        label={t.application.email}
+        name="email"
+        type="email"
+        required
+        maxLength={200}
+        autoComplete="email"
+      />
+      <Field
+        label={t.application.phone}
         name="phone"
         type="tel"
         required
         maxLength={20}
         autoComplete="tel"
-        placeholder="+91 98765 43210"
+        placeholder={t.application.phonePlaceholder}
       />
       <Field
-        label="Region"
-        hint="district or hills"
+        label={t.application.region}
+        hint={t.application.regionHint}
         name="region"
         required
         maxLength={80}
-        placeholder="Nilgiris"
+        placeholder={t.application.regionPlaceholder}
       />
       <Field
-        label="Aadhaar last 4 digits"
-        hint="for verification"
+        label={t.application.govtId}
+        hint={t.application.govtIdHint}
         name="govtIdLast4"
         required
         inputMode="numeric"
@@ -86,8 +109,8 @@ export function FarmerApplicationForm() {
         placeholder="1234"
       />
       <Field
-        label="Organic certificate link"
-        hint="optional"
+        label={t.application.certificate}
+        hint={t.application.optional}
         name="certificateUrl"
         type="url"
         maxLength={500}
@@ -95,14 +118,14 @@ export function FarmerApplicationForm() {
         className="sm:col-span-2"
       />
       <TextareaField
-        label="About the farm"
-        hint="at least 20 characters"
+        label={t.application.about}
+        hint={t.application.aboutHint}
         name="about"
         rows={4}
         required
         minLength={20}
         maxLength={1000}
-        placeholder="What you grow, how long you have farmed it, and how it is certified."
+        placeholder={t.application.aboutPlaceholder}
         className="sm:col-span-2"
       />
 
@@ -112,16 +135,16 @@ export function FarmerApplicationForm() {
           className="animate-pop rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 sm:col-span-2"
         >
           {error}
-          {badFields.length > 0 ? <> Check: {badFields.join(", ")}.</> : null}
+          {badFields.length > 0 ? (
+            <> {format(t.application.checkFields, { fields: badFields.join(", ") })}</>
+          ) : null}
         </p>
       ) : null}
 
-      <p className="text-xs text-bark-600 sm:col-span-2">
-        We only ask for the last four digits of your Aadhaar. Never share the full number.
-      </p>
+      <p className="text-xs text-bark-600 sm:col-span-2">{t.application.aadhaarNote}</p>
 
       <Button type="submit" size="lg" disabled={submitting} className="sm:col-span-2">
-        {submitting ? "Sending…" : "Send application"}
+        {submitting ? t.application.submitting : t.application.submit}
       </Button>
     </form>
   );

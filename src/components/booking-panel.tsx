@@ -6,6 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Field, TextareaField } from "@/components/ui/field";
 import { QuantityStepper } from "@/components/ui/quantity-stepper";
+import { useI18n } from "@/lib/i18n/client";
+import { apiErrorMessage } from "@/lib/i18n/api-error";
+import { format } from "@/lib/i18n/config";
 
 type Farmer = {
   farmName: string;
@@ -24,6 +27,7 @@ type Props = {
 };
 
 export function BookingPanel({ productId, productName, unit, farmer }: Props) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [submitting, setSubmitting] = useState(false);
@@ -48,12 +52,12 @@ export function BookingPanel({ productId, productName, unit, farmer }: Props) {
       const result = await response.json();
 
       if (!response.ok) {
-        setError(result.error ?? "We could not record that booking.");
+        setError(apiErrorMessage(t, result));
         return;
       }
       setReference(result.reference);
     } catch {
-      setError("Network error. Please try again.");
+      setError(t.errors.network);
     } finally {
       setSubmitting(false);
     }
@@ -63,16 +67,16 @@ export function BookingPanel({ productId, productName, unit, farmer }: Props) {
     <section id="contact" className="glass mt-10 scroll-mt-24 rounded-3xl p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="font-display text-xl">Buy direct from {sellerName}</h2>
+          <h2 className="font-display text-xl break-words">
+            {format(t.booking.heading, { seller: sellerName })}
+          </h2>
           <p className="mt-1 text-sm text-bark-600">
-            {farmer
-              ? `${farmer.contactName} · ${farmer.region}`
-              : "Stocked and dispatched by Organics."}
+            {farmer ? `${farmer.contactName} · ${farmer.region}` : t.booking.stockedBy}
           </p>
         </div>
         {farmer?.verifiedAt ? (
           <Badge tone="leaf" className="shrink-0">
-            <span aria-hidden>&#10003;</span> Verified farmer
+            <span aria-hidden>&#10003;</span> {t.farmers.verified}
           </Badge>
         ) : null}
       </div>
@@ -87,7 +91,7 @@ export function BookingPanel({ productId, productName, unit, farmer }: Props) {
         ) : null}
 
         <Button type="button" onClick={() => setOpen((value) => !value)} aria-expanded={open}>
-          {open ? "Close booking form" : "Book without paying now"}
+          {open ? t.booking.close : t.booking.open}
         </Button>
       </div>
 
@@ -96,16 +100,17 @@ export function BookingPanel({ productId, productName, unit, farmer }: Props) {
           role="status"
           className="mt-5 animate-pop rounded-2xl border border-leaf-300 bg-leaf-50 p-4 text-sm"
         >
-          <p className="font-semibold text-leaf-800">Booking received.</p>
+          <p className="font-semibold text-leaf-800">{t.booking.received}</p>
           <p className="mt-1 text-bark-600">
-            Your reference is <span className="font-mono font-semibold">{reference}</span>.{" "}
-            {sellerName} will call you to confirm quantity and delivery.
+            {t.booking.referenceBefore}
+            <span className="font-mono font-semibold">{reference}</span>
+            {format(t.booking.referenceAfter, { seller: sellerName })}
           </p>
         </div>
       ) : open ? (
         <form onSubmit={handleSubmit} className="mt-5 grid animate-rise gap-4 sm:grid-cols-2">
           <Field
-            label="Your name"
+            label={t.booking.yourName}
             name="customerName"
             required
             maxLength={120}
@@ -113,37 +118,44 @@ export function BookingPanel({ productId, productName, unit, farmer }: Props) {
           />
 
           <Field
-            label="Phone"
+            label={t.booking.phone}
             name="phone"
             type="tel"
             required
             maxLength={20}
             autoComplete="tel"
-            placeholder="+91 98765 43210"
+            placeholder={t.booking.phonePlaceholder}
           />
 
           <div>
-            <span className="text-sm font-semibold text-bark-900">Quantity ({unit})</span>
+            <span className="text-sm font-semibold text-bark-900">
+              {format(t.booking.quantity, { unit })}
+            </span>
             <div className="mt-1.5">
               <QuantityStepper
                 value={quantity}
                 max={500}
-                label={`Quantity in ${unit}`}
+                label={format(t.booking.quantityLabel, { unit })}
                 onChange={setQuantity}
               />
             </div>
             <input type="hidden" name="quantity" value={quantity} />
           </div>
 
-          <Field label="Preferred date" hint="optional" name="preferredDate" type="date" />
+          <Field
+            label={t.booking.preferredDate}
+            hint={t.booking.optional}
+            name="preferredDate"
+            type="date"
+          />
 
           <TextareaField
-            label="Note"
-            hint="optional"
+            label={t.booking.note}
+            hint={t.booking.optional}
             name="note"
             rows={2}
             maxLength={600}
-            placeholder={`Anything ${sellerName} should know about this order`}
+            placeholder={format(t.booking.notePlaceholder, { seller: sellerName })}
             className="sm:col-span-2"
           />
 
@@ -160,7 +172,7 @@ export function BookingPanel({ productId, productName, unit, farmer }: Props) {
             disabled={submitting}
             className="sm:col-span-2"
           >
-            {submitting ? "Sending\u2026" : `Request ${productName}`}
+            {submitting ? t.booking.submitting : format(t.booking.submit, { product: productName })}
           </Button>
         </form>
       ) : null}

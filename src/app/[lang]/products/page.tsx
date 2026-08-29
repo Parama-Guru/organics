@@ -3,14 +3,16 @@ import Link from "next/link";
 import { FilterChip } from "@/components/filter-chip";
 import { ProductCard } from "@/components/product-card";
 import { Button } from "@/components/ui/button";
+import { format, localePath } from "@/lib/i18n/config";
+import { getDictionary, getLocale } from "@/lib/i18n/server";
 import { getCategories, getProducts, getRegions } from "@/lib/products";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = {
-  title: "Shop",
-  description: "Browse the full range of certified organic produce, dairy and pantry staples.",
-};
+export async function generateMetadata() {
+  const t = await getDictionary();
+  return { title: t.meta.shopTitle, description: t.meta.shopDescription };
+}
 
 type Filters = { category?: string; region?: string; search?: string };
 
@@ -19,7 +21,7 @@ function firstValue(value: string | string[] | undefined): string | undefined {
 }
 
 // Filters compose, so every link has to carry the ones it is not changing.
-function hrefWith(current: Filters, patch: Filters): string {
+function hrefWith(base: string, current: Filters, patch: Filters): string {
   const next = { ...current, ...patch };
   const query = new URLSearchParams();
 
@@ -29,18 +31,10 @@ function hrefWith(current: Filters, patch: Filters): string {
   }
 
   const qs = query.toString();
-  return qs ? `/products?${qs}` : "/products";
+  return qs ? `${base}?${qs}` : base;
 }
 
-function Chip({ href, active, children }: { href: string; active: boolean; children: string }) {
-  return (
-    <FilterChip href={href} active={active}>
-      {children}
-    </FilterChip>
-  );
-}
-
-export default async function ProductsPage({ searchParams }: PageProps<"/products">) {
+export default async function ProductsPage({ searchParams }: PageProps<"/[lang]/products">) {
   const params = await searchParams;
   const filters: Filters = {
     category: firstValue(params.category)?.slice(0, 100),
@@ -48,7 +42,7 @@ export default async function ProductsPage({ searchParams }: PageProps<"/product
     search: firstValue(params.search)?.slice(0, 100),
   };
 
-  const [products, categories, regions] = await Promise.all([
+  const [products, categories, regions, locale, t] = await Promise.all([
     getProducts({
       categorySlug: filters.category,
       region: filters.region,
@@ -56,19 +50,27 @@ export default async function ProductsPage({ searchParams }: PageProps<"/product
     }),
     getCategories(),
     getRegions(),
+    getLocale(),
+    getDictionary(),
   ]);
 
+  const base = localePath(locale, "/products");
   const activeCategory = categories.find((category) => category.slug === filters.category);
   const isFiltered = Boolean(filters.category || filters.region || filters.search);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <h1 className="font-display text-3xl sm:text-4xl">
-        {activeCategory?.name ?? "All produce"}
-        {filters.region ? <span className="text-bark-600"> from {filters.region}</span> : null}
+        {activeCategory?.name ?? t.products.allProduce}
+        {filters.region ? (
+          <span className="text-bark-600">
+            {" "}
+            {format(t.products.fromRegion, { region: filters.region })}
+          </span>
+        ) : null}
       </h1>
       <p className="mt-2 text-bark-600">
-        {activeCategory?.description ?? "Everything we are harvesting and stocking right now."}
+        {activeCategory?.description ?? t.products.everythingNow}
       </p>
 
       <form method="get" className="mt-6 flex max-w-md gap-2" role="search">
@@ -81,45 +83,55 @@ export default async function ProductsPage({ searchParams }: PageProps<"/product
           name="search"
           defaultValue={filters.search ?? ""}
           maxLength={100}
-          placeholder="Search produce or region"
-          aria-label="Search produce or region"
+          placeholder={t.products.searchPlaceholder}
+          aria-label={t.products.searchLabel}
           className="w-full rounded-full border border-bark-200 bg-white/80 px-5 py-2.5 shadow-soft backdrop-blur transition-[border-color,box-shadow] placeholder:text-bark-600/55 focus:border-marigold-400 focus:outline-none focus:ring-4 focus:ring-marigold-400/25"
         />
         <Button type="submit" variant="dark">
-          Search
+          {t.products.search}
         </Button>
       </form>
 
-      <nav aria-label="Categories" className="mt-6 flex flex-wrap items-center gap-2">
-        <span className="text-xs uppercase tracking-wide text-bark-600">Category</span>
-        <Chip href={hrefWith(filters, { category: undefined })} active={!filters.category}>
-          All
-        </Chip>
+      <nav aria-label={t.products.category} className="mt-6 flex flex-wrap items-center gap-2">
+        <span className="text-xs uppercase tracking-wide text-bark-600">
+          {t.products.category}
+        </span>
+        <FilterChip
+          href={hrefWith(base, filters, { category: undefined })}
+          active={!filters.category}
+        >
+          {t.products.all}
+        </FilterChip>
         {categories.map((category) => (
-          <Chip
+          <FilterChip
             key={category.id}
-            href={hrefWith(filters, { category: category.slug })}
+            href={hrefWith(base, filters, { category: category.slug })}
             active={category.slug === filters.category}
           >
             {category.name}
-          </Chip>
+          </FilterChip>
         ))}
       </nav>
 
       {regions.length > 0 ? (
-        <nav aria-label="Sourcing regions" className="mt-3 flex flex-wrap items-center gap-2">
-          <span className="text-xs uppercase tracking-wide text-bark-600">Region</span>
-          <Chip href={hrefWith(filters, { region: undefined })} active={!filters.region}>
-            All
-          </Chip>
+        <nav aria-label={t.products.region} className="mt-3 flex flex-wrap items-center gap-2">
+          <span className="text-xs uppercase tracking-wide text-bark-600">
+            {t.products.region}
+          </span>
+          <FilterChip
+            href={hrefWith(base, filters, { region: undefined })}
+            active={!filters.region}
+          >
+            {t.products.all}
+          </FilterChip>
           {regions.map((region) => (
-            <Chip
+            <FilterChip
               key={region}
-              href={hrefWith(filters, { region })}
+              href={hrefWith(base, filters, { region })}
               active={region === filters.region}
             >
               {region}
-            </Chip>
+            </FilterChip>
           ))}
         </nav>
       ) : null}
@@ -129,10 +141,10 @@ export default async function ProductsPage({ searchParams }: PageProps<"/product
           <span aria-hidden className="text-5xl">
             {"\u{1F50D}"}
           </span>
-          <p className="mt-4 font-display text-xl">Nothing matches those filters</p>
+          <p className="mt-4 font-display text-xl">{t.products.noMatch}</p>
           {isFiltered ? (
-            <Button as={Link} href="/products" variant="secondary" className="mt-5">
-              Clear all filters
+            <Button as={Link} href={base} variant="secondary" className="mt-5">
+              {t.products.clearFilters}
             </Button>
           ) : null}
         </div>

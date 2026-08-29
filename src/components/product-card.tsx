@@ -2,17 +2,21 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import { format, localePath } from "@/lib/i18n/config";
+import { getDictionary, getLocale } from "@/lib/i18n/server";
 import { formatMoney } from "@/lib/money";
 import type { ProductSummary } from "@/lib/products";
 
-export function ProductCard({ product }: { product: ProductSummary }) {
+export async function ProductCard({ product }: { product: ProductSummary }) {
+  const [locale, t] = await Promise.all([getLocale(), getDictionary()]);
   const inStock = product.stock > 0;
+  const href = localePath(locale, `/products/${product.slug}`);
 
   return (
     <article className="group flex flex-col overflow-hidden rounded-3xl border border-white/70 bg-white/70 shadow-soft backdrop-blur-md transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-1.5 hover:border-marigold-400/70 hover:shadow-lift">
       {/* Decorative duplicate of the title link, so it is kept out of the a11y tree. */}
       <Link
-        href={`/products/${product.slug}`}
+        href={href}
         className="relative flex h-36 items-center justify-center overflow-hidden bg-leaf-50 text-5xl"
         aria-hidden
         tabIndex={-1}
@@ -38,7 +42,7 @@ export function ProductCard({ product }: { product: ProductSummary }) {
 
         <h3 className="font-display text-lg leading-snug break-words">
           <Link
-            href={`/products/${product.slug}`}
+            href={href}
             className="decoration-marigold-500 decoration-2 underline-offset-4 hover:underline"
           >
             {product.name}
@@ -49,9 +53,9 @@ export function ProductCard({ product }: { product: ProductSummary }) {
 
         {product.farmer ? (
           <p className="text-xs text-bark-600">
-            Listed by{" "}
+            {t.products.listedBy}{" "}
             <Link
-              href={`/farmers/${product.farmer.slug}`}
+              href={localePath(locale, `/farmers/${product.farmer.slug}`)}
               className="font-semibold text-bark-900 decoration-marigold-500 decoration-2 underline-offset-2 hover:underline"
             >
               {product.farmer.farmName}
@@ -60,15 +64,15 @@ export function ProductCard({ product }: { product: ProductSummary }) {
         ) : null}
 
         <div className="mt-auto flex items-end justify-between gap-3 border-t border-bark-200/60 pt-3">
-          <div>
-            <p className="font-display text-xl leading-none">
-              {formatMoney(product.priceCents)}
+          <div className="min-w-0">
+            <p className="font-display text-xl leading-none">{formatMoney(product.priceCents)}</p>
+            <p className="mt-1 text-xs text-bark-600">
+              {format(t.products.perUnit, { unit: product.unit })}
             </p>
-            <p className="mt-1 text-xs text-bark-600">per {product.unit}</p>
           </div>
 
-          <Button as={Link} href={`/products/${product.slug}`} size="sm">
-            {inStock ? "Contact" : "View"}
+          <Button as={Link} href={href} size="sm" className="shrink-0">
+            {inStock ? t.products.contact : t.products.view}
           </Button>
         </div>
       </div>

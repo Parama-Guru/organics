@@ -4,26 +4,29 @@ import { notFound } from "next/navigation";
 import { BookingPanel } from "@/components/booking-panel";
 import { ProductGallery } from "@/components/product-gallery";
 import { Button } from "@/components/ui/button";
+import { format, localePath } from "@/lib/i18n/config";
+import { getDictionary, getLocale } from "@/lib/i18n/server";
 import { formatMoney } from "@/lib/money";
 import { getProductBySlug } from "@/lib/products";
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata({ params }: PageProps<"/products/[slug]">) {
+export async function generateMetadata({ params }: PageProps<"/[lang]/products/[slug]">) {
   const { slug } = await params;
-  const product = await getProductBySlug(slug);
+  const [product, t] = await Promise.all([getProductBySlug(slug), getDictionary()]);
 
-  if (!product) return { title: "Product not found" };
+  if (!product) return { title: t.meta.productNotFound };
 
-  return {
-    title: product.name,
-    description: product.description,
-  };
+  return { title: product.name, description: product.description };
 }
 
-export default async function ProductPage({ params }: PageProps<"/products/[slug]">) {
+export default async function ProductPage({ params }: PageProps<"/[lang]/products/[slug]">) {
   const { slug } = await params;
-  const product = await getProductBySlug(slug);
+  const [product, locale, t] = await Promise.all([
+    getProductBySlug(slug),
+    getLocale(),
+    getDictionary(),
+  ]);
 
   if (!product) notFound();
 
@@ -32,10 +35,10 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
       <Link
-        href="/products"
+        href={localePath(locale, "/products")}
         className="inline-flex items-center gap-1.5 text-sm font-medium text-bark-600 transition-colors hover:text-bark-900"
       >
-        <span aria-hidden>&larr;</span> Back to shop
+        <span aria-hidden>&larr;</span> {t.product.backToShop}
       </Link>
 
       <div className="mt-6 grid animate-rise gap-8 sm:grid-cols-2">
@@ -45,7 +48,10 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
           <p className="text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-leaf-700">
             {product.category.name}
             {product.region ? (
-              <span className="text-bark-600"> &middot; grown in {product.region}</span>
+              <span className="text-bark-600">
+                {" "}
+                &middot; {format(t.product.grownIn, { region: product.region })}
+              </span>
             ) : null}
           </p>
           <h1 className="mt-2 font-display text-3xl leading-tight break-words sm:text-4xl">
@@ -55,10 +61,10 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
           <p className="mt-4 text-bark-600">{product.description}</p>
 
           <div className="mt-6 flex items-end gap-3">
-            <p className="font-display text-3xl leading-none">
-              {formatMoney(product.priceCents)}
+            <p className="font-display text-3xl leading-none">{formatMoney(product.priceCents)}</p>
+            <p className="pb-1 text-sm text-bark-600">
+              {format(t.products.perUnit, { unit: product.unit })}
             </p>
-            <p className="pb-1 text-sm text-bark-600">per {product.unit}</p>
           </div>
 
           <p
@@ -66,11 +72,15 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
               inStock ? "bg-leaf-100 text-leaf-800" : "bg-bark-100 text-bark-600"
             }`}
           >
-            {inStock ? `${product.stock} in stock` : "Currently unavailable"}
+            {inStock
+              ? format(t.product.inStock, { count: product.stock })
+              : t.product.unavailable}
           </p>
 
           <Button as="a" href="#contact" size="lg" className="mt-6">
-            {product.farmer ? `Contact ${product.farmer.farmName}` : "Contact us to order"}
+            {product.farmer
+              ? format(t.product.contactFarm, { farm: product.farmer.farmName })
+              : t.product.contactUs}
             <span aria-hidden>&darr;</span>
           </Button>
         </div>

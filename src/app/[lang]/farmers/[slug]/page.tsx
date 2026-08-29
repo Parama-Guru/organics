@@ -5,24 +5,30 @@ import { ProductCard } from "@/components/product-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getFarmerBySlug } from "@/lib/farmers";
+import { localePath } from "@/lib/i18n/config";
+import { getDictionary, getLocale } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata({ params }: PageProps<"/farmers/[slug]">) {
+export async function generateMetadata({ params }: PageProps<"/[lang]/farmers/[slug]">) {
   const { slug } = await params;
-  const result = await getFarmerBySlug(slug);
+  const [result, t] = await Promise.all([getFarmerBySlug(slug), getDictionary()]);
 
-  if (!result) return { title: "Farm not found" };
+  if (!result) return { title: t.meta.farmNotFound };
 
   return {
     title: result.farmer.farmName,
-    description: result.farmer.about ?? `Organic produce from ${result.farmer.farmName}.`,
+    description: result.farmer.about ?? result.farmer.farmName,
   };
 }
 
-export default async function FarmerPage({ params }: PageProps<"/farmers/[slug]">) {
+export default async function FarmerPage({ params }: PageProps<"/[lang]/farmers/[slug]">) {
   const { slug } = await params;
-  const result = await getFarmerBySlug(slug);
+  const [result, locale, t] = await Promise.all([
+    getFarmerBySlug(slug),
+    getLocale(),
+    getDictionary(),
+  ]);
 
   if (!result) notFound();
 
@@ -31,10 +37,10 @@ export default async function FarmerPage({ params }: PageProps<"/farmers/[slug]"
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <Link
-        href="/farmers"
+        href={localePath(locale, "/farmers")}
         className="inline-flex items-center gap-1.5 text-sm font-medium text-bark-600 transition-colors hover:text-bark-900"
       >
-        <span aria-hidden>&larr;</span> All farmers
+        <span aria-hidden>&larr;</span> {t.farmers.backToAll}
       </Link>
 
       <header className="glass mt-6 animate-rise rounded-3xl p-8">
@@ -42,11 +48,13 @@ export default async function FarmerPage({ params }: PageProps<"/farmers/[slug]"
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <Badge tone="leaf">
-                <span aria-hidden>&#10003;</span> Verified farmer
+                <span aria-hidden>&#10003;</span> {t.farmers.verified}
               </Badge>
               <Badge tone="neutral">{farmer.region}</Badge>
             </div>
-            <h1 className="mt-4 font-display text-3xl sm:text-4xl">{farmer.farmName}</h1>
+            <h1 className="mt-4 font-display text-3xl break-words sm:text-4xl">
+              {farmer.farmName}
+            </h1>
             <p className="mt-1 text-bark-600">{farmer.contactName}</p>
           </div>
 
@@ -59,13 +67,13 @@ export default async function FarmerPage({ params }: PageProps<"/farmers/[slug]"
       </header>
 
       <h2 className="mt-12 font-display text-2xl">
-        From this farm
+        {t.farmers.fromThisFarm}
         <span aria-hidden className="ml-3 inline-block h-1 w-12 rounded-full bg-leaf-500" />
       </h2>
 
       {products.length === 0 ? (
         <p className="glass mt-5 rounded-3xl p-10 text-center text-bark-600">
-          Nothing listed from this farm right now.
+          {t.farmers.nothingListed}
         </p>
       ) : (
         <div className="mt-5 grid gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">

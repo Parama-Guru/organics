@@ -22,24 +22,29 @@
   --color-marigold-500: #ec9346;
   --color-marigold-600: #cf6f1c;
 
-  /* Warm neutrals with indigo ink. `bark` is the surface/text ramp. */
+  /* Warm neutrals with India-flag navy ink. `bark` is the surface/text ramp.
+     900 is the Ashoka Chakra navy (#000080); the lighter steps are the same hue
+     desaturated so secondary text still clears AA (measured 6.29:1 on bark-50). */
   --color-bark-50: #faf7f2;
   --color-bark-100: #f1ece3;
   --color-bark-200: #ded6ca;
-  --color-bark-600: #55637a;
-  --color-bark-800: #2c4666;
-  --color-bark-900: #1f3a5f;
+  --color-bark-600: #4a54a8;
+  --color-bark-800: #141d8f;
+  --color-bark-900: #000080;
 
+  /* Latin resolves from Fraunces/Manrope; Tamil glyphs are absent there, so the
+     browser falls through to the Noto Tamil faces per glyph. */
   --font-sans:
-    var(--font-body-family), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+    var(--font-body-family), var(--font-body-tamil), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-display:
-    var(--font-display-family), ui-serif, Georgia, "Times New Roman", serif;
+    var(--font-display-family), var(--font-display-tamil), ui-serif, Georgia,
+    "Times New Roman", serif;
 
   /* Layered, warm-tinted shadows read as depth; flat grey ones look cheap. */
-  --shadow-soft: 0 1px 2px rgb(31 58 95 / 0.04), 0 4px 12px rgb(31 58 95 / 0.06);
-  --shadow-lift: 0 2px 4px rgb(31 58 95 / 0.05), 0 12px 28px rgb(31 58 95 / 0.12);
-  --shadow-glass: 0 1px 0 rgb(255 255 255 / 0.5) inset, 0 8px 32px rgb(31 58 95 / 0.10);
+  --shadow-soft: 0 1px 2px rgb(0 0 128 / 0.04), 0 4px 12px rgb(0 0 128 / 0.06);
+  --shadow-lift: 0 2px 4px rgb(0 0 128 / 0.05), 0 12px 28px rgb(0 0 128 / 0.12);
+  --shadow-glass: 0 1px 0 rgb(255 255 255 / 0.5) inset, 0 8px 32px rgb(0 0 128 / 0.10);
 
   /* Tailwind's smallest default is 40rem. 24rem is where the header has real
      slack with the wordmark shown (measured: negative slack at 23rem). */
@@ -119,7 +124,7 @@ h3 {
   box-shadow: var(--shadow-glass);
 }
 
-/* For glass sitting on the dark indigo hero. */
+/* For glass sitting on the dark navy hero. */
 @utility glass-dark {
   background-color: rgb(255 255 255 / 0.10);
   backdrop-filter: blur(14px) saturate(140%);
@@ -133,7 +138,7 @@ h3 {
     background-color: rgb(255 255 255 / 0.96);
   }
   .glass-dark {
-    background-color: rgb(31 58 95 / 0.86);
+    background-color: rgb(0 0 128 / 0.86);
   }
 }
 
@@ -144,6 +149,13 @@ h3 {
   select,
   textarea {
     font-size: 1rem;
+  }
+
+  /* Tamil words are long and take no hyphenation, so a heading that cannot fit
+     one line pushes the whole page wider. Measured: the /sell h1 ran 330px into
+     a 273px column at 320px. Breaking mid-word is the lesser evil. */
+  body {
+    overflow-wrap: break-word;
   }
 }
 
