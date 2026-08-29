@@ -2,14 +2,16 @@
 // Money is stored as integer minor units (cents/paise) to avoid float rounding errors.
 
 generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = ["native", "debian-openssl-3.0.x"]
+  provider        = "prisma-client-js"
+  binaryTargets   = ["native", "debian-openssl-3.0.x"]
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  directUrl  = env("DIRECT_URL")
+  extensions = [pg_trgm]
 }
 
 model Category {
@@ -57,6 +59,7 @@ model Farmer {
 
   @@index([status])
   @@index([region])
+  @@index([farmName(ops: raw("gin_trgm_ops"))], map: "Farmer_farmName_trgm_idx", type: Gin)
 }
 
 model ProductImage {
@@ -101,6 +104,11 @@ model Product {
   @@index([isActive, isFeatured])
   @@index([region])
   @@index([farmerId])
+  // Trigram indexes: search uses ILIKE '%term%', which no b-tree can serve. Without
+  // these a term that matches little or nothing scans the whole table.
+  @@index([name(ops: raw("gin_trgm_ops"))], map: "Product_name_trgm_idx", type: Gin)
+  @@index([description(ops: raw("gin_trgm_ops"))], map: "Product_description_trgm_idx", type: Gin)
+  @@index([region(ops: raw("gin_trgm_ops"))], map: "Product_region_trgm_idx", type: Gin)
 }
 
 enum EnquiryStatus {

@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { FilterChip } from "@/components/filter-chip";
 import { ProductCard } from "@/components/product-card";
 import { Button } from "@/components/ui/button";
 import { getCategories, getProducts, getRegions } from "@/lib/products";
@@ -33,17 +34,9 @@ function hrefWith(current: Filters, patch: Filters): string {
 
 function Chip({ href, active, children }: { href: string; active: boolean; children: string }) {
   return (
-    <Link
-      href={href}
-      aria-current={active ? "true" : undefined}
-      className={`rounded-full px-4 py-1.5 text-sm font-medium ring-1 transition-all duration-200 hover:-translate-y-0.5 ${
-        active
-          ? "bg-bark-900 text-bark-50 ring-bark-900 shadow-soft"
-          : "bg-white/70 text-bark-600 ring-bark-200 backdrop-blur hover:text-bark-900 hover:ring-marigold-400"
-      }`}
-    >
+    <FilterChip href={href} active={active}>
       {children}
-    </Link>
+    </FilterChip>
   );
 }
 
