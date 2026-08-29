@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getVerifiedFarmers } from "@/lib/farmers";
 import { format, localePath } from "@/lib/i18n/config";
+import { localisedOrNull, regionLabel } from "@/lib/i18n/content";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
@@ -51,13 +52,15 @@ export default async function FarmersPage() {
                 >
                   {"\u{1F33E}"}
                 </span>
-                <Badge tone="leaf">{farmer.region}</Badge>
+                <Badge tone="leaf">{regionLabel(locale, farmer.region)}</Badge>
               </div>
 
               <h2 className="mt-4 font-display text-xl break-words">{farmer.farmName}</h2>
               <p className="text-sm text-bark-600">{farmer.contactName}</p>
               {farmer.about ? (
-                <p className="mt-3 line-clamp-3 text-sm text-bark-600">{farmer.about}</p>
+                <p className="mt-3 line-clamp-3 text-sm text-bark-600">
+                  {localisedOrNull(locale, farmer.about, farmer.aboutTa)}
+                </p>
               ) : null}
 
               <p className="mt-4 border-t border-bark-200/60 pt-3 text-sm font-medium">

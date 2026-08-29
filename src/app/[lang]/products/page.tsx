@@ -4,6 +4,7 @@ import { FilterChip } from "@/components/filter-chip";
 import { ProductCard } from "@/components/product-card";
 import { Button } from "@/components/ui/button";
 import { format, localePath } from "@/lib/i18n/config";
+import { localised, localisedOrNull, regionLabel } from "@/lib/i18n/content";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
 import { getCategories, getProducts, getRegions } from "@/lib/products";
 
@@ -61,16 +62,20 @@ export default async function ProductsPage({ searchParams }: PageProps<"/[lang]/
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <h1 className="font-display text-3xl sm:text-4xl">
-        {activeCategory?.name ?? t.products.allProduce}
+        {activeCategory
+          ? localised(locale, activeCategory.name, activeCategory.nameTa)
+          : t.products.allProduce}
         {filters.region ? (
           <span className="text-bark-600">
             {" "}
-            {format(t.products.fromRegion, { region: filters.region })}
+            {format(t.products.fromRegion, { region: regionLabel(locale, filters.region) })}
           </span>
         ) : null}
       </h1>
       <p className="mt-2 text-bark-600">
-        {activeCategory?.description ?? t.products.everythingNow}
+        {(activeCategory
+          ? localisedOrNull(locale, activeCategory.description, activeCategory.descriptionTa)
+          : null) ?? t.products.everythingNow}
       </p>
 
       <form method="get" className="mt-6 flex max-w-md gap-2" role="search">
@@ -108,7 +113,7 @@ export default async function ProductsPage({ searchParams }: PageProps<"/[lang]/
             href={hrefWith(base, filters, { category: category.slug })}
             active={category.slug === filters.category}
           >
-            {category.name}
+            {localised(locale, category.name, category.nameTa)}
           </FilterChip>
         ))}
       </nav>
@@ -130,7 +135,7 @@ export default async function ProductsPage({ searchParams }: PageProps<"/[lang]/
               href={hrefWith(base, filters, { region })}
               active={region === filters.region}
             >
-              {region}
+              {regionLabel(locale, region)}
             </FilterChip>
           ))}
         </nav>

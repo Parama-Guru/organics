@@ -10,6 +10,7 @@ export const farmerCardSelect = {
   contactName: true,
   region: true,
   about: true,
+  aboutTa: true,
   verifiedAt: true,
   _count: { select: { products: { where: publicProductWhere } } },
 } satisfies Prisma.FarmerSelect;

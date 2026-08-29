@@ -34,6 +34,7 @@ type SeedFarmer = {
   email: string;
   region: string;
   about: string;
+  aboutTa: string;
   status: "PENDING" | "VERIFIED" | "REJECTED" | "SUSPENDED";
   govtIdLast4?: string;
 };
@@ -48,6 +49,8 @@ const farmers: SeedFarmer[] = [
     region: "Nilgiris",
     about:
       "Third-generation hill farm above Coonoor. Certified organic since 2016, growing leaf vegetables and tomatoes without synthetic inputs.",
+    aboutTa:
+      "கூனூருக்கு மேலே மூன்று தலைமுறையாக நடக்கும் மலைப் பண்ணை. 2016 முதல் இயற்கைச் சான்று உண்டு. கீரை வகைகளும் தக்காளியும் ரசாயனம் இல்லாமல் விளைகின்றன.",
     status: "VERIFIED",
     govtIdLast4: "4417",
   },
@@ -60,6 +63,8 @@ const farmers: SeedFarmer[] = [
     region: "Thanjavur",
     about:
       "Delta paddy and pulses co-operative of eleven families. Unpolished rice milled to order, never fumigated in storage.",
+    aboutTa:
+      "பதினொரு குடும்பங்கள் இணைந்து நடத்தும் காவிரி டெல்டா கூட்டமைப்பு. பாலிஷ் செய்யாத அரிசியைக் கேட்கும்போது அரைத்துத் தருகிறோம். சேமிப்பில் புகையூட்டல் கிடையாது.",
     status: "VERIFIED",
     govtIdLast4: "9082",
   },
@@ -72,6 +77,8 @@ const farmers: SeedFarmer[] = [
     region: "Coorg",
     about:
       "Shade-grown estate in Madikeri. Avocado, coffee and cold-pressed coconut oil, all wood-pressed on the estate.",
+    aboutTa:
+      "மடிக்கேரியில் நிழலில் வளரும் தோட்டம். வெண்ணெய்ப்பழம், காபி, தோட்டத்திலேயே மரச்செக்கில் ஆட்டிய தேங்காய் எண்ணெய்.",
     status: "VERIFIED",
     govtIdLast4: "2310",
   },
@@ -84,8 +91,52 @@ const farmers: SeedFarmer[] = [
     email: "meera@newvalleyproduce.in",
     region: "Erode",
     about: "Recently applied. Turmeric and banana smallholding on the Bhavani river.",
+    aboutTa:
+      "பவானி ஆற்றங்கரையில் மஞ்சளும் வாழையும் பயிரிடும் சிறு பண்ணை. இப்போதுதான் விண்ணப்பித்திருக்கிறார்கள்.",
     status: "PENDING",
     govtIdLast4: "7765",
+  },
+  {
+    slug: "bhavani-riverside",
+    contactName: "Selvi Murugan",
+    farmName: "Bhavani Riverside Farm",
+    phone: "+91 94420 33518",
+    email: "selvi@bhavaniriverside.in",
+    region: "Erode",
+    about:
+      "Twenty-two native Kangeyam cows on the Bhavani riverbank, with vegetables and citrus on the same land. Milk leaves the same morning it is drawn.",
+    aboutTa:
+      "பவானி ஆற்றங்கரையில் இருபத்திரண்டு காங்கேயம் நாட்டு மாடுகள். அதே நிலத்தில் காய்கறியும் எலுமிச்சை வகையும் விளைகிறது. கறந்த அன்று காலையே பால் வெளியே செல்கிறது.",
+    status: "VERIFIED",
+    govtIdLast4: "5194",
+  },
+  {
+    slug: "konkan-alphonso",
+    contactName: "Prakash Sawant",
+    farmName: "Konkan Alphonso Orchard",
+    phone: "+91 90280 47712",
+    email: "prakash@konkanalphonso.in",
+    region: "Ratnagiri",
+    about:
+      "Family orchard behind the Ratnagiri coast. Alphonso is picked by hand at the tree and ripened in hay, never with carbide.",
+    aboutTa:
+      "ரத்னகிரி கடற்கரைக்குப் பின்னால் உள்ள குடும்பத் தோட்டம். ஆல்பன்சோ மாம்பழத்தை மரத்திலேயே கையால் பறித்து, வைக்கோலில் பழுக்க வைக்கிறோம். கார்பைடு கிடையாது.",
+    status: "VERIFIED",
+    govtIdLast4: "6620",
+  },
+  {
+    slug: "kullu-hill-orchard",
+    contactName: "Devika Thakur",
+    farmName: "Kullu Hill Orchard",
+    phone: "+91 98160 22904",
+    email: "devika@kulluhill.in",
+    region: "Himachal",
+    about:
+      "Cold-climate smallholding above the Kullu valley. Wild berries in season, and rock salt brought down from the old Mandi workings.",
+    aboutTa:
+      "குலு பள்ளத்தாக்குக்கு மேலே உள்ள குளிர்ப் பகுதிச் சிறு பண்ணை. பருவத்தில் காட்டுப் பழங்கள்; பழைய மண்டி சுரங்கத்திலிருந்து கல் உப்பு.",
+    status: "VERIFIED",
+    govtIdLast4: "3348",
   },
 ];
 
@@ -99,8 +150,9 @@ type SeedProduct = {
   region: string;
   stock: number;
   isFeatured?: boolean;
-  // Omitted means the shop stocks it itself, like Amazon's first-party retail.
-  farmerSlug?: string;
+  // Required: a listing without a named farm behind it is exactly what this site
+  // exists to avoid.
+  farmerSlug: string;
 };
 
 const catalog: Array<{
@@ -160,6 +212,7 @@ const catalog: Array<{
         emoji: "\u{1F966}",
         region: "Coorg",
         stock: 60,
+        farmerSlug: "coorg-highlands",
       },
       {
         name: "Snake Gourd",
@@ -223,6 +276,7 @@ const catalog: Array<{
         emoji: "\u{1F346}",
         region: "Erode",
         stock: 75,
+        farmerSlug: "bhavani-riverside",
       },
     ],
   },
@@ -241,6 +295,7 @@ const catalog: Array<{
         region: "Ratnagiri",
         stock: 40,
         isFeatured: true,
+        farmerSlug: "konkan-alphonso",
       },
       {
         name: "Wild Blueberries",
@@ -251,6 +306,7 @@ const catalog: Array<{
         emoji: "\u{1FAD0}",
         region: "Himachal",
         stock: 55,
+        farmerSlug: "kullu-hill-orchard",
       },
       {
         name: "Hass Avocados",
@@ -272,6 +328,7 @@ const catalog: Array<{
         emoji: "\u{1F34C}",
         region: "Thanjavur",
         stock: 150,
+        farmerSlug: "kaveri-farms",
       },
       {
         name: "Nendran Banana",
@@ -304,6 +361,7 @@ const catalog: Array<{
         emoji: "\u{1F34A}",
         region: "Erode",
         stock: 96,
+        farmerSlug: "bhavani-riverside",
       },
       {
         name: "Guava, Allahabad Safeda",
@@ -333,6 +391,7 @@ const catalog: Array<{
         region: "Erode",
         stock: 100,
         isFeatured: true,
+        farmerSlug: "bhavani-riverside",
       },
       {
         name: "Free-Range Eggs",
@@ -343,6 +402,7 @@ const catalog: Array<{
         emoji: "\u{1F95A}",
         region: "Erode",
         stock: 85,
+        farmerSlug: "bhavani-riverside",
       },
       {
         name: "Cultured Farm Butter",
@@ -353,6 +413,7 @@ const catalog: Array<{
         emoji: "\u{1F9C8}",
         region: "Erode",
         stock: 45,
+        farmerSlug: "bhavani-riverside",
       },
       {
         name: "Set Curd",
@@ -363,6 +424,7 @@ const catalog: Array<{
         emoji: "\u{1F368}",
         region: "Erode",
         stock: 70,
+        farmerSlug: "bhavani-riverside",
       },
       {
         name: "Bilona Cow Ghee",
@@ -374,6 +436,7 @@ const catalog: Array<{
         region: "Erode",
         stock: 30,
         isFeatured: true,
+        farmerSlug: "bhavani-riverside",
       },
     ],
   },
@@ -413,6 +476,7 @@ const catalog: Array<{
         emoji: "\u{1F33E}",
         region: "Thanjavur",
         stock: 50,
+        farmerSlug: "kaveri-farms",
       },
     ],
   },
@@ -442,6 +506,7 @@ const catalog: Array<{
         region: "Nilgiris",
         stock: 42,
         isFeatured: true,
+        farmerSlug: "sundar-organics",
       },
       {
         name: "Himalayan Rock Salt",
@@ -452,6 +517,7 @@ const catalog: Array<{
         emoji: "\u{1F9C2}",
         region: "Himachal",
         stock: 90,
+        farmerSlug: "kullu-hill-orchard",
       },
       {
         name: "Wood-Pressed Groundnut Oil",
@@ -502,6 +568,166 @@ const catalog: Array<{
   },
 ];
 
+// Tamil catalogue copy, keyed by slug. Written to the *Ta columns; anything not
+// listed here falls back to the English column at read time.
+const categoryTa: Record<string, { name: string; description: string }> = {
+  "fresh-vegetables": {
+    name: "காய்கறிகள்",
+    description: "இயற்கைப் பண்ணைகளில் பறித்த பருவகால காய்கறிகள்.",
+  },
+  "fresh-fruits": {
+    name: "பழங்கள்",
+    description: "மரத்திலேயே பழுத்த பழங்கள். மெழுகும் இல்லை, மருந்தும் இல்லை.",
+  },
+  "dairy-and-eggs": {
+    name: "பால், முட்டை",
+    description: "மேய்ச்சலில் வளரும் மாடுகள், திறந்தவெளியில் சுற்றும் கோழிகள்.",
+  },
+  "grains-and-pulses": {
+    name: "தானியம், பருப்பு",
+    description: "கல்லில் அரைத்த தானியங்கள், ஒரே பண்ணைப் பருப்பு. புகையூட்டாமல் சேமிப்பு.",
+  },
+  "pantry-staples": {
+    name: "சமையலறைப் பொருட்கள்",
+    description: "மரச்செக்கு எண்ணெய், சுத்தமான தேன், தினசரித் தேவைகள். சேர்க்கைகள் இல்லை.",
+  },
+};
+
+const productTa: Record<string, { name: string; description: string }> = {
+  "organic-baby-spinach": {
+    name: "இளம் பசலைக் கீரை",
+    description: "மென்மையான இளம் பசலை இலைகள். மூன்று முறை கழுவி அனுப்புகிறோம்.",
+  },
+  "heirloom-tomatoes": {
+    name: "நாட்டுத் தக்காளி",
+    description: "கொடியிலேயே பழுத்த நாட்டுத் தக்காளி. ஆழமான இனிப்புச் சுவை, ரசாயனம் இல்லை.",
+  },
+  "rainbow-carrots": {
+    name: "வண்ணக் கேரட்",
+    description: "ஊதா, மஞ்சள், ஆரஞ்சு கேரட் ஒன்றாக ஒரு கட்டு. இளசாகப் பறித்தது.",
+  },
+  "broccoli-crowns": {
+    name: "ப்ரோக்கோலி",
+    description: "அடர் பச்சை ப்ரோக்கோலி. பறித்த சில மணி நேரத்திலேயே குளிர்வைக்கிறோம்.",
+  },
+  "snake-gourd": {
+    name: "புடலங்காய்",
+    description: "விதை இறுகும் முன் பறித்த இளம் புடலை. பொரியலுக்கு ஏற்றது.",
+  },
+  "little-millet": {
+    name: "சாமை",
+    description: "மானாவாரி நிலத்துச் சாமை. உமி நீக்கியது, பாலிஷ் இல்லை.",
+  },
+  "black-urad-whole": {
+    name: "முழு கருப்பு உளுந்து",
+    description: "தோல் நீக்காத உளுந்து. கையால் பிரித்தது, பாலிஷ் செய்யவில்லை.",
+  },
+  "country-okra": {
+    name: "நாட்டு வெண்டைக்காய்",
+    description: "குட்டையான நாட்டு வெண்டை. வதக்கும்போது வழுவழுப்பாகாமல் இறுகி இருக்கும்.",
+  },
+  "curry-leaf-bunch": {
+    name: "கருவேப்பிலைக் கட்டு",
+    description: "அனுப்பும் அன்று காலை வெட்டிய தடித்த கருவேப்பிலை. மருந்து அடிப்பதில்லை.",
+  },
+  "purple-brinjal": {
+    name: "ஊதா கத்திரிக்காய்",
+    description: "சிறிய இனிப்புச் சுவைக் கத்திரி. நீண்ட நேரம் கொதித்தாலும் உருவம் கெடாது.",
+  },
+  "alphonso-mangoes": {
+    name: "ஆல்பன்சோ மாம்பழம்",
+    description: "வெயிலில் பழுத்த ஆல்பன்சோ. தோட்டத்திலேயே கையால் பறித்தது, கார்பைடு இல்லை.",
+  },
+  "wild-blueberries": {
+    name: "காட்டு புளூபெர்ரி",
+    description: "சிறிய, சுவை அடர்ந்த காட்டு புளூபெர்ரி.",
+  },
+  "hass-avocados": {
+    name: "ஹாஸ் வெண்ணெய்ப்பழம்",
+    description: "கிரீம் போன்ற ஹாஸ் வெண்ணெய்ப்பழம். சரியான பக்குவத்தில் அனுப்புகிறோம்.",
+  },
+  "banana-robusta": {
+    name: "ரோபஸ்டா வாழைப்பழம்",
+    description: "தினசரி இயற்கை வாழைப்பழம். மருந்து இல்லாமல் தானாகப் பழுத்தது.",
+  },
+  "nendran-banana": {
+    name: "நேந்திரம் பழம்",
+    description: "இறுக்கமான கேரள நேந்திரம். சிப்ஸுக்கும் ஆவியில் வேகவைக்கவும் ஏற்றது.",
+  },
+  "panneer-grapes": {
+    name: "பன்னீர் திராட்சை",
+    description: "கம்பம் பள்ளத்தாக்கு விதைத் திராட்சை. தளர்வாக விற்கிறோம், மெழுகு இல்லை.",
+  },
+  "sweet-lime": {
+    name: "சாத்துக்குடி",
+    description: "மெல்லிய தோல் கொண்ட சாத்துக்குடி. கசக்காமல் நன்றாகச் சாறு பிழியும்.",
+  },
+  "guava-allahabad-safeda": {
+    name: "கொய்யா, அலகாபாத் சபேதா",
+    description: "வெள்ளைச் சதை கொண்ட மொறுமொறுப்பான கொய்யா. மென்மையாகும் முன் பறித்தது.",
+  },
+  "a2-whole-milk": {
+    name: "A2 முழு பால்",
+    description: "புல் மேய்ந்த மாடுகளின் A2 பால், மிதமாகக் காய்ச்சியது.",
+  },
+  "free-range-eggs": {
+    name: "நாட்டுக் கோழி முட்டை",
+    description: "வெளியே சுற்றி மேயும் கோழிகளின் முட்டை. அடர் ஆரஞ்சு நிற மஞ்சள் கரு.",
+  },
+  "cultured-farm-butter": {
+    name: "பண்ணை வெண்ணெய்",
+    description: "சிறு தொகுதிகளாகக் கடைந்த வெண்ணெய். கிரீமும் உப்பும் மட்டுமே.",
+  },
+  "set-curd": {
+    name: "கட்டித் தயிர்",
+    description: "அதே A2 பாலில் இரவு முழுக்க உறைந்த கெட்டித் தயிர். கலக்கவில்லை.",
+  },
+  "bilona-cow-ghee": {
+    name: "பிலோனா பசு நெய்",
+    description: "கிரீமில் அல்ல, தயிரில் இருந்து கையால் கடைந்த நெய். அடர் மஞ்சள், நல்ல வாசனை.",
+  },
+  "sonamasuri-brown-rice": {
+    name: "சோனாமசூரி கைக்குத்தல் அரிசி",
+    description: "பாலிஷ் செய்யாத சோனாமசூரி. மென்மையான பதம், குறைந்த கிளைசெமிக் அளவு.",
+  },
+  "whole-red-lentils": {
+    name: "முழு மசூர் பருப்பு",
+    description: "ரசாயனம் இல்லாத மசூர் பருப்பு. விரைவில் வெந்து மென்மையான பருப்பாகும்.",
+  },
+  "stone-milled-wheat-flour": {
+    name: "கல் மில் கோதுமை மாவு",
+    description: "சக்கி மில்லில் அரைத்த முழு கோதுமை மாவு. தவிடும் முளையும் அப்படியே.",
+  },
+  "cold-pressed-coconut-oil": {
+    name: "மரச்செக்கு தேங்காய் எண்ணெய்",
+    description: "மரச்செக்கில் ஆட்டிய கன்னி தேங்காய் எண்ணெய். இயற்கை வாசனை அப்படியே.",
+  },
+  "raw-forest-honey": {
+    name: "காட்டுத் தேன்",
+    description: "காய்ச்சாத, வடிகட்டாத பல்பூத் தேன். காட்டுக் கூடுகளிலிருந்து சேகரித்தது.",
+  },
+  "himalayan-rock-salt": {
+    name: "இமய கல் உப்பு",
+    description: "கையால் எடுத்த இளஞ்சிவப்புக் கல் உப்பு. சுத்திகரிக்காதது, சேர்க்கைகள் இல்லை.",
+  },
+  "wood-pressed-groundnut-oil": {
+    name: "மரச்செக்கு கடலை எண்ணெய்",
+    description: "மெதுவாக ஆட்டிய செக்கு எண்ணெய். நிறமும் வாசனையும் அப்படியே.",
+  },
+  "palm-jaggery-blocks": {
+    name: "கருப்பட்டி",
+    description: "பனையிலிருந்து இறக்கிய பதநீரைக் காய்ச்சியது. எதுவும் சேர்க்கவில்லை.",
+  },
+  "single-origin-filter-coffee": {
+    name: "பில்டர் காபிப் பொடி",
+    description: "நிழலில் வளர்ந்த அரேபிக்கா, 20% சிக்கரியுடன். டிகாக்ஷனுக்கு ஏற்ற அரவை.",
+  },
+  "raw-turmeric-fingers": {
+    name: "பச்சை மஞ்சள் கிழங்கு",
+    description: "குர்குமின் அதிகமுள்ள ஈரோட்டு மஞ்சள். வெயிலில் முழுசாக உலர்த்தியது.",
+  },
+};
+
 async function main() {
   const farmerIdBySlug = new Map<string, string>();
 
@@ -522,21 +748,33 @@ async function main() {
 
   for (const category of catalog) {
     const { products, ...categoryData } = category;
+    const ta = categoryTa[categoryData.slug];
+    const data = {
+      ...categoryData,
+      nameTa: ta?.name ?? null,
+      descriptionTa: ta?.description ?? null,
+    };
 
     const savedCategory = await prisma.category.upsert({
       where: { slug: categoryData.slug },
-      update: categoryData,
-      create: categoryData,
+      update: data,
+      create: data,
     });
 
     for (const product of products) {
       const { farmerSlug, ...productData } = product;
+      const farmerId = farmerIdBySlug.get(farmerSlug);
+      if (!farmerId) throw new Error(`Unknown farmerSlug "${farmerSlug}" on ${product.slug}`);
+
       const shots = shotsFor(product.slug);
+      const productTamil = productTa[product.slug];
       const data = {
         ...productData,
+        nameTa: productTamil?.name ?? null,
+        descriptionTa: productTamil?.description ?? null,
         imageUrl: shots[0],
         categoryId: savedCategory.id,
-        farmerId: farmerSlug ? (farmerIdBySlug.get(farmerSlug) ?? null) : null,
+        farmerId,
       };
 
       const saved = await prisma.product.upsert({

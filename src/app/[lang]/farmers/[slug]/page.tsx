@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getFarmerBySlug } from "@/lib/farmers";
 import { localePath } from "@/lib/i18n/config";
+import { localisedOrNull, regionLabel } from "@/lib/i18n/content";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
@@ -50,7 +51,7 @@ export default async function FarmerPage({ params }: PageProps<"/[lang]/farmers/
               <Badge tone="leaf">
                 <span aria-hidden>&#10003;</span> {t.farmers.verified}
               </Badge>
-              <Badge tone="neutral">{farmer.region}</Badge>
+              <Badge tone="neutral">{regionLabel(locale, farmer.region)}</Badge>
             </div>
             <h1 className="mt-4 font-display text-3xl break-words sm:text-4xl">
               {farmer.farmName}
@@ -58,12 +59,16 @@ export default async function FarmerPage({ params }: PageProps<"/[lang]/farmers/
             <p className="mt-1 text-bark-600">{farmer.contactName}</p>
           </div>
 
-          <Button as="a" href={`tel:${farmer.phone.replace(/\s/g, "")}`} variant="secondary">
+          <Button as="a" href={`tel:${farmer.phone.replace(/[^\d+]/g, "")}`} size="lg">
             <span aria-hidden>&#9742;</span> {farmer.phone}
           </Button>
         </div>
 
-        {farmer.about ? <p className="mt-5 max-w-3xl text-bark-600">{farmer.about}</p> : null}
+        {farmer.about ? (
+          <p className="mt-5 max-w-3xl text-bark-600">
+            {localisedOrNull(locale, farmer.about, farmer.aboutTa)}
+          </p>
+        ) : null}
       </header>
 
       <h2 className="mt-12 font-display text-2xl">

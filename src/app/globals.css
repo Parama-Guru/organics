@@ -110,6 +110,28 @@ h3 {
   letter-spacing: -0.015em;
 }
 
+/* Tamil script needs different typographic defaults from Latin, so these override
+   the utilities rather than every call site repeating a conditional class.
+   Unlayered, and one level more specific than a utility class, so they win.
+   - Tamil has no upper case: `uppercase` does nothing, and letter-spacing pulls a
+     vowel sign away from the consonant it belongs to. Both are neutralised.
+   - The above-base and below-base marks need more leading than Latin does, so the
+     tighter display values used for Fraunces would clip them. */
+html:lang(ta) * {
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+html:lang(ta) body {
+  line-height: 1.7;
+}
+
+html:lang(ta) h1,
+html:lang(ta) h2,
+html:lang(ta) h3 {
+  line-height: 1.3;
+}
+
 /* Keep keyboard focus clearly visible for accessibility. */
 :focus-visible {
   outline: 2px solid var(--color-leaf-600);

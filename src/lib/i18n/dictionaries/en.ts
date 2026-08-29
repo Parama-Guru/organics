@@ -1,17 +1,15 @@
 export const en = {
   meta: {
-    title: "Certified organic produce, straight from the farm",
+    title: "Organic produce, straight from the farm",
     description:
-      "Browse certified organic produce and contact the farm directly. Every farmer is verified before their produce is listed.",
+      "Browse organic produce and call the farm yourself. Every farm is checked before its listings go live.",
     shopTitle: "Shop",
-    shopDescription:
-      "Browse the full range of certified organic produce, dairy and pantry staples.",
+    shopDescription: "Everything our verified farms have listed right now.",
     farmersTitle: "Our farmers",
-    farmersDescription:
-      "The verified organic farms behind the shop, listed with their region and what they grow.",
+    farmersDescription: "The farms behind every listing, with their region and phone number.",
     sellTitle: "Sell with us",
     sellDescription:
-      "Apply to list your certified organic produce. Every farm is verified before its listings go live.",
+      "List your organic produce and take enquiries yourself. We check every farm before its listings go live.",
     productNotFound: "Product not found",
     farmNotFound: "Farm not found",
   },
@@ -27,25 +25,25 @@ export const en = {
   },
 
   home: {
-    badge: "Certified organic",
+    badge: "Every farm checked",
     titleLead: "Real food, grown the ",
     titleAccent: "slow way",
     titleTail: ".",
     intro:
-      "Every farm here is verified before its produce is listed. Find what you want, then call the farmer directly and arrange it yourself. No middleman, no markup.",
+      "We check every farm before its produce appears here. Find what you want, call the farmer yourself, and settle it between you. No middleman, no markup.",
     browse: "Browse produce",
     meetFarmers: "Meet the farmers",
     shopByCategory: "Shop by category",
     weeklyPick: "This week's pick",
     viewAll: "View all",
-    emptyBefore: "The catalog is empty. Run ",
+    emptyBefore: "The catalogue is empty. Run ",
     emptyAfter: " to load sample produce.",
   },
 
   products: {
     allProduce: "All produce",
     fromRegion: "from {region}",
-    everythingNow: "Everything we are harvesting and stocking right now.",
+    everythingNow: "Everything our verified farms have listed right now.",
     searchPlaceholder: "Search produce or region",
     searchLabel: "Search produce or region",
     search: "Search",
@@ -53,7 +51,7 @@ export const en = {
     region: "Region",
     all: "All",
     noMatch: "Nothing matches those filters",
-    clearFilters: "Clear all filters",
+    clearFilters: "Clear filters",
     contact: "Contact",
     view: "View",
     listedBy: "Listed by",
@@ -65,46 +63,38 @@ export const en = {
     grownIn: "grown in {region}",
     inStock: "{count} in stock",
     unavailable: "Currently unavailable",
-    contactFarm: "Contact {farm}",
-    contactUs: "Contact us to order",
+    contactFarm: "Call {farm}",
+  },
+
+  contact: {
+    eyebrow: "Talk to the farm directly",
+    verified: "Checked farm",
+    whatsapp: "WhatsApp",
+    note: "Ask {seller} about price, quantity and how to collect it. We do not take orders and we do not take a cut.",
+  },
+
+  gallery: {
+    images: "{name} images",
+    view: "{name}, view {index}",
+    show: "Show image {index} of {total}",
   },
 
   farmers: {
-    everyFarmVerified: "Every farm verified",
+    everyFarmVerified: "Every farm checked",
     title: "Our farmers",
     intro:
-      "We check each farm's details before a single listing goes live. Call them directly, or book from any product page.",
+      "We check a farm's details before any of its listings go live. Call them directly from any product page.",
     none: "No farms listed yet",
-    applyToList: "Apply to list your farm",
+    applyToList: "List your farm",
     listingCount: "{count} listing",
     listingCountPlural: "{count} listings",
     growOrganic: "Grow organic produce?",
-    applyHere: "Apply to list your farm here.",
+    applyHere: "List your farm here and take enquiries yourself.",
     backToAll: "All farmers",
-    verified: "Verified farmer",
+    verified: "Checked farm",
     fromThisFarm: "From this farm",
     nothingListed: "Nothing listed from this farm right now.",
-  },
-
-  booking: {
-    heading: "Buy direct from {seller}",
-    stockedBy: "Stocked and listed by Organics.",
-    open: "Book without paying now",
-    close: "Close booking form",
-    received: "Booking received.",
-    referenceBefore: "Your reference is ",
-    referenceAfter: ". {seller} will call you to confirm quantity and timing.",
-    yourName: "Your name",
-    phone: "Phone",
-    phonePlaceholder: "+91 98765 43210",
-    quantity: "Quantity ({unit})",
-    quantityLabel: "Quantity in {unit}",
-    preferredDate: "Preferred date",
-    optional: "optional",
-    note: "Note",
-    notePlaceholder: "Anything {seller} should know about this request",
-    submit: "Request {product}",
-    submitting: "Sending…",
+    callFarm: "Call {farm}",
   },
 
   sell: {
@@ -113,14 +103,13 @@ export const en = {
     titleAccent: "without a middleman",
     titleTail: ".",
     intro:
-      "We list certified organic farms only. Buyers see your farm name, your region and your phone number, and can book straight from the product page.",
+      "We list organic farms only. Buyers see your farm name, your region and your phone number, and call you directly. We never handle the money.",
     step1Title: "Apply",
     step1Body: "Tell us about the farm, what you grow and how it is certified.",
-    step2Title: "We verify",
-    step2Body: "We check your details and call you. Nothing is listed until this passes.",
-    step3Title: "List and sell",
-    step3Body:
-      "Your produce appears in the shop, and buyers can call or book you directly.",
+    step2Title: "We check",
+    step2Body: "We go through your details and call you. Nothing goes live until that is done.",
+    step3Title: "Buyers call you",
+    step3Body: "Your produce appears in the shop with your number on it. You take it from there.",
     applyHeading: "Apply to list",
   },
 
@@ -134,15 +123,13 @@ export const en = {
     regionHint: "district or hills",
     regionPlaceholder: "Nilgiris",
     govtId: "Aadhaar last 4 digits",
-    govtIdHint: "for verification",
+    govtIdHint: "for the check",
     certificate: "Organic certificate link",
     optional: "optional",
     about: "About the farm",
     aboutHint: "at least 20 characters",
-    aboutPlaceholder:
-      "What you grow, how long you have farmed it, and how it is certified.",
-    aadhaarNote:
-      "We only ask for the last four digits of your Aadhaar. Never share the full number.",
+    aboutPlaceholder: "What you grow, how long you have farmed it, and how it is certified.",
+    aadhaarNote: "We only ask for the last four digits. Never share the full number.",
     submit: "Send application",
     submitting: "Sending…",
     doneTitle: "Application received",
@@ -152,20 +139,18 @@ export const en = {
   },
 
   footer: {
-    copyright: "© {year} Organics. Certified organic, straight from the farm.",
-    buyDirect: "Buy direct from the farm",
+    copyright: "© {year} Organics. Organic produce, straight from the farm.",
+    buyDirect: "Call the farm directly",
     farmerCta: "Are you a farmer? Sell with us",
   },
 
-  // Keyed by the `code` the API returns, so the wording is never sent over the wire.
+  // Keyed by the `code` the API returns, so wording is never sent over the wire.
   errors: {
     forbidden_origin: "That request was blocked. Please reload the page and try again.",
     rate_limited: "Too many attempts from this device. Please try again later.",
     body_too_large: "That is too long. Please shorten it and try again.",
     invalid_json: "Something went wrong sending that. Please try again.",
     invalid_fields: "Please check the highlighted details.",
-    product_unavailable: "That listing is no longer available.",
-    insufficient_stock: "Only {available} left. Please reduce the quantity.",
     unknown: "Something went wrong. Please try again.",
     network: "Network error. Please try again.",
   },

@@ -3,6 +3,9 @@
 import Image from "next/image";
 import { useState } from "react";
 
+import { useI18n } from "@/lib/i18n/client";
+import { format } from "@/lib/i18n/config";
+
 type Shot = { id: string; url: string; alt: string | null };
 
 type Props = {
@@ -12,6 +15,7 @@ type Props = {
 };
 
 export function ProductGallery({ images, name, emoji }: Props) {
+  const { t } = useI18n();
   const [active, setActive] = useState(0);
 
   if (images.length === 0) {
@@ -22,8 +26,6 @@ export function ProductGallery({ images, name, emoji }: Props) {
     );
   }
 
-  const current = images[active];
-
   return (
     <div>
       <div className="relative h-64 overflow-hidden rounded-3xl bg-leaf-50 sm:h-80">
@@ -31,7 +33,8 @@ export function ProductGallery({ images, name, emoji }: Props) {
           <Image
             key={shot.id}
             src={shot.url}
-            alt={shot.alt ?? name}
+            // The stored alt is English-only, so the localised name wins here.
+            alt={format(t.gallery.view, { name, index: index + 1 })}
             fill
             priority={index === 0}
             sizes="(max-width: 640px) 100vw, 50vw"
@@ -47,7 +50,7 @@ export function ProductGallery({ images, name, emoji }: Props) {
       {images.length > 1 ? (
         <div
           role="tablist"
-          aria-label={`${name} images`}
+          aria-label={format(t.gallery.images, { name })}
           className="mt-3 flex flex-wrap gap-3"
         >
           {images.map((shot, index) => (
@@ -56,7 +59,10 @@ export function ProductGallery({ images, name, emoji }: Props) {
               type="button"
               role="tab"
               aria-selected={index === active}
-              aria-label={`Show image ${index + 1} of ${images.length}`}
+              aria-label={format(t.gallery.show, {
+                index: index + 1,
+                total: images.length,
+              })}
               onClick={() => setActive(index)}
               className={`relative h-16 w-20 overflow-hidden rounded-xl border-2 transition-all duration-200 hover:-translate-y-0.5 ${
                 index === active
@@ -77,7 +83,7 @@ export function ProductGallery({ images, name, emoji }: Props) {
       ) : null}
 
       <p className="sr-only" aria-live="polite">
-        {current.alt ?? `${name} image ${active + 1}`}
+        {format(t.gallery.view, { name, index: active + 1 })}
       </p>
     </div>
   );

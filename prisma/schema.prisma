@@ -15,13 +15,17 @@ datasource db {
 }
 
 model Category {
-  id          String    @id @default(cuid())
-  name        String    @unique
-  slug        String    @unique
-  description String?
-  products    Product[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id            String    @id @default(cuid())
+  name          String    @unique
+  slug          String    @unique
+  description   String?
+  // Tamil copy. Null falls back to the English column, so a new category is
+  // never blank in the Tamil UI.
+  nameTa        String?
+  descriptionTa String?
+  products      Product[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   @@index([slug])
 }
@@ -45,6 +49,7 @@ model Farmer {
   email          String       @unique
   region         String
   about          String?
+  aboutTa        String?
   photoUrl       String?
   status         FarmerStatus @default(PENDING)
   // Evidence captured at signup and checked by an admin before VERIFIED.
@@ -53,7 +58,6 @@ model Farmer {
   verifiedAt     DateTime?
   reviewNote     String?
   products       Product[]
-  enquiries      Enquiry[]
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
@@ -75,28 +79,29 @@ model ProductImage {
 }
 
 model Product {
-  id          String         @id @default(cuid())
-  name        String
-  slug        String         @unique
-  description String
-  priceCents  Int
-  unit        String
-  imageUrl    String?
-  emoji       String?
-  region      String?
-  stock       Int            @default(0)
-  isActive    Boolean        @default(true)
-  isFeatured  Boolean        @default(false)
-  // Null means the shop sells it itself (Amazon's 1P); set means a farmer lists
-  // it and the listing inherits that farmer's verification state (3P).
-  farmerId    String?
-  farmer      Farmer?        @relation(fields: [farmerId], references: [id], onDelete: Restrict)
-  categoryId  String
-  category    Category       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  images      ProductImage[]
-  enquiries   Enquiry[]
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  id            String         @id @default(cuid())
+  name          String
+  slug          String         @unique
+  description   String
+  nameTa        String?
+  descriptionTa String?
+  priceCents    Int
+  unit          String
+  imageUrl      String?
+  emoji         String?
+  region        String?
+  stock         Int            @default(0)
+  isActive      Boolean        @default(true)
+  isFeatured    Boolean        @default(false)
+  // Required: nothing is listed without a named farm behind it, and the listing
+  // inherits that farm's verification state.
+  farmerId      String
+  farmer        Farmer         @relation(fields: [farmerId], references: [id], onDelete: Restrict)
+  categoryId    String
+  category      Category       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  images        ProductImage[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 
   @@index([categoryId])
   @@index([slug])
@@ -108,34 +113,4 @@ model Product {
   @@index([name(ops: raw("gin_trgm_ops"))], map: "Product_name_trgm_idx", type: Gin)
   @@index([description(ops: raw("gin_trgm_ops"))], map: "Product_description_trgm_idx", type: Gin)
   @@index([region(ops: raw("gin_trgm_ops"))], map: "Product_region_trgm_idx", type: Gin)
-}
-
-enum EnquiryStatus {
-  NEW
-  CONTACTED
-  CONFIRMED
-  CANCELLED
-}
-
-// The "call the farmer and book it" path. Buyers arrange and pay off-platform;
-// this only records the request so the farmer can follow it up.
-model Enquiry {
-  id            String        @id @default(cuid())
-  reference     String        @unique
-  productId     String
-  product       Product       @relation(fields: [productId], references: [id], onDelete: Restrict)
-  farmerId      String?
-  farmer        Farmer?       @relation(fields: [farmerId], references: [id], onDelete: SetNull)
-  customerName  String
-  phone         String
-  email         String?
-  quantity      Int
-  preferredDate DateTime?
-  note          String?
-  status        EnquiryStatus @default(NEW)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-
-  @@index([farmerId, status])
-  @@index([productId])
 }

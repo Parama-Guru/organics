@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { format, localePath } from "@/lib/i18n/config";
+import { localised, regionLabel } from "@/lib/i18n/content";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
 import { formatMoney } from "@/lib/money";
 import type { ProductSummary } from "@/lib/products";
@@ -36,8 +37,10 @@ export async function ProductCard({ product }: { product: ProductSummary }) {
 
       <div className="flex flex-1 flex-col gap-2 p-4">
         <p className="text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-leaf-700">
-          {product.category.name}
-          {product.region ? <span className="text-bark-600"> &middot; {product.region}</span> : null}
+          {localised(locale, product.category.name, product.category.nameTa)}
+          {product.region ? (
+            <span className="text-bark-600"> &middot; {regionLabel(locale, product.region)}</span>
+          ) : null}
         </p>
 
         <h3 className="font-display text-lg leading-snug break-words">
@@ -45,11 +48,13 @@ export async function ProductCard({ product }: { product: ProductSummary }) {
             href={href}
             className="decoration-marigold-500 decoration-2 underline-offset-4 hover:underline"
           >
-            {product.name}
+            {localised(locale, product.name, product.nameTa)}
           </Link>
         </h3>
 
-        <p className="line-clamp-2 text-sm text-bark-600">{product.description}</p>
+        <p className="line-clamp-2 text-sm text-bark-600">
+          {localised(locale, product.description, product.descriptionTa)}
+        </p>
 
         {product.farmer ? (
           <p className="text-xs text-bark-600">

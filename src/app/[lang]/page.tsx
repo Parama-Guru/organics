@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ProductCard } from "@/components/product-card";
 import { Button } from "@/components/ui/button";
 import { localePath } from "@/lib/i18n/config";
+import { localised, localisedOrNull } from "@/lib/i18n/content";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
 import { getCategories, getFeaturedProducts } from "@/lib/products";
 
@@ -70,7 +71,7 @@ export default async function HomePage() {
               className="group animate-rise rounded-3xl border border-white/70 bg-white/70 p-5 shadow-soft backdrop-blur-md transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-1.5 hover:border-marigold-400/70 hover:shadow-lift"
             >
               <h3 className="flex items-center justify-between gap-2 font-display text-lg">
-                {category.name}
+                {localised(locale, category.name, category.nameTa)}
                 <span
                   aria-hidden
                   className="text-marigold-500 opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100"
@@ -79,7 +80,9 @@ export default async function HomePage() {
                 </span>
               </h3>
               {category.description ? (
-                <p className="mt-1 text-sm text-bark-600">{category.description}</p>
+                <p className="mt-1 text-sm text-bark-600">
+                  {localisedOrNull(locale, category.description, category.descriptionTa)}
+                </p>
               ) : null}
             </Link>
           ))}

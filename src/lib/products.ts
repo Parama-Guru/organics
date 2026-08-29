@@ -3,26 +3,28 @@ import { unstable_cache } from "next/cache";
 
 import { prisma } from "./prisma";
 
-// A listing is public only if the shop owns it (farmerId null, first-party) or
-// its farmer has passed verification. Applied to EVERY public read, so a pending
-// or suspended farmer cannot get product pages indexed.
+// A listing is public only if its farm has passed verification. Every product has
+// a farm, so there is no first-party escape hatch: a pending or suspended farm
+// cannot get its product pages indexed. Applied to EVERY public read.
 export const publicProductWhere = {
   isActive: true,
-  OR: [{ farmerId: null }, { farmer: { status: "VERIFIED" as const } }],
+  farmer: { status: "VERIFIED" as const },
 } satisfies Prisma.ProductWhereInput;
 
 export const productSummarySelect = {
   id: true,
   name: true,
+  nameTa: true,
   slug: true,
   description: true,
+  descriptionTa: true,
   priceCents: true,
   unit: true,
   emoji: true,
   imageUrl: true,
   region: true,
   stock: true,
-  category: { select: { name: true, slug: true } },
+  category: { select: { name: true, nameTa: true, slug: true } },
   farmer: { select: { slug: true, farmName: true, region: true } },
 } satisfies Prisma.ProductSelect;
 
@@ -40,6 +42,7 @@ export const productDetailSelect = {
       phone: true,
       region: true,
       about: true,
+      aboutTa: true,
       verifiedAt: true,
     },
   },
@@ -149,7 +152,14 @@ export function getProductBySlug(slug: string) {
 export const getCategories = unstable_cache(
   async () =>
     prisma.category.findMany({
-      select: { id: true, name: true, slug: true, description: true },
+      select: {
+        id: true,
+        name: true,
+        nameTa: true,
+        slug: true,
+        description: true,
+        descriptionTa: true,
+      },
       orderBy: { name: "asc" },
     }),
   ["shop-categories"],
