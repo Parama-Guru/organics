@@ -49,7 +49,13 @@ export function ProductCard({ product }: { product: ProductSummary }) {
 
         {product.farmer ? (
           <p className="text-xs text-bark-600">
-            Listed by <span className="font-semibold text-bark-900">{product.farmer.farmName}</span>
+            Listed by{" "}
+            <Link
+              href={`/farmers/${product.farmer.slug}`}
+              className="font-semibold text-bark-900 decoration-marigold-500 decoration-2 underline-offset-2 hover:underline"
+            >
+              {product.farmer.farmName}
+            </Link>
           </p>
         ) : null}
 

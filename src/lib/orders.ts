@@ -3,6 +3,7 @@ import { randomBytes } from "node:crypto";
 import { loadConfig } from "@conf/config";
 
 import { prisma } from "./prisma";
+import { publicProductWhere } from "./products";
 import type { CreateOrderInput } from "./validation";
 
 export class OrderError extends Error {
@@ -43,8 +44,11 @@ export async function createOrder(input: CreateOrderInput) {
   const productIds = [...quantities.keys()];
 
   return prisma.$transaction(async (tx) => {
+    // The cart lives in localStorage, so the ids arrive from the client. Filter by
+    // the same rule the catalogue uses, or a known id for an unverified farmer's
+    // hidden listing can still be checked out.
     const products = await tx.product.findMany({
-      where: { id: { in: productIds }, isActive: true },
+      where: { ...publicProductWhere, id: { in: productIds } },
     });
 
     if (products.length !== productIds.length) {

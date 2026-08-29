@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export function SiteFooter() {
   return (
     <footer className="mt-20 border-t border-white/60 bg-white/55 backdrop-blur-xl">
@@ -13,6 +15,14 @@ export function SiteFooter() {
         <p className="inline-flex items-center gap-2 justify-self-start rounded-full bg-leaf-100 px-4 py-2 text-sm font-medium text-leaf-800 sm:justify-self-end">
           <span aria-hidden>&#128666;</span> Free delivery on larger baskets
         </p>
+      </div>
+      <div className="mx-auto max-w-6xl border-t border-bark-200/50 px-4 py-4 text-sm sm:px-6">
+        <Link
+          href="/sell"
+          className="font-medium decoration-marigold-500 decoration-2 underline-offset-4 hover:underline"
+        >
+          Are you a farmer? Sell with us
+        </Link>
       </div>
     </footer>
   );

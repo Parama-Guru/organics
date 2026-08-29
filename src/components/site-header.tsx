@@ -9,6 +9,7 @@ import { useCart } from "@/lib/cart-context";
 const navigation = [
   { href: "/", label: "Home" },
   { href: "/products", label: "Shop" },
+  { href: "/farmers", label: "Farmers" },
 ];
 
 export function SiteHeader() {
