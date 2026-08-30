@@ -6,6 +6,7 @@ import { Suspense } from "react";
 
 import { LanguageToggle } from "@/components/language-toggle";
 import { Button } from "@/components/ui/button";
+import { LeafMark } from "@/components/ui/icons";
 import { useI18n } from "@/lib/i18n/client";
 import { localePath } from "@/lib/i18n/config";
 
@@ -19,67 +20,81 @@ export function SiteHeader() {
     { path: "/farmers", label: t.nav.farmers },
   ];
 
+  // Rendered twice: inline on desktop, on its own row below `sm`. Only one is
+  // ever displayed, so only one reaches the accessibility tree.
+  const navLinks = navigation.map((item) => {
+    const href = localePath(locale, item.path);
+    const active = item.path === "/" ? pathname === href : pathname.startsWith(href);
+    return (
+      <Link
+        key={item.path}
+        href={href}
+        aria-current={active ? "page" : undefined}
+        className={`relative flex min-h-11 shrink-0 items-center whitespace-nowrap rounded-lg px-2 font-medium transition-colors sm:px-3 ${
+          active ? "text-bark-900" : "text-bark-600 hover:text-bark-900"
+        }`}
+      >
+        {item.label}
+        <span
+          aria-hidden
+          className={`absolute inset-x-2 bottom-0 h-0.5 rounded-full bg-marigold-500 transition-transform duration-300 sm:inset-x-3 sm:-bottom-0.5 ${
+            active ? "scale-x-100" : "scale-x-0"
+          }`}
+        />
+      </Link>
+    );
+  });
+
   return (
     <header className="sticky top-0 z-40 border-b border-white/60 bg-white/65 backdrop-blur-xl backdrop-saturate-150">
-      {/* Tamil nav labels are much wider than the English ones, so below `sm` the nav
-          wraps onto its own row instead of being squeezed or clipped. */}
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-2 px-4 pb-1.5 pt-2 sm:h-16 sm:flex-nowrap sm:gap-x-4 sm:px-6 sm:pb-0 sm:pt-0">
+      {/* Below `sm` the nav gets its own row. Sharing one row with the brand, the
+          language toggle and the sell button left it 12px wide, so on Tamil the
+          Shop and Farmers links were completely unreachable. */}
+      <div className="mx-auto flex h-16 max-w-6xl items-center gap-2 px-4 sm:gap-4 sm:px-6">
         <Link
           href={localePath(locale, "/")}
-          className="group flex items-center gap-2 font-semibold tracking-tight"
+          className="group flex shrink-0 items-center gap-2 font-semibold tracking-tight"
         >
           <span
             aria-hidden
-            className="flex h-8 w-8 items-center justify-center rounded-xl bg-leaf-100 text-base shadow-soft transition-transform duration-300 group-hover:-rotate-6 sm:h-9 sm:w-9 sm:text-xl"
+            className="flex h-9 w-9 items-center justify-center rounded-xl bg-leaf-100 text-xl text-leaf-700 shadow-soft transition-transform duration-300 group-hover:-rotate-6"
           >
-            &#127807;
+            <LeafMark />
           </span>
-          <span className="font-display text-base text-bark-900 sm:text-xl">Organics</span>
+          <span className="font-display text-lg text-bark-900 sm:text-xl">Organics</span>
         </Link>
 
         <nav
           aria-label="Main"
-          className="order-last flex w-full items-center gap-0.5 text-sm sm:order-none sm:w-auto sm:gap-1"
+          className="no-scrollbar hidden min-w-0 flex-1 items-center gap-0.5 overflow-x-auto text-sm sm:flex sm:gap-1"
         >
-          {navigation.map((item) => {
-            const href = localePath(locale, item.path);
-            const active = item.path === "/" ? pathname === href : pathname.startsWith(href);
-            return (
-              <Link
-                key={item.path}
-                href={href}
-                aria-current={active ? "page" : undefined}
-                className={`relative rounded-lg px-2 py-1.5 font-medium transition-colors sm:px-3 sm:py-2 ${
-                  active ? "text-bark-900" : "text-bark-600 hover:text-bark-900"
-                }`}
-              >
-                {item.label}
-                <span
-                  aria-hidden
-                  className={`absolute inset-x-2 bottom-0 h-0.5 rounded-full bg-marigold-500 transition-transform duration-300 sm:inset-x-3 sm:-bottom-0.5 ${
-                    active ? "scale-x-100" : "scale-x-0"
-                  }`}
-                />
-              </Link>
-            );
-          })}
+          {navLinks}
         </nav>
 
         <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
           {/* useSearchParams needs a boundary because /sell renders statically. */}
-          <Suspense fallback={<div className="h-7 w-24" />}>
+          <Suspense fallback={<div className="h-11 w-24" />}>
             <LanguageToggle />
           </Suspense>
 
-          {/* Button's own `inline-flex` beats a `hidden` utility on the same element,
-              so the wrapper owns visibility. The footer repeats this link. */}
-          <div className="hidden md:block">
-            <Button as={Link} href={localePath(locale, "/sell")} size="sm">
+          {/* Farmers browse on phones, so the acquisition CTA has to survive
+              there — but it is a secondary button. When the loudest thing in the
+              header says "sell with us", a buyer's first read of the page is
+              that the site wants something from them. */}
+          <div className="hidden shrink-0 sm:block">
+            <Button as={Link} href={localePath(locale, "/sell")} size="sm" variant="secondary">
               {t.nav.sell}
             </Button>
           </div>
         </div>
       </div>
+
+      <nav
+        aria-label="Main"
+        className="no-scrollbar mx-auto flex max-w-6xl items-center gap-1 overflow-x-auto border-t border-white/60 px-4 text-sm sm:hidden"
+      >
+        {navLinks}
+      </nav>
     </header>
   );
 }

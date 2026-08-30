@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500" role="img">
+  <defs>
+    <linearGradient id="wash" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#603237"/>
+      <stop offset="1" stop-color="#904b53"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="500" fill="url(#wash)"/>
+  <circle cx="285" cy="135" r="225" fill="#ffffff" opacity="0.07"/>
+  <circle cx="600.5" cy="432.5" r="180" fill="#f7bfc5" opacity="0.1"/>
+  <circle cx="400" cy="250" r="222" fill="#8a5a2b" opacity="0.22"/>
+  <circle cx="400" cy="250" r="212" fill="#fdfaf4"/>
+  <ellipse cx="400" cy="382" rx="150" ry="20" fill="#000" opacity="0.07"/>
+<g transform="translate(400 250) scale(1.28) translate(-400 -390)"
+   stroke="#572e32" stroke-width="7.03" stroke-linejoin="round" stroke-linecap="round">
+<path d="M495 369 L521 395 L495 421 L469 395 Z" fill="#c26670"/>
+         <path d="M495 369 L521 395 L495 395 Z" stroke="none" fill="#fff" opacity="0.28"/><path d="M356 279 L399 322 L356 365 L313 322 Z" fill="#e58c96"/>
+         <path d="M356 279 L399 322 L356 322 Z" stroke="none" fill="#fff" opacity="0.28"/><path d="M417 331 L455 369 L417 407 L379 369 Z" fill="#e58c96"/>
+         <path d="M417 331 L455 369 L417 369 Z" stroke="none" fill="#fff" opacity="0.28"/><path d="M478 383 L511 416 L478 449 L445 416 Z" fill="#c26670"/>
+         <path d="M478 383 L511 416 L478 416 Z" stroke="none" fill="#fff" opacity="0.28"/><path d="M339 315 L367 343 L339 371 L311 343 Z" fill="#e58c96"/>
+         <path d="M339 315 L367 343 L339 343 Z" stroke="none" fill="#fff" opacity="0.28"/><path d="M400 345 L445 390 L400 435 L355 390 Z" fill="#e58c96"/>
+         <path d="M400 345 L445 390 L400 390 Z" stroke="none" fill="#fff" opacity="0.28"/><path d="M461 397 L501 437 L461 477 L421 437 Z" fill="#c26670"/>
+         <path d="M461 397 L501 437 L461 437 Z" stroke="none" fill="#fff" opacity="0.28"/><path d="M322 329 L357 364 L322 399 L287 364 Z" fill="#e58c96"/>
+         <path d="M322 329 L357 364 L322 364 Z" stroke="none" fill="#fff" opacity="0.28"/><path d="M383 381 L413 411 L383 441 L353 411 Z" fill="#e58c96"/>
+         <path d="M383 381 L413 411 L383 411 Z" stroke="none" fill="#fff" opacity="0.28"/>
+</g>
+</svg>

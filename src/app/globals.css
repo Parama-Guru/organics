@@ -23,14 +23,16 @@
   --color-marigold-600: #cf6f1c;
 
   /* Warm neutrals with India-flag navy ink. `bark` is the surface/text ramp.
-     900 is the Ashoka Chakra navy (#000080); the lighter steps are the same hue
-     desaturated so secondary text still clears AA (measured 6.29:1 on bark-50). */
+     900 is the Ashoka Chakra navy (#000080) and carries the brand: the hero, the
+     dark buttons, the headings. Body copy uses `ink`, the same hue desaturated,
+     because a whole page set in saturated navy reads like a system dialog. */
   --color-bark-50: #faf7f2;
   --color-bark-100: #f1ece3;
   --color-bark-200: #ded6ca;
   --color-bark-600: #4a54a8;
   --color-bark-800: #141d8f;
   --color-bark-900: #000080;
+  --color-ink: #1b2450;
 
   /* Latin resolves from Fraunces/Manrope; Tamil glyphs are absent there, so the
      browser falls through to the Noto Tamil faces per glyph. */
@@ -42,8 +44,8 @@
     "Times New Roman", serif;
 
   /* Layered, warm-tinted shadows read as depth; flat grey ones look cheap. */
-  --shadow-soft: 0 1px 2px rgb(0 0 128 / 0.04), 0 4px 12px rgb(0 0 128 / 0.06);
-  --shadow-lift: 0 2px 4px rgb(0 0 128 / 0.05), 0 12px 28px rgb(0 0 128 / 0.12);
+  --shadow-soft: 0 1px 2px rgb(0 0 128 / 0.05), 0 4px 12px rgb(0 0 128 / 0.07);
+  --shadow-lift: 0 4px 8px rgb(0 0 128 / 0.08), 0 16px 34px rgb(0 0 128 / 0.20);
   --shadow-glass: 0 1px 0 rgb(255 255 255 / 0.5) inset, 0 8px 32px rgb(0 0 128 / 0.10);
 
   /* Tailwind's smallest default is 40rem. 24rem is where the header has real
@@ -92,7 +94,7 @@
 
 body {
   background-color: var(--color-bark-50);
-  color: var(--color-bark-900);
+  color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   /* Warm light behind the whole page so flat sections still feel lit. */
@@ -136,6 +138,61 @@ html:lang(ta) h3 {
 :focus-visible {
   outline: 2px solid var(--color-leaf-600);
   outline-offset: 2px;
+}
+
+/* Horizontal chip rails on phones: the native scrollbar renders as a full desktop
+   track with arrow buttons under each row, which reads as a rendering fault. */
+/* Card hover, written out rather than composed from `hover:-translate-y-*` and
+   `hover:shadow-*`. Two reasons. Tailwind v4 compiles those to the independent
+   `translate` / `scale` properties, and this project has to run on older mobile
+   browsers that do not support them — verified here: setting `translate` inline
+   moved the element 0px, while `transform` works. The shadow token also has to
+   be applied directly, since --tw-shadow was updating without the box-shadow
+   shorthand ever recomputing. */
+@utility card-lift {
+  transition:
+    transform 300ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 300ms ease-out,
+    border-color 300ms ease-out;
+}
+
+.card-lift:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-lift);
+  border-color: color-mix(in oklab, var(--color-marigold-400) 70%, transparent);
+}
+
+.card-lift img {
+  transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.card-lift:hover img {
+  transform: scale(1.06);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-lift:hover,
+  .card-lift:hover img {
+    transform: none;
+  }
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Fades the right edge of a horizontally scrolling rail so it is visible that
+   there is more to the right. Written as a plain class, not @utility, because
+   the mask must not be sorted into the utilities layer where a later utility
+   could drop it. */
+.rail-fade {
+  -webkit-mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 2.5rem), transparent 100%);
+  mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 2.5rem), transparent 100%);
 }
 
 @utility glass {

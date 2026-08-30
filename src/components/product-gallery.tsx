@@ -20,7 +20,7 @@ export function ProductGallery({ images, name, emoji }: Props) {
 
   if (images.length === 0) {
     return (
-      <div className="flex h-64 items-center justify-center rounded-3xl bg-leaf-50 text-7xl sm:h-80 sm:text-8xl">
+      <div className="flex h-72 items-center justify-center rounded-3xl border border-white/70 bg-leaf-50 text-7xl shadow-soft sm:h-96 sm:text-8xl">
         <span aria-hidden>{emoji ?? "\u{1F331}"}</span>
       </div>
     );
@@ -28,7 +28,7 @@ export function ProductGallery({ images, name, emoji }: Props) {
 
   return (
     <div>
-      <div className="relative h-64 overflow-hidden rounded-3xl bg-leaf-50 sm:h-80">
+      <div className="relative h-72 overflow-hidden rounded-3xl border border-white/70 bg-leaf-50 shadow-soft sm:h-96">
         {images.map((shot, index) => (
           <Image
             key={shot.id}

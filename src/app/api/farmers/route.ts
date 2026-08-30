@@ -99,6 +99,8 @@ export async function POST(request: NextRequest) {
         region: input.region,
         about: input.about,
         govtIdLast4: input.govtIdLast4,
+        certifier: input.certifier,
+        certificateNo: input.certificateNo,
         certificateUrl: input.certificateUrl || null,
         // Status is never taken from the request; an admin promotes to VERIFIED.
         status: "PENDING",

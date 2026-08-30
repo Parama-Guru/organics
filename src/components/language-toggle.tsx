@@ -47,7 +47,7 @@ export function LanguageToggle() {
                 : format(t.nav.switchTo, { language: LOCALE_NAMES[target] })
             }
             onClick={() => remember(target)}
-            className={`rounded-full px-2.5 py-1 text-xs font-semibold transition-colors ${
+            className={`flex min-h-9 items-center rounded-full px-2.5 text-xs font-semibold transition-colors ${
               active
                 ? "bg-bark-900 text-bark-50"
                 : "text-bark-600 hover:bg-bark-900/5 hover:text-bark-900"

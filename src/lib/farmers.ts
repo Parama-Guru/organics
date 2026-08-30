@@ -3,15 +3,21 @@ import type { Prisma } from "@prisma/client";
 import { prisma } from "./prisma";
 import { publicProductWhere, productSummarySelect } from "./products";
 
-export const farmerCardSelect = {
+const farmerCardSelect = {
   id: true,
   slug: true,
   farmName: true,
   contactName: true,
+  phone: true,
   region: true,
   about: true,
   aboutTa: true,
+  photoUrl: true,
   verifiedAt: true,
+  certifier: true,
+  certificateNo: true,
+  certificateUrl: true,
+  certifiedUntil: true,
   _count: { select: { products: { where: publicProductWhere } } },
 } satisfies Prisma.FarmerSelect;
 
@@ -29,7 +35,7 @@ export function getVerifiedFarmers() {
 export async function getFarmerBySlug(slug: string) {
   const farmer = await prisma.farmer.findFirst({
     where: { slug, status: "VERIFIED" },
-    select: { ...farmerCardSelect, phone: true },
+    select: farmerCardSelect,
   });
 
   if (!farmer) return null;
@@ -41,13 +47,4 @@ export async function getFarmerBySlug(slug: string) {
   });
 
   return { farmer, products };
-}
-
-export function getFarmerRegions() {
-  return prisma.farmer.findMany({
-    where: { status: "VERIFIED" },
-    select: { region: true },
-    distinct: ["region"],
-    orderBy: { region: "asc" },
-  });
 }

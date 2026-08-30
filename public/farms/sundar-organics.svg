@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500" role="img">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#dfeff0"/>
+      <stop offset="1" stop-color="#f3f7ea"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#sky)"/>
+  <g transform="translate(142 130) scale(1)" fill="#ffffff" opacity="0.55">
+      <circle cx="0" cy="0" r="26"/><circle cx="34" cy="-12" r="34"/><circle cx="74" cy="2" r="24"/>
+      <rect x="-2" y="-4" width="78" height="28" rx="14"/>
+    </g>
+  <g transform="translate(488 92) scale(0.72)" fill="#ffffff" opacity="0.55">
+      <circle cx="0" cy="0" r="26"/><circle cx="34" cy="-12" r="34"/><circle cx="74" cy="2" r="24"/>
+      <rect x="-2" y="-4" width="78" height="28" rx="14"/>
+    </g>
+  <circle cx="484" cy="230" r="58" fill="#f0c53a" opacity="0.95"/>
+  <g transform="translate(0 -66)">
+    <path d="M0 296 q 150 -62 300 -16 q 150 46 300 -22 q 120 -54 200 -12 L800 500 L0 500 Z" fill="#8fbf8d"/>
+    <path d="M0 352 q 190 -56 380 -6 q 190 50 420 -18 L800 500 L0 500 Z" fill="#5da368"/>
+    <path d="M40 452 q 100 -38 200 -6" fill="none" stroke="#3f8a52" stroke-width="26"/>
+             <path d="M40 452 q 100 -38 200 -6" fill="none" stroke="#1c3e25" stroke-width="5" opacity="0.45"/><path d="M240 452 q 100 -38 200 -6" fill="none" stroke="#3f8a52" stroke-width="26"/>
+             <path d="M240 452 q 100 -38 200 -6" fill="none" stroke="#1c3e25" stroke-width="5" opacity="0.45"/><path d="M440 452 q 100 -38 200 -6" fill="none" stroke="#3f8a52" stroke-width="26"/>
+             <path d="M440 452 q 100 -38 200 -6" fill="none" stroke="#1c3e25" stroke-width="5" opacity="0.45"/><path d="M640 452 q 100 -38 200 -6" fill="none" stroke="#3f8a52" stroke-width="26"/>
+             <path d="M640 452 q 100 -38 200 -6" fill="none" stroke="#1c3e25" stroke-width="5" opacity="0.45"/>
+    <path d="M0 452 q 220 -34 430 4 q 210 38 370 -12 L800 500 L0 500 Z" fill="#3f8a52"/>
+  </g>
+  <rect y="430" width="800" height="70" fill="#3f8a52"/>
+</svg>

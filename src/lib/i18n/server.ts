@@ -7,10 +7,6 @@ import { ta } from "./dictionaries/ta";
 
 const dictionaries: Record<Locale, Dictionary> = { en, ta };
 
-export function dictionaryFor(locale: Locale): Dictionary {
-  return dictionaries[locale];
-}
-
 /**
  * Reads the `[lang]` root segment. Server Components only — root params are not
  * available in Client Components, Server Actions or Route Handlers.

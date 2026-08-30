@@ -18,6 +18,10 @@ export const farmerApplicationSchema = z.object({
     .string()
     .trim()
     .regex(/^\d{4}$/, "enter the last 4 digits"),
+  // Required: the site publishes the scheme and certificate number for every
+  // listed farm, so it cannot accept a farm that has not supplied one.
+  certifier: z.string().trim().min(3).max(160),
+  certificateNo: z.string().trim().min(3).max(80),
   certificateUrl: z.union([z.url().max(500), z.literal("")]).optional(),
 });
 

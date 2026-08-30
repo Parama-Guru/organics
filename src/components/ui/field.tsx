@@ -11,7 +11,7 @@ function Label({ children, hint }: { children: ReactNode; hint?: string }) {
   return (
     <span className="flex items-baseline justify-between gap-2">
       <span className="text-sm font-semibold text-bark-900">{children}</span>
-      {hint ? <span className="text-xs text-bark-600">{hint}</span> : null}
+      {hint ? <span className="text-sm text-bark-600">{hint}</span> : null}
     </span>
   );
 }

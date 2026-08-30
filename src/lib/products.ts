@@ -1,6 +1,7 @@
 import type { Prisma } from "@prisma/client";
 import { unstable_cache } from "next/cache";
 
+import type { ProductSort } from "./product-query-schema";
 import { prisma } from "./prisma";
 
 // A listing is public only if its farm has passed verification. Every product has
@@ -25,10 +26,10 @@ export const productSummarySelect = {
   region: true,
   stock: true,
   category: { select: { name: true, nameTa: true, slug: true } },
-  farmer: { select: { slug: true, farmName: true, region: true } },
+  farmer: { select: { slug: true, farmName: true, region: true, verifiedAt: true } },
 } satisfies Prisma.ProductSelect;
 
-export const productDetailSelect = {
+const productDetailSelect = {
   ...productSummarySelect,
   images: {
     select: { id: true, url: true, alt: true },
@@ -43,7 +44,11 @@ export const productDetailSelect = {
       region: true,
       about: true,
       aboutTa: true,
+      photoUrl: true,
       verifiedAt: true,
+      certifier: true,
+      certificateNo: true,
+      certifiedUntil: true,
     },
   },
 } satisfies Prisma.ProductSelect;
@@ -59,6 +64,16 @@ export type ProductDetail = Prisma.ProductGetPayload<{
 export function getFeaturedProducts(limit = 4) {
   return prisma.product.findMany({
     where: { ...publicProductWhere, isFeatured: true },
+    select: productSummarySelect,
+    orderBy: { name: "asc" },
+    take: limit,
+  });
+}
+
+/** Other listings from the same farm, so a product page is not a dead end. */
+export function getMoreFromFarm(farmerSlug: string, excludeSlug: string, limit = 4) {
+  return prisma.product.findMany({
+    where: { ...publicProductWhere, farmer: { slug: farmerSlug }, slug: { not: excludeSlug } },
     select: productSummarySelect,
     orderBy: { name: "asc" },
     take: limit,
@@ -102,14 +117,25 @@ export async function getProducts(options: {
   categorySlug?: string;
   region?: string;
   search?: string;
+  sort?: ProductSort;
   limit?: number;
 }) {
-  const { categorySlug, region, search, limit = 60 } = options;
+  const { categorySlug, region, search, sort = "name", limit = 60 } = options;
 
   const searchIds = search?.trim() ? await searchProductIds(search.trim()) : null;
 
   // An empty result short-circuits instead of sending `IN ()` to Postgres.
   if (searchIds !== null && searchIds.length === 0) return [];
+
+  // Grouping by category put every dairy line first, and one farm supplies all
+  // of them — the grid opened with five identical farm names. Sorting by product
+  // name interleaves farms and categories instead.
+  const orderBy: Prisma.ProductOrderByWithRelationInput[] =
+    sort === "price-asc"
+      ? [{ priceCents: "asc" }, { name: "asc" }]
+      : sort === "price-desc"
+        ? [{ priceCents: "desc" }, { name: "asc" }]
+        : [{ name: "asc" }];
 
   return prisma.product.findMany({
     where: {
@@ -119,7 +145,7 @@ export async function getProducts(options: {
       ...(searchIds ? { id: { in: searchIds } } : {}),
     },
     select: productSummarySelect,
-    orderBy: [{ category: { name: "asc" } }, { name: "asc" }],
+    orderBy,
     take: limit,
   });
 }
@@ -159,6 +185,14 @@ export const getCategories = unstable_cache(
         slug: true,
         description: true,
         descriptionTa: true,
+        // One representative listing, so the category tiles show produce rather
+        // than six identically shaped boxes of text.
+        products: {
+          where: publicProductWhere,
+          select: { imageUrl: true },
+          orderBy: { name: "asc" },
+          take: 1,
+        },
       },
       orderBy: { name: "asc" },
     }),

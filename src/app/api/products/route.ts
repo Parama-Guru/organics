@@ -28,6 +28,7 @@ export async function GET(request: NextRequest) {
     categorySlug: parsed.data.category,
     region: parsed.data.region,
     search: parsed.data.search,
+    sort: parsed.data.sort,
     limit: parsed.data.limit,
   });
 

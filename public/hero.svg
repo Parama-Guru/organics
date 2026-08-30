@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 760" width="900" height="760" role="img">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffe7bd"/>
+      <stop offset="0.55" stop-color="#fdf3df"/>
+      <stop offset="1" stop-color="#f3f6e8"/>
+    </linearGradient>
+    <linearGradient id="crate" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c98b4a"/>
+      <stop offset="1" stop-color="#a76c33"/>
+    </linearGradient>
+    <clipPath id="frame"><rect width="900" height="760" rx="0"/></clipPath>
+  </defs>
+
+  <g clip-path="url(#frame)">
+    <rect width="900" height="760" fill="url(#sky)"/>
+
+    <!-- sun -->
+    <circle cx="672" cy="150" r="86" fill="#f6b53f" opacity="0.55"/>
+    <circle cx="672" cy="150" r="54" fill="#f4a52b" opacity="0.75"/>
+
+    <!-- far ridge -->
+    <path d="M0 330 q 170 -86 340 -30 q 170 56 300 -34 q 140 -78 260 -14 L900 760 L0 760 Z" fill="#cfe0c4"/>
+    <!-- mid hills -->
+    <path d="M0 408 q 210 -76 420 -8 q 210 68 480 -30 L900 760 L0 760 Z" fill="#9ec78f"/>
+    <!-- near field -->
+    <path d="M0 486 q 240 -60 470 4 q 230 62 430 -22 L900 760 L0 760 Z" fill="#6da95f"/>
+
+    <!-- planting rows -->
+    <g stroke="#59934d" stroke-width="6" stroke-linecap="round" opacity="0.75">
+      <path d="M-20 566 q 300 -34 940 8"/>
+      <path d="M-20 604 q 300 -32 940 10"/>
+      <path d="M-20 644 q 300 -30 940 12"/>
+    </g>
+
+    <!-- trees on the ridge -->
+    <g>
+      <path d="M150 486 L150 430" stroke="#4f7f45" stroke-width="9" stroke-linecap="round"/>
+      <circle cx="150" cy="412" r="34" fill="#4f9e5c"/>
+      <path d="M232 496 L232 452" stroke="#4f7f45" stroke-width="8" stroke-linecap="round"/>
+      <circle cx="232" cy="436" r="26" fill="#63ad6b"/>
+      <path d="M782 470 L782 418" stroke="#4f7f45" stroke-width="9" stroke-linecap="round"/>
+      <circle cx="782" cy="400" r="32" fill="#4f9e5c"/>
+    </g>
+
+    <!-- foreground crate of produce -->
+    <g transform="translate(258 476)">
+      <ellipse cx="192" cy="272" rx="230" ry="30" fill="#3f6b38" opacity="0.22"/>
+
+      <!-- greens spilling over the back -->
+      <g>
+        <path d="M96 96 q -34 -66 6 -104 q 22 44 14 84 Z" fill="#4f9e5c"/>
+        <path d="M140 88 q -18 -74 30 -102 q 8 52 -8 96 Z" fill="#63ad6b"/>
+        <path d="M232 84 q 20 -72 74 -84 q -20 50 -48 88 Z" fill="#4f9e5c"/>
+      </g>
+
+      <!-- tomatoes -->
+      <circle cx="112" cy="126" r="40" fill="#d9452f"/>
+      <ellipse cx="99" cy="112" rx="12" ry="8" fill="#fff" opacity="0.32"/>
+      <circle cx="186" cy="112" r="34" fill="#e0563d"/>
+      <ellipse cx="175" cy="100" rx="10" ry="7" fill="#fff" opacity="0.3"/>
+
+      <!-- citrus -->
+      <circle cx="262" cy="128" r="38" fill="#f0a52b"/>
+      <ellipse cx="249" cy="114" rx="11" ry="8" fill="#fff" opacity="0.3"/>
+
+      <!-- brinjal -->
+      <path d="M318 108 q 46 30 26 76 q -20 44 -56 22 q -30 -20 -6 -62 q 16 -28 36 -36 Z" fill="#6b3f9e"/>
+      <path d="M318 108 q -12 -20 4 -30 q 16 12 12 32 Z" fill="#4f9e5c"/>
+
+      <!-- crate front -->
+      <path d="M0 150 L384 150 L354 272 L30 272 Z" fill="url(#crate)"/>
+      <g stroke="#8a5a2b" stroke-width="7" stroke-linecap="round" opacity="0.7">
+        <path d="M12 190 L372 190"/>
+        <path d="M20 228 L364 228"/>
+      </g>
+      <path d="M0 150 L384 150 L378 176 L6 176 Z" fill="#d9a05f"/>
+    </g>
+
+    <!-- basket of eggs, small foreground prop -->
+    <g transform="translate(80 640)">
+      <ellipse cx="70" cy="66" rx="86" ry="16" fill="#3f6b38" opacity="0.2"/>
+      <ellipse cx="44" cy="30" rx="22" ry="27" fill="#f6e6c8"/>
+      <ellipse cx="76" cy="22" rx="22" ry="27" fill="#f2ddb6"/>
+      <ellipse cx="106" cy="32" rx="21" ry="26" fill="#f6e6c8"/>
+      <path d="M0 44 L146 44 q -12 46 -73 46 q -61 0 -73 -46 Z" fill="#c98b3a"/>
+    </g>
+  </g>
+</svg>

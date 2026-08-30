@@ -16,6 +16,10 @@ const configSchema = z
           .default("INR"),
         // Drives digit grouping: en-IN gives 12,34,567 where en-US gives 1,234,567.
         locale: z.string().min(2).default("en-IN"),
+        // Shown in the footer and the privacy page. Left empty the contact line is
+        // hidden entirely, rather than shipping a placeholder address.
+        contact_email: z.string().default(""),
+        contact_place: z.string().default(""),
       })
       .prefault({}),
     database: z
@@ -30,28 +34,6 @@ const configSchema = z
             direct_url: z.string().default(""),
           })
           .prefault({}),
-        mongodb: z
-          .object({
-            uri: z.string().default(""),
-            database: z.string().min(1).default("organics"),
-          })
-          .prefault({}),
-      })
-      .prefault({}),
-    redis: z
-      .object({
-        enabled: z.boolean().default(false),
-        url: z.string().default(""),
-      })
-      .prefault({}),
-    supabase: z
-      .object({
-        url: z.string().default(""),
-        // Safe to ship to the browser; RLS still applies.
-        publishable_key: z.string().default(""),
-        // Bypasses Row Level Security. Server-only, never inlined into a bundle.
-        secret_key: z.string().default(""),
-        jwks_url: z.string().default(""),
       })
       .prefault({}),
     admin: z
@@ -66,26 +48,6 @@ const configSchema = z
       .prefault({}),
   })
   .check((ctx) => {
-    if (ctx.value.redis.enabled && !ctx.value.redis.url) {
-      ctx.issues.push({
-        code: "custom",
-        input: ctx.value.redis.url,
-        path: ["redis", "url"],
-        message: "required when redis.enabled is true",
-      });
-    }
-
-    // This value is inlined into the client bundle, so pasting the secret key
-    // here would publish it to every visitor.
-    if (ctx.value.supabase.publishable_key.startsWith("sb_secret_")) {
-      ctx.issues.push({
-        code: "custom",
-        input: ctx.value.supabase.publishable_key,
-        path: ["supabase", "publishable_key"],
-        message: "looks like a secret key — use the sb_publishable_ key here",
-      });
-    }
-
     // A hash with no signing secret would mean unsigned session cookies, i.e.
     // anyone could forge one. Refuse to start half-configured.
     if (ctx.value.admin.password_hash && ctx.value.admin.session_secret.length < 32) {

@@ -109,13 +109,29 @@ export function FarmerApplicationForm() {
         placeholder="1234"
       />
       <Field
+        label={t.application.certifier}
+        hint={t.application.certifierHint}
+        name="certifier"
+        required
+        minLength={3}
+        maxLength={160}
+        placeholder={t.application.certifierPlaceholder}
+        className="sm:col-span-2"
+      />
+      <Field
+        label={t.application.certificateNo}
+        name="certificateNo"
+        required
+        minLength={3}
+        maxLength={80}
+      />
+      <Field
         label={t.application.certificate}
         hint={t.application.optional}
         name="certificateUrl"
         type="url"
         maxLength={500}
         placeholder="https://…"
-        className="sm:col-span-2"
       />
       <TextareaField
         label={t.application.about}
@@ -141,7 +157,7 @@ export function FarmerApplicationForm() {
         </p>
       ) : null}
 
-      <p className="text-xs text-bark-600 sm:col-span-2">{t.application.aadhaarNote}</p>
+      <p className="text-sm text-bark-600 sm:col-span-2">{t.application.aadhaarNote}</p>
 
       <Button type="submit" size="lg" disabled={submitting} className="sm:col-span-2">
         {submitting ? t.application.submitting : t.application.submit}

@@ -45,7 +45,7 @@ export default async function SellPage() {
         ))}
       </ol>
 
-      <h2 className="mt-14 font-display text-2xl">
+      <h2 className="mt-14 font-display text-2xl sm:text-3xl">
         {t.sell.applyHeading}
         <span aria-hidden className="ml-3 inline-block h-1 w-12 rounded-full bg-marigold-500" />
       </h2>

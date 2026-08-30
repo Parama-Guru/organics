@@ -53,8 +53,13 @@ model Farmer {
   photoUrl       String?
   status         FarmerStatus @default(PENDING)
   // Evidence captured at signup and checked by an admin before VERIFIED.
+  // "Certified organic" is a regulated claim in India, so the scheme, the
+  // certificate number and its expiry are recorded and shown, not just asserted.
   govtIdLast4    String?
+  certifier      String?
+  certificateNo  String?
   certificateUrl String?
+  certifiedUntil DateTime?
   verifiedAt     DateTime?
   reviewNote     String?
   products       Product[]
