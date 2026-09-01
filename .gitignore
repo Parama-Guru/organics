@@ -37,6 +37,9 @@ yarn-error.log*
 
 # app config - conf/config.yaml holds real secrets; only the template is tracked
 /conf/config.yaml
+# Downloaded Google OAuth JSON contains a client secret. Runtime reads env vars;
+# these files must never enter Git, Docker, or a public repository.
+/conf/client_secret*.json
 
 # vercel
 .vercel

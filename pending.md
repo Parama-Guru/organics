@@ -3,7 +3,7 @@
 Updated as work lands. `[x]` = done and verified, `[ ]` = not done, `[~]` = done
 but blocked on something outside the code.
 
-**Score: 40 done · 6 blocked · 72 open**
+**Score: 41 done · 7 blocked · 71 open**
 
 Last updated: 2026-09-01 · customer access, billing and sponsorship phase planned
 
@@ -36,6 +36,9 @@ dashboard.
       application** and place `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in
       local config / Render Environment. Never paste the secret into chat or
       commit it. Redirect paths are listed below.
+- [ ] **Rotate the pasted AMCS `jwt_secret` if that other application still
+      uses it.** It was posted in chat and is compromised. It will not be copied
+      into Organics; this app keeps its existing Redis-backed customer session.
 - [ ] **Transactional email provider and verified sender domain.** Recommend
       Resend SMTP for the first launch. Verify `ossil.in`, then set
       `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` and `SMTP_FROM` in
@@ -111,6 +114,9 @@ dashboard.
       sitemap if anonymous crawlers cannot read them.
 
 ### Google sign-in
+- [x] Downloaded `conf/client_secret*.json` files are ignored before any OAuth
+      work; the current file was confirmed untracked and is no longer eligible
+      for `git add -A`.
 - [ ] Add a provider-identity table keyed by `(provider, providerAccountId)` and
       linked to the existing `Customer`; never use an email as the permanent
       Google identity key.
