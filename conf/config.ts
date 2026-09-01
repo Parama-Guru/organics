@@ -151,7 +151,11 @@ const configSchema = z
         code: "custom",
         input: ctx.value.redis.url,
         path: ["redis", "url"],
-        message: "required when accounts.enabled is true and app.env is prod",
+        message:
+          "required when accounts.enabled is true and app.env is prod. On Render this comes " +
+          "from the organics-kv Key Value instance via fromService, so an empty value usually " +
+          "means the blueprint has not been applied since that service was added — sync it, or " +
+          "set ACCOUNTS_ENABLED=false to run the directory without buyer accounts",
       });
     }
 
@@ -181,18 +185,14 @@ const configSchema = z
       });
     }
 
-    if (
-      ctx.value.admin.password_hash &&
-      !/^scrypt:[0-9a-f]{32}:[0-9a-f]{128}$/.test(ctx.value.admin.password_hash)
-    ) {
-      ctx.issues.push({
-        code: "custom",
-        input: ctx.value.admin.password_hash,
-        path: ["admin", "password_hash"],
-        message: "must be a scrypt hash — generate it with `npm run admin:hash`",
-      });
-    }
+    // A malformed hash is NOT fatal. An empty one already means "admin area
+    // off, public site up", so letting a typo in the same variable take the
+    // whole directory down instead is the severity ladder upside down: buyers
+    // and farmers would lose the site over a staff-only credential. It is
+    // blanked below, with a loud warning, so the outcome matches the empty case.
   });
+
+const ADMIN_HASH = /^scrypt:[0-9a-f]{32}:[0-9a-f]{128}$/;
 
 export type AppConfig = z.infer<typeof configSchema>;
 
@@ -261,6 +261,19 @@ export function loadConfig(): AppConfig {
       .map((issue) => `${issue.path.join(".") || "(root)"}: ${issue.message}`)
       .join("; ");
     throw new Error(`Invalid configuration in ${path.relative(process.cwd(), file)} — ${details}`);
+  }
+
+  // Degrade rather than die. `admin.password_hash` arrives from an environment
+  // variable that has to be pasted by hand, and a trailing newline or a
+  // truncated copy is the likeliest mistake in the whole deployment. Treated as
+  // "no hash", which 404s /tj and leaves the public directory serving.
+  if (parsed.data.admin.password_hash && !ADMIN_HASH.test(parsed.data.admin.password_hash)) {
+    console.error(
+      "[config] ADMIN_PASSWORD_HASH is not a valid scrypt hash, so the admin area is disabled. " +
+        "It must match scrypt:<32 hex>:<128 hex> — 168 characters, one line, lower case. " +
+        "Regenerate with `npm run admin:hash` and paste it without quotes or a trailing newline.",
+    );
+    parsed.data.admin.password_hash = "";
   }
 
   cached = parsed.data;
