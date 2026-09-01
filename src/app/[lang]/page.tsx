@@ -336,7 +336,10 @@ export default async function HomePage({ searchParams }: PageProps<"/[lang]">) {
               key={member.href}
               className="card-lift flex animate-rise flex-col overflow-hidden rounded-3xl border border-white/70 bg-white shadow-soft"
             >
-              <div className="relative h-52 bg-leaf-50 sm:h-60">
+              {/* 4:5, the ratio the briefs in generate_images/ ask for. A
+                  landscape slot cropped these at the chest and threw away the
+                  crate of produce, which is the whole reason the photo exists. */}
+              <div className="relative aspect-[4/5] bg-leaf-50">
                 <Image
                   src={member.image}
                   alt=""

@@ -18,6 +18,10 @@ who does not exist is a small lie on a page about trust.
 - **No stock photography of foreign farms.** Tamil Nadu, or nothing.
 - **Landscape 1.6:1** for cards (`public/farms/`, `public/products/`), **4:5
   portrait** for the people on the home page.
+- **The 4:5 is exact, not approximate.** The home page slot measures 355x444 at
+  desktop and 311x389 on a 360px phone — 0.800 either way — so a 4:5 file is
+  shown whole and anything else gets cropped from the bottom, which is where
+  the produce is. Export **1200x1500**.
 - **Export WebP** at roughly 1600px on the long edge, quality 78. The card slots
   are at most 400px wide, so anything larger is bytes on a phone connection for
   no visible gain.
