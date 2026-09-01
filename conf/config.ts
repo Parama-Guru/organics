@@ -3,6 +3,33 @@ import path from "node:path";
 import { parse } from "yaml";
 import { z } from "zod";
 
+/**
+ * `${VAR}` substitution always yields a string, so a hosted deployment sends
+ * "false" and "587" where the schema wants a boolean and a number. Plain
+ * `z.coerce.boolean()` is not usable here: it follows JS truthiness, so the
+ * string "false" would come out `true`.
+ */
+const envBool = (fallback: boolean) =>
+  z
+    .preprocess((value) => {
+      if (typeof value !== "string") return value;
+      const text = value.trim().toLowerCase();
+      if (text === "") return undefined;
+      if (["true", "1", "yes", "on"].includes(text)) return true;
+      if (["false", "0", "no", "off"].includes(text)) return false;
+      return value;
+    }, z.boolean())
+    .default(fallback);
+
+const envInt = (fallback: number, min: number, max: number) =>
+  z
+    .preprocess((value) => {
+      if (typeof value !== "string") return value;
+      const text = value.trim();
+      return text === "" ? undefined : Number(text);
+    }, z.number().int().min(min).max(max))
+    .default(fallback);
+
 const configSchema = z
   .object({
     app: z
@@ -23,7 +50,13 @@ const configSchema = z
         // Publishing the farm's number is the whole point of the directory, but
         // it stays off until the farms have agreed to it. While false, every
         // call and WhatsApp button becomes a "details coming soon" note.
-        show_farmer_phone: z.boolean().default(false),
+        show_farmer_phone: envBool(false),
+        // How many proxies of ours sit in front of the app. Rate limiting reads
+        // the client address this many entries in from the right of
+        // X-Forwarded-For; everything further left is client-supplied and
+        // forgeable. Render and Vercel both put exactly one hop in front. Set 0
+        // when the app is exposed directly, and the header is then ignored.
+        trusted_proxy_hops: envInt(1, 0, 5),
       })
       .prefault({}),
     database: z
@@ -53,10 +86,10 @@ const configSchema = z
       .object({
         // Buyer accounts: saved produce and saved farms. Off by default, so a
         // deployment does not start collecting personal data unasked.
-        enabled: z.boolean().default(false),
+        enabled: envBool(false),
         // Signs the session cookie. Rotating it signs everyone out.
         session_secret: z.string().default(""),
-        session_ttl_days: z.number().int().min(1).max(90).default(30),
+        session_ttl_days: envInt(30, 1, 90),
       })
       .prefault({}),
     mail: z
@@ -64,7 +97,7 @@ const configSchema = z
         // Password reset is the only thing that sends mail. With no host the
         // reset link is not offered at all rather than half-working.
         host: z.string().default(""),
-        port: z.number().int().min(1).max(65535).default(587),
+        port: envInt(587, 1, 65535),
         user: z.string().default(""),
         password: z.string().default(""),
         from: z.string().default(""),
@@ -77,7 +110,7 @@ const configSchema = z
         password_hash: z.string().default(""),
         // Signs the admin session cookie. Rotating it logs everyone out.
         session_secret: z.string().default(""),
-        session_ttl_minutes: z.number().int().min(5).max(10_080).default(480),
+        session_ttl_minutes: envInt(480, 5, 10_080),
       })
       .prefault({}),
   })

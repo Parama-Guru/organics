@@ -22,6 +22,10 @@ export const farmerApplicationSchema = z.object({
   // listed farm, so it cannot accept a farm that has not supplied one.
   certifier: z.string().trim().min(3).max(160),
   certificateNo: z.string().trim().min(3).max(80),
+  // Optional, but if given it has to be a real date the UI can show.
+  certifiedUntil: z
+    .union([z.iso.date(), z.literal("")])
+    .optional(),
   certificateUrl: z.union([z.url().max(500), z.literal("")]).optional(),
 });
 

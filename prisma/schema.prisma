@@ -28,6 +28,7 @@ model Category {
   updatedAt     DateTime  @updatedAt
 
   @@index([slug])
+  @@index([nameTa(ops: raw("gin_trgm_ops"))], map: "Category_nameTa_trgm_idx", type: Gin)
 }
 
 // A district. Was a free-text column repeated on Farmer and Product, with the
@@ -45,6 +46,7 @@ model Region {
   updatedAt DateTime  @updatedAt
 
   @@index([slug])
+  @@index([nameTa(ops: raw("gin_trgm_ops"))], map: "Region_nameTa_trgm_idx", type: Gin)
 }
 
 // A farmer only becomes visible to shoppers at VERIFIED; everything else hides
@@ -80,6 +82,12 @@ model Farmer {
   certifiedUntil DateTime?
   verifiedAt     DateTime?
   reviewNote     String?
+  // Portal access is granted separately from verification: an admin can approve
+  // a farm's listings without handing over a login, and can revoke the login
+  // without unpublishing the farm.
+  passwordHash   String?
+  portalEnabledAt DateTime?
+  lastSignInAt   DateTime?
   products       Product[]
   savedBy        SavedFarmer[]
   createdAt      DateTime     @default(now())
@@ -138,6 +146,10 @@ model Product {
   // these a term that matches little or nothing scans the whole table.
   @@index([name(ops: raw("gin_trgm_ops"))], map: "Product_name_trgm_idx", type: Gin)
   @@index([description(ops: raw("gin_trgm_ops"))], map: "Product_description_trgm_idx", type: Gin)
+  // The Tamil columns carry the same indexes: on a Tamil-only site these are the
+  // ones a visitor's keywords actually hit.
+  @@index([nameTa(ops: raw("gin_trgm_ops"))], map: "Product_nameTa_trgm_idx", type: Gin)
+  @@index([descriptionTa(ops: raw("gin_trgm_ops"))], map: "Product_descriptionTa_trgm_idx", type: Gin)
 }
 
 // A buyer account. The site takes no payment, so an account exists only to keep

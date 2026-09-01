@@ -8,7 +8,7 @@ import { Field } from "@/components/ui/field";
 
 const MESSAGES: Record<string, string> = {
   bad_passphrase: "That passphrase is not right.",
-  rate_limited: "Too many attempts. Wait a few minutes and try again.",
+  rate_limited: "Too many attempts. Wait about 15 minutes and try again.",
   forbidden_origin: "That request was blocked. Reload the page and try again.",
   invalid_fields: "Enter the passphrase.",
   not_found: "The admin area is not configured on this deployment.",
@@ -26,7 +26,7 @@ export function AdminLoginForm() {
 
     const passphrase = new FormData(event.currentTarget).get("passphrase");
     try {
-      const response = await fetch("/api/admin/session", {
+      const response = await fetch("/api/tj/session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ passphrase }),
@@ -37,7 +37,7 @@ export function AdminLoginForm() {
         setError(MESSAGES[result.code] ?? "Could not sign in.");
         return;
       }
-      router.replace("/admin");
+      router.replace("/tj");
       router.refresh();
     } catch {
       setError("Network error. Please try again.");

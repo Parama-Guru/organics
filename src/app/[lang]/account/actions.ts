@@ -23,6 +23,7 @@ import {
   sendResetEmail,
 } from "@/lib/password-reset";
 import { prisma } from "@/lib/prisma";
+import { clientKeyFromHeaders } from "@/lib/rate-limit";
 import { regionIdForCustomer } from "@/lib/regions";
 import { consumeRateLimit } from "@/lib/session-store";
 
@@ -36,9 +37,7 @@ export type ActionState = {
 };
 
 function clientKey(list: Headers): string {
-  const forwarded = list.get("x-forwarded-for");
-  if (forwarded) return forwarded.split(",")[0]!.trim();
-  return list.get("x-real-ip")?.trim() || "unknown";
+  return clientKeyFromHeaders(list);
 }
 
 function fieldsFrom(issues: { path: PropertyKey[] }[]): string[] {

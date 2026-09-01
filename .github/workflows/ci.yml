@@ -64,6 +64,10 @@ jobs:
 
       - run: npm run lint
 
+      # The example file is the only config a hosted deploy has. Checked before
+      # the build so a broken one is named, rather than surfacing as a build error.
+      - run: npm run config:check
+
       - run: npm run typecheck
 
       - run: npm run build

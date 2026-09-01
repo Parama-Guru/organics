@@ -1,7 +1,7 @@
 import type { Prisma } from "@prisma/client";
 
 import { prisma } from "./prisma";
-import { publicProductWhere, productSummarySelect } from "./products";
+import { publicProductWhere, productSummarySelect, decodeSlug } from "./products";
 
 const farmerCardSelect = {
   id: true,
@@ -32,7 +32,10 @@ export function getVerifiedFarmers() {
   });
 }
 
-export async function getFarmerBySlug(slug: string) {
+export async function getFarmerBySlug(rawSlug: string) {
+  // Route params arrive percent-encoded; see decodeSlug.
+  const slug = decodeSlug(rawSlug);
+
   const farmer = await prisma.farmer.findFirst({
     where: { slug, status: "VERIFIED" },
     select: farmerCardSelect,

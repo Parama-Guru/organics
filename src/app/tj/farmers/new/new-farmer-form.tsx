@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
-import { createFarmer } from "@/app/admin/actions";
+import { createFarmer } from "@/app/tj/actions";
 import { Button } from "@/components/ui/button";
 import { Field, TextareaField } from "@/components/ui/field";
 
@@ -23,7 +23,7 @@ export function NewFarmerForm() {
         setError(result.message);
         return;
       }
-      router.push("/admin");
+      router.push("/tj");
       router.refresh();
     });
   }
@@ -61,6 +61,31 @@ export function NewFarmerForm() {
         maxLength={4}
         placeholder="1234"
       />
+      {/* Both are required by farmerApplicationSchema and both are published on
+          the farm's public page. Leaving them off the form made this page
+          impossible to submit: it failed with "check these fields: certifier,
+          certificateNo" against fields that were not on screen. */}
+      <Field
+        label="Certified by"
+        hint="the certifying body"
+        name="certifier"
+        required
+        maxLength={160}
+        placeholder="Indian Organic Certification Agency"
+      />
+      <Field
+        label="Certificate number"
+        name="certificateNo"
+        required
+        maxLength={80}
+        placeholder="IOCA/2026/00123"
+      />
+      <Field
+        label="Certificate valid until"
+        hint="optional"
+        name="certifiedUntil"
+        type="date"
+      />
       <Field
         label="Organic certificate link"
         hint="optional"
@@ -68,7 +93,6 @@ export function NewFarmerForm() {
         type="url"
         maxLength={500}
         placeholder="https://…"
-        className="sm:col-span-2"
       />
       <TextareaField
         label="About the farm"

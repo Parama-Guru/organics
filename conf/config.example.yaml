@@ -28,6 +28,12 @@ app:
   # stays off until the farms have agreed. While false the call and WhatsApp
   # buttons are replaced by a "contact details coming soon" note.
   show_farmer_phone: ${SHOW_FARMER_PHONE:-false}
+  # How many proxies of ours sit in front of the app. Rate limiting reads the
+  # client address this many entries in from the right of X-Forwarded-For;
+  # anything further left is client-supplied and forgeable. Render and Vercel
+  # each put exactly one hop in front. Set 0 when the app is exposed directly,
+  # and the header is ignored entirely.
+  trusted_proxy_hops: ${TRUSTED_PROXY_HOPS:-1}
 
 database:
   # System of record, reached through Prisma. Everything the site reads lives

@@ -1,6 +1,6 @@
 import type { ComponentPropsWithoutRef, ElementType, ReactNode } from "react";
 
-type Variant = "primary" | "secondary" | "ghost" | "dark" | "onDark";
+type Variant = "primary" | "secondary" | "ghost" | "dark" | "onDark" | "danger";
 type Size = "sm" | "md" | "lg";
 
 const base =
@@ -25,6 +25,11 @@ const variants: Record<Variant, string> = {
   // white text (~1.75:1), so it needs its own surface.
   onDark:
     "border-white/40 bg-white/10 text-white backdrop-blur hover:-translate-y-0.5 hover:border-white hover:bg-white hover:text-bark-900",
+  // Deleting is not the same shape of act as hiding, so it does not get to look
+  // identical. Outlined rather than filled: a wall of solid red buttons in a
+  // list reads as an error state instead of a set of choices.
+  danger:
+    "border-red-300 bg-white text-red-700 hover:-translate-y-0.5 hover:border-red-500 hover:bg-red-50 hover:shadow-soft",
 };
 
 const sizes: Record<Size, string> = {

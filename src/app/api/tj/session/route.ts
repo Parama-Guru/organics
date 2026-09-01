@@ -5,6 +5,7 @@ import { loadConfig } from "@conf/config";
 import { ADMIN_COOKIE, isAdminEnabled, issueSession } from "@/lib/admin-auth";
 import { verifyPassphrase } from "@/lib/admin-hash";
 import { clientKeyFromHeaders, rateLimit } from "@/lib/rate-limit";
+import { consumeRateLimit } from "@/lib/session-store";
 
 export const dynamic = "force-dynamic";
 
@@ -22,11 +23,20 @@ export async function POST(request: NextRequest) {
   }
 
   // Slow down guessing. Deliberately tighter than the public endpoints.
-  const limit = rateLimit(`admin-login:${clientKeyFromHeaders(request.headers)}`, 5, 900_000);
-  if (!limit.allowed) {
+  //
+  // Two limiters on purpose: the Redis one is shared across replicas, which is
+  // what actually caps an attacker; the in-process one still applies if Redis
+  // is unreachable, so a Redis outage cannot open the door. The admin area has
+  // one shared credential, so this is the most valuable door on the site and
+  // was previously the only one still on the weaker per-process limiter.
+  const clientKey = clientKeyFromHeaders(request.headers);
+  const shared = await consumeRateLimit(`admin-login:${clientKey}`, 5, 900);
+  const local = rateLimit(`admin-login:${clientKey}`, 5, 900_000);
+  if (!shared.allowed || !local.allowed) {
+    const retryAfter = Math.max(shared.retryAfterSeconds, local.retryAfterSeconds, 60);
     return NextResponse.json(
       { code: "rate_limited" },
-      { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } },
+      { status: 429, headers: { "Retry-After": String(retryAfter) } },
     );
   }
 
@@ -48,7 +58,7 @@ export async function POST(request: NextRequest) {
     httpOnly: true,
     sameSite: "strict",
     secure: new URL(loadConfig().app.site_url).protocol === "https:",
-    path: "/admin",
+    path: "/tj",
     maxAge,
   });
   return response;
@@ -56,6 +66,6 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE() {
   const response = NextResponse.json({ ok: true });
-  response.cookies.set(ADMIN_COOKIE, "", { path: "/admin", maxAge: 0 });
+  response.cookies.set(ADMIN_COOKIE, "", { path: "/tj", maxAge: 0 });
   return response;
 }

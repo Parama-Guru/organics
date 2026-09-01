@@ -1,18 +1,18 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { NewFarmerForm } from "@/app/admin/farmers/new/new-farmer-form";
+import { NewFarmerForm } from "@/app/tj/farmers/new/new-farmer-form";
 import { isSignedIn } from "@/lib/admin-auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function NewFarmerPage() {
-  if (!(await isSignedIn())) redirect("/admin/login");
+  if (!(await isSignedIn())) redirect("/tj/login");
 
   return (
     <>
       <Link
-        href="/admin"
+        href="/tj"
         className="text-sm font-medium text-bark-600 hover:text-bark-900"
       >
         <span aria-hidden>&larr;</span> Applications

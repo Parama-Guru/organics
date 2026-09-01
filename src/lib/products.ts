@@ -193,9 +193,24 @@ export const getRegions = unstable_cache(
   { revalidate: 300, tags: ["catalog"] },
 );
 
+/**
+ * Route params arrive percent-encoded, unlike search params. An ASCII slug is
+ * unchanged by encoding, so this went unnoticed until a Tamil slug existed:
+ * the page looked up "%E0%AE%9A%E0%AF%8B..." and 404ed on its own link.
+ */
+export function decodeSlug(raw: string): string {
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    // Malformed escapes: no slug can equal it anyway, so let the lookup miss
+    // rather than throw a 500 at anyone who mistypes a URL.
+    return raw;
+  }
+}
+
 export function getProductBySlug(slug: string) {
   return prisma.product.findFirst({
-    where: { ...publicProductWhere, slug },
+    where: { ...publicProductWhere, slug: decodeSlug(slug) },
     select: productDetailSelect,
   });
 }

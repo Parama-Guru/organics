@@ -11,6 +11,7 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
+    "config:check": "tsx scripts/check-config.mts",
     "typegen": "next typegen",
     "typecheck": "next typegen && tsc --noEmit",
     "db:generate": "prisma generate",
@@ -18,7 +19,8 @@
     "db:deploy": "prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
-    "admin:hash": "tsx scripts/hash-admin-passphrase.mts"
+    "admin:hash": "tsx scripts/hash-admin-passphrase.mts",
+    "verify:boundary": "tsx --conditions=react-server scripts/verify-boundary.mts"
   },
   "overrides": {
     "deepmerge-ts": "^8.0.2"
@@ -44,6 +46,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.3.2",
     "prisma": "6.19.3",
+    "server-only": "^0.0.1",
     "tailwindcss": "^4",
     "tsx": "^4.23.12",
     "typescript": "^5"

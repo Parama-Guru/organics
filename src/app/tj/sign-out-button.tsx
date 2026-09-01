@@ -13,8 +13,8 @@ export function SignOutButton() {
       disabled={busy}
       onClick={async () => {
         setBusy(true);
-        await fetch("/api/admin/session", { method: "DELETE" });
-        router.replace("/admin/login");
+        await fetch("/api/tj/session", { method: "DELETE" });
+        router.replace("/tj/login");
         router.refresh();
       }}
       className="rounded-full border border-bark-200 px-3 py-1.5 text-sm font-medium text-bark-600 transition-colors hover:text-bark-900 disabled:opacity-55"
