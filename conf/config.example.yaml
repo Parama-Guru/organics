@@ -24,6 +24,11 @@ app:
   # line is hidden — better nothing than a placeholder address on a trust page.
   contact_email: "${CONTACT_EMAIL:-}"
   contact_place: "${CONTACT_PLACE:-}"
+  # Shown on the contact page. Each empty value hides its own line, so the page
+  # never prints a number nobody answers.
+  contact_phone: "${CONTACT_PHONE:-}"
+  contact_address: "${CONTACT_ADDRESS:-}"
+  contact_hours: "${CONTACT_HOURS:-}"
   # Publishing each farm's phone number is the point of the directory, but it
   # stays off until the farms have agreed. While false the call and WhatsApp
   # buttons are replaced by a "contact details coming soon" note.
@@ -34,6 +39,18 @@ app:
   # each put exactly one hop in front. Set 0 when the app is exposed directly,
   # and the header is ignored entirely.
   trusted_proxy_hops: ${TRUSTED_PROXY_HOPS:-1}
+
+# Social accounts, linked from the footer. Each is rendered as a real link once
+# its URL is set and as a dimmed, unclickable icon until then: an icon that
+# quietly appears on the day the account opens is easy to miss, whereas a greyed
+# out one is a visible reminder that the handle is still to be filled in.
+social:
+  instagram: "${SOCIAL_INSTAGRAM:-}"
+  facebook: "${SOCIAL_FACEBOOK:-}"
+  linkedin: "${SOCIAL_LINKEDIN:-}"
+  youtube: "${SOCIAL_YOUTUBE:-}"
+  # Full https://wa.me/91XXXXXXXXXX link, not a bare number.
+  whatsapp: "${SOCIAL_WHATSAPP:-}"
 
 database:
   # System of record, reached through Prisma. Everything the site reads lives

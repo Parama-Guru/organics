@@ -27,6 +27,125 @@ const regions = [
   { slug: "coorg", name: "Coorg", nameTa: "குடகு" },
   { slug: "ratnagiri", name: "Ratnagiri", nameTa: "ரத்னகிரி" },
   { slug: "himachal", name: "Himachal", nameTa: "இமாசலம்" },
+  { slug: "coimbatore", name: "Coimbatore", nameTa: "கோயம்புத்தூர்" },
+  { slug: "madurai", name: "Madurai", nameTa: "மதுரை" },
+  { slug: "chennai", name: "Chennai", nameTa: "சென்னை" },
+];
+
+type SeedStore = {
+  slug: string;
+  storeName: string;
+  contactName: string;
+  phone: string;
+  email: string;
+  region: string;
+  addressLine: string;
+  about: string;
+  aboutTa: string;
+  status: "PENDING" | "VERIFIED" | "REJECTED" | "SUSPENDED";
+  govtIdLast4?: string;
+  // Every shop selling food in India needs one; it is the licence, not the
+  // organic certificate, that is the gate for a reseller.
+  fssaiNumber?: string;
+  certifier?: string;
+  certificateNo?: string;
+  certifiedUntil?: string;
+  checkedDaysAgo?: number;
+  reviewNote?: string;
+};
+
+const stores: SeedStore[] = [
+  {
+    slug: "arogya-organic-mart",
+    storeName: "Arogya Organic Mart",
+    contactName: "Meena Sundaram",
+    phone: "+91 98942 30188",
+    email: "meena@arogyaorganic.in",
+    region: "Coimbatore",
+    addressLine: "14, Bharathi Street, Ram Nagar",
+    about:
+      "Neighbourhood shop stocking millets, pulses and cold-pressed oils from certified farms in Erode and the Nilgiris. Open since 2014.",
+    aboutTa:
+      "ஈரோடு, நீலகிரி பகுதிகளின் சான்று பெற்ற பண்ணைகளிலிருந்து சிறுதானியம், பருப்பு, மரச்செக்கு எண்ணெய் வாங்கி வைக்கும் கடை. 2014 முதல் இயங்குகிறது.",
+    status: "VERIFIED",
+    govtIdLast4: "7731",
+    fssaiNumber: "12419028000771",
+    certifier: "NPOP / India Organic — Indocert",
+    certificateNo: "IC-NPOP-2018-07731",
+    certifiedUntil: "2027-06-30",
+    checkedDaysAgo: 18,
+  },
+  {
+    slug: "thooya-unavu-angadi",
+    storeName: "Thooya Unavu Angadi",
+    contactName: "Karthik Velan",
+    phone: "+91 90475 22619",
+    email: "karthik@thooyaunavu.in",
+    region: "Madurai",
+    addressLine: "7/2, South Masi Street, near Meenakshi Amman Kovil",
+    about:
+      "Family-run store on South Masi Street. Unpolished rice milled weekly, palm jaggery from Ramanathapuram and vegetables brought up from delta farms twice a week.",
+    aboutTa:
+      "தெற்கு மாசி வீதியில் குடும்பமாக நடத்தும் கடை. வாரம்தோறும் அரைக்கப்படும் பாலிஷ் இல்லாத அரிசி, ராமநாதபுரம் கருப்பட்டி, வாரம் இருமுறை டெல்டாவிலிருந்து வரும் காய்கறிகள்.",
+    status: "VERIFIED",
+    govtIdLast4: "5504",
+    fssaiNumber: "22419028001504",
+    certifier: "PGS-India Organic — Regional Council, Madurai",
+    certificateNo: "PGS-TN-5504-2021",
+    certifiedUntil: "2026-11-30",
+    checkedDaysAgo: 41,
+  },
+  {
+    slug: "green-basket-anna-nagar",
+    storeName: "Green Basket, Anna Nagar",
+    contactName: "Priya Raghavan",
+    phone: "+91 98410 77302",
+    email: "priya@greenbasket.in",
+    region: "Chennai",
+    addressLine: "31, 2nd Avenue, Anna Nagar West",
+    about:
+      "City shop that buys direct from farms in Erode and Thanjavur. No cold storage: what arrives on Tuesday is gone by Friday.",
+    aboutTa:
+      "ஈரோடு, தஞ்சாவூர் பண்ணைகளிடம் நேரடியாக வாங்கும் நகரக் கடை. குளிர்பதனம் கிடையாது — செவ்வாய் வந்தது வெள்ளிக்குள் தீர்ந்துவிடும்.",
+    status: "VERIFIED",
+    govtIdLast4: "2296",
+    fssaiNumber: "12420028002296",
+    checkedDaysAgo: 6,
+  },
+  {
+    slug: "nilgiri-natural-store",
+    storeName: "Nilgiri Natural Store",
+    contactName: "Joseph Mathew",
+    phone: "+91 94430 61177",
+    email: "joseph@nilgirinatural.in",
+    region: "Nilgiris",
+    addressLine: "5, Bedford Circle, Coonoor",
+    about:
+      "Hill-station shop selling honey, spices and tea from growers within thirty kilometres of Coonoor.",
+    aboutTa:
+      "கூனூரிலிருந்து முப்பது கிலோமீட்டருக்குள் உள்ள விளைவிப்பாளர்களிடமிருந்து தேன், மசாலா, தேயிலை விற்கும் மலைவாசக் கடை.",
+    status: "PENDING",
+    govtIdLast4: "8840",
+    fssaiNumber: "12419028008840",
+    certifier: "NPOP / India Organic — Lacon Quality Certification",
+    certificateNo: "LQ-NPOP-2023-08840",
+    certifiedUntil: "2028-01-31",
+  },
+  {
+    slug: "sattvik-bazaar",
+    storeName: "Sattvik Bazaar",
+    contactName: "Ramesh Iyer",
+    phone: "+91 99404 18265",
+    email: "ramesh@sattvikbazaar.in",
+    region: "Erode",
+    addressLine: "22, Perundurai Road, Veerappanchatram",
+    about: "Turmeric and pulses wholesaler moving into retail.",
+    aboutTa: "மஞ்சளும் பருப்பும் மொத்தமாக விற்று வந்து, சில்லறை விற்பனைக்கு வரும் கடை.",
+    status: "REJECTED",
+    govtIdLast4: "3318",
+    fssaiNumber: "12419028003318",
+    reviewNote: "FSSAI licence had lapsed at the time of the check. Told to reapply once renewed.",
+  },
 ];
 
 type SeedFarmer = {
@@ -806,6 +925,26 @@ async function main() {
     farmerIdBySlug.set(farmer.slug, saved.id);
   }
 
+  for (const store of stores) {
+    const { status, certifiedUntil, checkedDaysAgo, region, ...rest } = store;
+    const regionId = regionIdByName.get(region);
+    if (!regionId) throw new Error(`Unknown region "${region}" on ${store.slug}`);
+
+    const data = {
+      ...rest,
+      regionId,
+      status,
+      certifiedUntil: certifiedUntil ? new Date(certifiedUntil) : null,
+      verifiedAt:
+        status === "VERIFIED" ? new Date(Date.now() - (checkedDaysAgo ?? 0) * 86_400_000) : null,
+    };
+    await prisma.organicStore.upsert({
+      where: { slug: store.slug },
+      update: data,
+      create: data,
+    });
+  }
+
   for (const category of catalog) {
     const { products, ...categoryData } = category;
     const ta = categoryTa[categoryData.slug];
@@ -855,17 +994,21 @@ async function main() {
     }
   }
 
-  const [categories, products, farmerCount, verified, images] = await Promise.all([
-    prisma.category.count(),
-    prisma.product.count(),
-    prisma.farmer.count(),
-    prisma.farmer.count({ where: { status: "VERIFIED" } }),
-    prisma.productImage.count(),
-  ]);
+  const [categories, products, farmerCount, verified, images, storeCount, liveStores] =
+    await Promise.all([
+      prisma.category.count(),
+      prisma.product.count(),
+      prisma.farmer.count(),
+      prisma.farmer.count({ where: { status: "VERIFIED" } }),
+      prisma.productImage.count(),
+      prisma.organicStore.count(),
+      prisma.organicStore.count({ where: { status: "VERIFIED" } }),
+    ]);
 
   console.log(
     `Seed complete: ${categories} categories, ${products} products, ${images} images, ` +
-      `${farmerCount} farmers (${verified} verified).`,
+      `${farmerCount} farmers (${verified} verified), ` +
+      `${storeCount} stores (${liveStores} listed).`,
   );
 }
 

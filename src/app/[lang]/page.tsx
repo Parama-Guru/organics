@@ -5,20 +5,23 @@ import { ProductCard } from "@/components/product-card";
 import { PhoneSoonNotice } from "@/components/phone-soon-notice";
 import { Button } from "@/components/ui/button";
 import { ArrowRightIcon, MapPinIcon, PhoneIcon, ShieldCheckIcon } from "@/components/ui/icons";
+import { accountsEnabled } from "@/lib/customer-auth";
 import { getVerifiedFarmers } from "@/lib/farmers";
 import { format, localePath } from "@/lib/i18n/config";
 import { localised, localisedOrNull, regionLabel } from "@/lib/i18n/content";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
 import { getCategories, getFeaturedProducts } from "@/lib/products";
+import { getRegisteredCounts } from "@/lib/stores";
 
 // The catalog lives in Postgres, which is not reachable while the Docker image builds.
 export const dynamic = "force-dynamic";
 
 export default async function HomePage({ searchParams }: PageProps<"/[lang]">) {
-  const [featured, categories, farmers, locale, t, params] = await Promise.all([
+  const [featured, categories, farmers, counts, locale, t, params] = await Promise.all([
     getFeaturedProducts(8),
     getCategories(),
     getVerifiedFarmers(),
+    getRegisteredCounts(),
     getLocale(),
     getDictionary(),
     searchParams,
@@ -28,6 +31,31 @@ export default async function HomePage({ searchParams }: PageProps<"/[lang]">) {
     { icon: ShieldCheckIcon, title: t.how.step1Title, body: t.how.step1Body },
     { icon: MapPinIcon, title: t.how.step2Title, body: t.how.step2Body },
     { icon: PhoneIcon, title: t.how.step3Title, body: t.how.step3Body },
+  ];
+
+  // Two portraits, one each side of the exchange this site exists to arrange.
+  // Both are illustrations rather than photographs — see the briefs in
+  // generate_images/ for the real ones that replace them.
+  const accountsOn = accountsEnabled();
+  const members = [
+    {
+      image: "/community/farmer.svg",
+      count: counts.farmers,
+      label: counts.farmers === 1 ? t.home.communityFarmersOne : t.home.communityFarmers,
+      caption: t.home.communityFarmerCaption,
+      href: "/sell",
+      cta: t.home.communityJoinFarmer,
+    },
+    {
+      image: "/community/buyer.svg",
+      count: counts.customers,
+      label: counts.customers === 1 ? t.home.communityCustomersOne : t.home.communityCustomers,
+      caption: t.home.communityCustomerCaption,
+      // With accounts switched off there is nothing to join, so the card points
+      // at the produce instead of a route that 404s.
+      href: accountsOn ? "/account/sign-up" : "/products",
+      cta: accountsOn ? t.home.communityJoinCustomer : t.home.browse,
+    },
   ];
 
   return (
@@ -289,6 +317,70 @@ export default async function HomePage({ searchParams }: PageProps<"/[lang]">) {
           </ul>
         </section>
       ) : null}
+
+      {/* Who is registered, at the foot of the page.
+          Printed exactly as counted — no rounding and no "+" — because the
+          claim this site makes is that everyone here was checked, not that
+          there are lots of them. A directory that inflates its own numbers has
+          given up the only thing it was selling. */}
+      <section className="mt-16 sm:mt-24">
+        <h2 className="font-display text-3xl sm:text-4xl">
+          {t.home.communityHeading}
+          <span aria-hidden className="ml-3 inline-block h-1 w-12 rounded-full bg-leaf-500" />
+        </h2>
+        <p className="mt-3 max-w-2xl leading-relaxed text-bark-600">{t.home.communityIntro}</p>
+
+        <div className="mt-6 grid gap-4 md:grid-cols-3">
+          {members.map((member) => (
+            <figure
+              key={member.href}
+              className="card-lift flex animate-rise flex-col overflow-hidden rounded-3xl border border-white/70 bg-white shadow-soft"
+            >
+              <div className="relative h-52 bg-leaf-50 sm:h-60">
+                <Image
+                  src={member.image}
+                  alt=""
+                  fill
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                  className="object-cover object-top"
+                />
+              </div>
+              <figcaption className="flex flex-1 flex-col p-5">
+                <p className="font-display text-4xl text-brand">{member.count}</p>
+                <p className="mt-1 text-bark-600">{member.label}</p>
+                {/* The caption describes someone real. At zero it would be
+                    describing nobody, so it waits until there is one. */}
+                {member.count > 0 ? (
+                  <p className="mt-3 text-sm leading-relaxed text-bark-600">{member.caption}</p>
+                ) : null}
+                <Link
+                  href={localePath(locale, member.href)}
+                  className="mt-auto inline-flex items-center gap-1.5 pt-4 text-sm font-semibold text-brand underline-offset-4 hover:underline"
+                >
+                  {member.cta} <ArrowRightIcon />
+                </Link>
+              </figcaption>
+            </figure>
+          ))}
+
+          {/* Shops get the count and the way in, but no portrait: a third
+              invented figure would say less than the shelf a real photograph
+              of one would. */}
+          <div className="flex animate-rise flex-col justify-center rounded-3xl border border-leaf-200 bg-leaf-50/70 p-6">
+            <p className="font-display text-5xl text-brand">{counts.stores}</p>
+            <p className="mt-1 text-bark-600">
+              {counts.stores === 1 ? t.home.communityStoresOne : t.home.communityStores}
+            </p>
+            <p className="mt-4 text-sm leading-relaxed text-bark-600">{t.stores.registerCtaBody}</p>
+            <Link
+              href={localePath(locale, "/stores/register")}
+              className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand underline-offset-4 hover:underline"
+            >
+              {t.home.communityJoinStore} <ArrowRightIcon />
+            </Link>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

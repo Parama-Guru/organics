@@ -182,6 +182,88 @@ export function BookmarkIcon({ className = "" }: Props) {
   );
 }
 
+// Social marks. Drawn to the same 24x24 currentColor grid as the rest of the
+// set rather than pasted from each brand's own kit, so a row of them keeps one
+// weight instead of five.
+
+export function InstagramIcon({ className = "" }: Props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden className={`${base} ${className}`}>
+      <rect
+        x="3.25"
+        y="3.25"
+        width="17.5"
+        height="17.5"
+        rx="5"
+        stroke="currentColor"
+        strokeWidth="1.7"
+      />
+      <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.7" />
+      <circle cx="17.1" cy="6.9" r="1.15" fill="currentColor" />
+    </svg>
+  );
+}
+
+export function FacebookIcon({ className = "" }: Props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden className={`${base} ${className}`}>
+      <path
+        d="M13.9 21v-8h2.7l.4-3.1h-3.1V7.9c0-.9.25-1.5 1.55-1.5H17V3.6A21 21 0 0 0 14.6 3.5c-2.4 0-4 1.45-4 4.1v2.3H8v3.1h2.6V21"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function LinkedInIcon({ className = "" }: Props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden className={`${base} ${className}`}>
+      <rect
+        x="3.25"
+        y="3.25"
+        width="17.5"
+        height="17.5"
+        rx="3"
+        stroke="currentColor"
+        strokeWidth="1.7"
+      />
+      <path
+        d="M7.6 10.4V17M12 17v-3.6c0-1.1.8-1.9 1.85-1.9s1.85.8 1.85 1.9V17"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+      />
+      <path d="M12 10.4V17" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+      <circle cx="7.6" cy="7.5" r="1.1" fill="currentColor" />
+    </svg>
+  );
+}
+
+export function YouTubeIcon({ className = "" }: Props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden className={`${base} ${className}`}>
+      <rect
+        x="2.5"
+        y="5.25"
+        width="19"
+        height="13.5"
+        rx="4"
+        stroke="currentColor"
+        strokeWidth="1.7"
+      />
+      <path
+        d="M10.4 9.4l4.6 2.6-4.6 2.6V9.4Z"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function UserIcon({ className = "" }: Props) {
   return (
     <svg viewBox="0 0 24 24" fill="none" aria-hidden className={`${base} ${className}`}>

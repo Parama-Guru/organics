@@ -71,6 +71,11 @@ export default async function AdminOverview() {
     buyers,
     newBuyers,
     savedProducts,
+    pendingStores,
+    liveStores,
+    closedStores,
+    unansweredMessages,
+    newMessages,
     recentEdits,
   ] = await Promise.all([
     prisma.farmer.count({ where: { status: "PENDING" } }),
@@ -93,6 +98,11 @@ export default async function AdminOverview() {
     prisma.customer.count(),
     prisma.customer.count({ where: { createdAt: { gte: sevenDaysAgo } } }),
     prisma.savedProduct.count(),
+    prisma.organicStore.count({ where: { status: "PENDING" } }),
+    prisma.organicStore.count({ where: { status: "VERIFIED" } }),
+    prisma.organicStore.count({ where: { status: { in: ["SUSPENDED", "REJECTED"] } } }),
+    prisma.contactMessage.count({ where: { handledAt: null } }),
+    prisma.contactMessage.count({ where: { createdAt: { gte: sevenDaysAgo } } }),
     prisma.product.findMany({
       where: { updatedAt: { gte: sevenDaysAgo } },
       orderBy: { updatedAt: "desc" },
@@ -157,10 +167,38 @@ export default async function AdminOverview() {
       </section>
 
       <section className="mt-8">
+        <h2 className="font-display text-lg text-bark-900">Organic stores</h2>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <Stat
+            label="Waiting for review"
+            value={pendingStores}
+            href="/tj/stores?status=PENDING"
+            alarming
+          />
+          <Stat label="Live on the site" value={liveStores} href="/tj/stores?status=VERIFIED" />
+          <Stat label="Rejected or suspended" value={closedStores} href="/tj/stores" />
+        </div>
+      </section>
+
+      <section className="mt-8">
         <h2 className="font-display text-lg text-bark-900">Buyers</h2>
         <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Stat label="Accounts" value={buyers} href="/tj/buyers" />
           <Stat label="Joined this week" value={newBuyers} href="/tj/buyers" />
+        </div>
+      </section>
+
+      <section className="mt-8">
+        <h2 className="font-display text-lg text-bark-900">Messages</h2>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <Stat
+            label="Unanswered"
+            value={unansweredMessages}
+            href="/tj/messages"
+            note="Somebody is waiting on a reply"
+            alarming
+          />
+          <Stat label="Arrived this week" value={newMessages} href="/tj/messages" />
         </div>
       </section>
 

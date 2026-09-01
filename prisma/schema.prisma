@@ -42,6 +42,7 @@ model Region {
   farmers   Farmer[]
   products  Product[]
   customers Customer[]
+  stores    OrganicStore[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
@@ -150,6 +151,77 @@ model Product {
   // ones a visitor's keywords actually hit.
   @@index([nameTa(ops: raw("gin_trgm_ops"))], map: "Product_nameTa_trgm_idx", type: Gin)
   @@index([descriptionTa(ops: raw("gin_trgm_ops"))], map: "Product_descriptionTa_trgm_idx", type: Gin)
+}
+
+// A shop that resells certified organic produce. Reviewed on the same footing
+// as a farm — apply, get checked, get listed — but it stocks rather than grows,
+// so it carries an address and an FSSAI licence instead of acreage, and it has
+// no listings of its own.
+enum StoreStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  SUSPENDED
+}
+
+model OrganicStore {
+  id             String      @id @default(cuid())
+  slug           String      @unique
+  storeName      String
+  contactName    String
+  phone          String
+  email          String      @unique
+  regionId       String
+  region         Region      @relation(fields: [regionId], references: [id], onDelete: Restrict)
+  // Street address; the district lives on the region relation, as everywhere else.
+  addressLine    String
+  about          String?
+  aboutTa        String?
+  photoUrl       String?
+  status         StoreStatus @default(PENDING)
+  // Evidence gathered before listing. A retail outlet needs an FSSAI licence to
+  // sell food at all, which is the shop-side equivalent of a farm's NPOP scheme.
+  govtIdLast4    String?
+  fssaiNumber    String?
+  certifier      String?
+  certificateNo  String?
+  certificateUrl String?
+  certifiedUntil DateTime?
+  verifiedAt     DateTime?
+  reviewNote     String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  @@index([status])
+  @@index([regionId])
+  @@index([storeName(ops: raw("gin_trgm_ops"))], map: "OrganicStore_storeName_trgm_idx", type: Gin)
+}
+
+// Who is writing in. The contact form asks first, because a farmer wanting to
+// list and a buyer chasing an order need different answers.
+enum ContactRole {
+  CUSTOMER
+  FARMER
+  STORE
+  OTHER
+}
+
+// Contact messages are stored rather than emailed. Mail is optional
+// configuration, and a form that silently drops what people write is worse than
+// no form; the admin area reads these.
+model ContactMessage {
+  id        String      @id @default(cuid())
+  role      ContactRole
+  name      String
+  email     String
+  phone     String?
+  message   String
+  // Cleared by an admin once it has been answered.
+  handledAt DateTime?
+  createdAt DateTime    @default(now())
+
+  @@index([handledAt, createdAt])
+  @@index([role])
 }
 
 // A buyer account. The site takes no payment, so an account exists only to keep

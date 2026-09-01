@@ -10,8 +10,21 @@ export const en = {
     sellTitle: "Sell with us",
     sellDescription:
       "List your organic produce and take enquiries yourself. We check every farm before its listings go live.",
+    storesTitle: "Organic stores",
+    storesDescription:
+      "Checked shops that stock organic produce, listed by district with the person to ask for.",
+    storeRegisterTitle: "Register your organic store",
+    storeRegisterDescription:
+      "List your shop alongside the farms we check, so buyers looking for organic produce nearby can find you.",
+    contactTitle: "Contact us",
+    contactDescription:
+      "Tell us whether you are a buyer, a farmer or an organic store, and we will answer accordingly.",
+    careersTitle: "Careers",
+    careersDescription:
+      "Field, engineering and support roles at a directory that puts farmers first.",
     productNotFound: "Product not found",
     farmNotFound: "Farm not found",
+    storeNotFound: "Store not found",
   },
 
   nav: {
@@ -19,7 +32,9 @@ export const en = {
     home: "Home",
     shop: "Shop",
     farmers: "Farmers",
+    stores: "Stores",
     sell: "Sell with us",
+    contact: "Contact",
     language: "Language",
     switchTo: "Switch to {language}",
     account: "My list",
@@ -131,6 +146,24 @@ export const en = {
     statCommission: "commission taken",
     statCall: "phone call to the farm",
     farmsHeading: "The farms behind it",
+
+    // The registered counts, at the foot of the page. Shown as they are, with no
+    // rounding up and no "+", because the whole pitch is that these are checked
+    // rather than numerous.
+    communityHeading: "Who is on Organics",
+    communityIntro:
+      "Everyone counted here has been through the same check. The numbers are exactly what is on the site today.",
+    communityFarmers: "farmers registered",
+    communityCustomers: "buyers registered",
+    communityStores: "organic stores registered",
+    communityFarmersOne: "farmer registered",
+    communityCustomersOne: "buyer registered",
+    communityStoresOne: "organic store registered",
+    communityFarmerCaption: "A farmer listed on Organics",
+    communityCustomerCaption: "A buyer who found their farm here",
+    communityJoinFarmer: "List your farm",
+    communityJoinStore: "Register your store",
+    communityJoinCustomer: "Create your list",
   },
 
   how: {
@@ -277,6 +310,143 @@ export const en = {
     checkFields: "Check: {fields}.",
   },
 
+  stores: {
+    badge: "Every shop checked",
+    heading: "Organic stores",
+    intro:
+      "Shops that stock certified organic produce. We check the licence and the certificate before a shop is listed, the same way we check a farm.",
+    introSoon:
+      "Shops that stock certified organic produce. We check the licence and the certificate before a shop is listed. Phone numbers open shortly.",
+    searchPlaceholder: "Shop name or district",
+    search: "Search",
+    verified: "Checked shop",
+    countOne: "1 store listed",
+    countMany: "{count} stores listed",
+    empty: "No stores are listed yet.",
+    emptySearch: "No store matches that search.",
+    clear: "Clear",
+    fssai: "FSSAI licence",
+    certifiedBy: "Certified by",
+    registerCta: "Run an organic shop?",
+    registerCtaBody:
+      "List it here, free. Buyers looking for organic produce in your district will find you.",
+    registerCtaButton: "Register your store",
+  },
+
+  storeApplication: {
+    badge: "For shops",
+    titleLead: "Put your shop ",
+    titleAccent: "on the map",
+    titleTail: ".",
+    intro:
+      "We list shops that stock certified organic produce. Buyers see your shop name, your district and your address, and come to you. Listing is free and we take no cut.",
+    step1Title: "Apply",
+    step1Body: "Tell us about the shop, what you stock and how it is licensed.",
+    step2Title: "We check",
+    step2Body:
+      "We go through the FSSAI licence and the organic certificate, and call you. Nothing goes live until that is done.",
+    step3Title: "Buyers find you",
+    step3Body: "Your shop appears in the directory under your district, with your address.",
+    applyHeading: "Apply to be listed",
+    storeName: "Shop name",
+    contactName: "Your name",
+    email: "Email",
+    phone: "Phone",
+    phonePlaceholder: "+91 98765 43210",
+    region: "District",
+    regionHint: "where the shop is",
+    regionPlaceholder: "Coimbatore",
+    address: "Shop address",
+    addressHint: "door number, street and area — the district goes above",
+    addressPlaceholder: "12, Bharathi Street, Ram Nagar",
+    govtId: "Aadhaar last 4 digits",
+    govtIdHint: "for the check",
+    fssai: "FSSAI licence number",
+    fssaiHint: "14 digits, printed on the licence",
+    certifier: "Organic certification scheme and body",
+    certifierHint: "NPOP, PGS-India or equivalent, if you hold one",
+    certifierPlaceholder: "NPOP / India Organic — Indocert",
+    certificateNo: "Certificate number",
+    certificate: "Certificate link",
+    optional: "optional",
+    about: "About the shop",
+    aboutHint: "at least 20 characters",
+    aboutPlaceholder:
+      "What you stock, how long the shop has been open, and which farms you buy from.",
+    aadhaarNote: "We only ask for the last four digits. Never share the full number.",
+    privacyLink: "What we do with these details",
+    submit: "Send application",
+    submitting: "Sending…",
+    doneTitle: "Application received",
+    doneBody:
+      "We check every shop before it is listed, so nothing appears in the directory yet. Expect a call on the number you gave us within a few working days.",
+    checkFields: "Check: {fields}.",
+  },
+
+  contactPage: {
+    badge: "We read every message",
+    heading: "Contact us",
+    intro: "Tell us who you are first — a buyer, a farmer and a shop each need a different answer.",
+    roleHeading: "I am a…",
+    roleCustomer: "A buyer",
+    roleCustomerHint: "A question about a listing, a farm or your account.",
+    roleFarmer: "A farmer",
+    roleFarmerHint: "Listing your produce, your application, or your farm page.",
+    roleStore: "An organic store",
+    roleStoreHint: "Listing your shop, or a question about your entry.",
+    roleOther: "Something else",
+    roleOtherHint: "Press, partnerships, or anything that fits nowhere above.",
+    name: "Your name",
+    email: "Email",
+    phone: "Phone",
+    phonePlaceholder: "+91 98765 43210",
+    optional: "optional",
+    message: "Your message",
+    messageHint: "at least 10 characters",
+    messagePlaceholder: "What can we help with?",
+    submit: "Send message",
+    submitting: "Sending…",
+    doneTitle: "Message sent",
+    doneBody: "We read everything that comes in and reply within a few working days.",
+    checkFields: "Check: {fields}.",
+    reachHeading: "Other ways to reach us",
+    emailLabel: "Email",
+    phoneLabel: "Phone",
+    addressLabel: "Address",
+    hoursLabel: "Office hours",
+    farmerShortcut: "Want to list your farm?",
+    farmerShortcutLink: "Apply to list",
+    storeShortcut: "Want to list your shop?",
+    storeShortcutLink: "Register your store",
+  },
+
+  careers: {
+    badge: "We are hiring",
+    titleLead: "Build the thing that ",
+    titleAccent: "pays farmers properly",
+    titleTail: ".",
+    intro:
+      "We are a small team in Tamil Nadu. We check organic farms, publish their numbers and take no commission — which means the work is mostly getting the details right, in the field and in the code.",
+    valuesHeading: "How we work",
+    value1Title: "Small team, whole problems",
+    value1Body:
+      "You own a piece end to end rather than a ticket queue. If it is broken, it is yours to fix.",
+    value2Title: "Tamil first",
+    value2Body:
+      "The site is Tamil before it is English. So are the farm visits, the phone calls and most of the arguments.",
+    value3Title: "Nothing we cannot stand behind",
+    value3Body:
+      "We check every farm before its listings go live. That standard applies to the product too.",
+    rolesHeading: "Open roles",
+    noRoles: "We have no advertised openings today.",
+    noRolesBody:
+      "That does not mean there is no work. If you read the pages above and thought you could do this better, write to us with what you would fix first.",
+    generalHeading: "Nothing that fits?",
+    generalBody:
+      "Send us what you have built and the part of this you would want to own. We keep good applications on file and come back to them.",
+    contactCta: "Write to us",
+  },
+
   footer: {
     copyright: "© {year} Organics. A directory of checked organic farms.",
     blurb:
@@ -285,8 +455,17 @@ export const en = {
       "We check organic farms and list them. Buyers will call the farm directly — numbers open shortly, and we never handle the order or the money.",
     browseHeading: "Browse",
     trustHeading: "Trust",
+    companyHeading: "Company",
+    followHeading: "Follow",
     howWeCheck: "How we check farms",
     privacy: "Privacy",
+    contact: "Contact us",
+    careers: "Careers",
+    joinAsStore: "Register your store",
+    // Every account is being opened as the site launches. Until a handle exists
+    // its icon is shown dimmed and unclickable rather than hidden, so the gap is
+    // visible to us instead of quietly disappearing on the day it is filled in.
+    soon: "{network} — opening soon",
   },
 
   trust: {

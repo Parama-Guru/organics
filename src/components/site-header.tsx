@@ -24,6 +24,7 @@ export function SiteHeader({
     { path: "/", label: t.nav.home },
     { path: "/products", label: t.nav.shop },
     { path: "/farmers", label: t.nav.farmers },
+    { path: "/stores", label: t.nav.stores },
   ];
 
   // Rendered twice: inline on desktop, on its own row below `sm`. Only one is

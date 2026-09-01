@@ -47,6 +47,11 @@ const configSchema = z
         // hidden entirely, rather than shipping a placeholder address.
         contact_email: z.string().default(""),
         contact_place: z.string().default(""),
+        // Shown on the contact page. Empty hides the line rather than printing a
+        // number nobody answers.
+        contact_phone: z.string().default(""),
+        contact_address: z.string().default(""),
+        contact_hours: z.string().default(""),
         // Publishing the farm's number is the whole point of the directory, but
         // it stays off until the farms have agreed to it. While false, every
         // call and WhatsApp button becomes a "details coming soon" note.
@@ -57,6 +62,19 @@ const configSchema = z
         // forgeable. Render and Vercel both put exactly one hop in front. Set 0
         // when the app is exposed directly, and the header is then ignored.
         trusted_proxy_hops: envInt(1, 0, 5),
+      })
+      .prefault({}),
+    // The accounts are being opened as the site launches. Each is rendered as a
+    // real link once its URL is set and as a dimmed, unclickable icon until
+    // then — a footer that quietly loses its Instagram icon on the day the
+    // account is created is harder to spot than one that shows it greyed out.
+    social: z
+      .object({
+        instagram: z.string().default(""),
+        facebook: z.string().default(""),
+        linkedin: z.string().default(""),
+        youtube: z.string().default(""),
+        whatsapp: z.string().default(""),
       })
       .prefault({}),
     database: z

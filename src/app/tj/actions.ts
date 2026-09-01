@@ -321,3 +321,86 @@ function revalidateProductViews(): void {
   revalidatePath("/ta/farmers");
   revalidatePath("/ta");
 }
+
+// --------------------------------------------------------------------- stores
+
+const storeDecisionSchema = z.object({
+  storeId: z.string().min(1).max(60),
+  note: z.string().max(500).optional(),
+});
+
+export async function decideStore(
+  status: "VERIFIED" | "REJECTED" | "SUSPENDED" | "PENDING",
+  formData: FormData,
+): Promise<ActionResult> {
+  // Server Actions are reachable by anyone who knows the action id, so the
+  // session is re-checked here rather than trusted from the page that rendered.
+  if (!(await isSignedIn())) return NOT_SIGNED_IN;
+
+  const parsed = storeDecisionSchema.safeParse({
+    storeId: formData.get("storeId"),
+    note: formData.get("note") || undefined,
+  });
+  if (!parsed.success) return { ok: false, message: "That request was malformed." };
+
+  const { count } = await prisma.organicStore.updateMany({
+    where: { id: parsed.data.storeId },
+    data: {
+      status,
+      // Cleared on the way out for the same reason it is on a farm: the public
+      // query gates on status, but the "checked" badge reads verifiedAt.
+      verifiedAt: status === "VERIFIED" ? new Date() : null,
+      ...(parsed.data.note ? { reviewNote: parsed.data.note } : {}),
+    },
+  });
+  if (count === 0) return { ok: false, message: "That shop no longer exists." };
+
+  revalidateStoreViews();
+  return { ok: true };
+}
+
+export async function deleteStore(formData: FormData): Promise<ActionResult> {
+  if (!(await isSignedIn())) return NOT_SIGNED_IN;
+
+  const parsed = idSchema.safeParse({ id: formData.get("storeId") });
+  if (!parsed.success) return { ok: false, message: "That request was malformed." };
+
+  // A shop owns no listings, so unlike a farm this needs no transaction.
+  await prisma.organicStore.deleteMany({ where: { id: parsed.data.id } });
+
+  revalidateStoreViews();
+  return { ok: true };
+}
+
+function revalidateStoreViews(): void {
+  revalidatePath("/tj/stores");
+  revalidatePath("/ta/stores");
+  revalidatePath("/ta");
+}
+
+// ------------------------------------------------------------------- messages
+
+/**
+ * Mark a contact message answered, or put it back in the queue.
+ *
+ * Nothing is deleted: the message is the only record that someone wrote in, and
+ * an admin closing one by mistake should be able to reopen it.
+ */
+export async function setMessageHandled(
+  handled: boolean,
+  formData: FormData,
+): Promise<ActionResult> {
+  if (!(await isSignedIn())) return NOT_SIGNED_IN;
+
+  const parsed = idSchema.safeParse({ id: formData.get("messageId") });
+  if (!parsed.success) return { ok: false, message: "That request was malformed." };
+
+  const { count } = await prisma.contactMessage.updateMany({
+    where: { id: parsed.data.id },
+    data: { handledAt: handled ? new Date() : null },
+  });
+  if (count === 0) return { ok: false, message: "That message no longer exists." };
+
+  revalidatePath("/tj/messages");
+  return { ok: true };
+}

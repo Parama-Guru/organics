@@ -3,23 +3,23 @@ import { randomBytes } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 
-import { farmerApplicationSchema } from "@/lib/farmer-application-schema";
 import { prisma } from "@/lib/prisma";
 import { regionIdForName } from "@/lib/regions";
 import { clientKeyFromHeaders, rateLimit } from "@/lib/rate-limit";
 import { isSameOrigin } from "@/lib/same-origin";
+import { storeApplicationSchema } from "@/lib/store-application-schema";
 
 export const dynamic = "force-dynamic";
 
 const MAX_BODY_BYTES = 8_192;
 
-function slugify(farmName: string): string {
-  const base = farmName
+function slugify(storeName: string): string {
+  const base = storeName
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "")
     .slice(0, 40);
-  return `${base || "farm"}-${randomBytes(3).toString("hex")}`;
+  return `${base || "store"}-${randomBytes(3).toString("hex")}`;
 }
 
 export async function POST(request: NextRequest) {
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const limit = rateLimit(`farmer-apply:${clientKeyFromHeaders(request.headers)}`, 3, 3_600_000);
+  const limit = rateLimit(`store-apply:${clientKeyFromHeaders(request.headers)}`, 3, 3_600_000);
   if (!limit.allowed) {
     return NextResponse.json(
       {
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const parsed = farmerApplicationSchema.safeParse(body);
+  const parsed = storeApplicationSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
       {
@@ -71,28 +71,30 @@ export async function POST(request: NextRequest) {
   }
 
   const input = parsed.data;
-  const existing = await prisma.farmer.findUnique({
+  const existing = await prisma.organicStore.findUnique({
     where: { email: input.email },
     select: { id: true },
   });
 
   // Never update an existing record here. An upsert would let anyone overwrite a
-  // verified farmer's phone number and intercept their orders. The response is
+  // verified shop's phone number and intercept its callers. The response is
   // identical either way so this endpoint cannot be used to test which emails
   // are already registered.
   if (!existing) {
-    await prisma.farmer.create({
+    await prisma.organicStore.create({
       data: {
-        slug: slugify(input.farmName),
-        farmName: input.farmName,
+        slug: slugify(input.storeName),
+        storeName: input.storeName,
         contactName: input.contactName,
         email: input.email,
         phone: input.phone,
         regionId: await regionIdForName(input.region),
+        addressLine: input.addressLine,
         about: input.about,
         govtIdLast4: input.govtIdLast4,
-        certifier: input.certifier,
-        certificateNo: input.certificateNo,
+        fssaiNumber: input.fssaiNumber,
+        certifier: input.certifier || null,
+        certificateNo: input.certificateNo || null,
         certificateUrl: input.certificateUrl || null,
         // Status is never taken from the request; an admin promotes to VERIFIED.
         status: "PENDING",
