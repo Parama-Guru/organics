@@ -76,10 +76,22 @@ export default async function AdminLayout({ children }: LayoutProps<"/tj">) {
                   Messages
                 </Link>
                 <Link
+                  href="/tj/enquiries"
+                  className="inline-flex min-h-11 items-center rounded-lg px-2 text-bark-600 hover:bg-bark-50 hover:text-bark-900"
+                >
+                  Enquiries
+                </Link>
+                <Link
                   href="/tj/export"
                   className="inline-flex min-h-11 items-center rounded-lg px-2 text-bark-600 hover:bg-bark-50 hover:text-bark-900"
                 >
                   Export
+                </Link>
+                <Link
+                  href="/tj/sponsored"
+                  className="inline-flex min-h-11 items-center rounded-lg px-2 text-bark-600 hover:bg-bark-50 hover:text-bark-900"
+                >
+                  Sponsored
                 </Link>
                 <Link
                   href="/tj/farmers/new"

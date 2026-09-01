@@ -82,9 +82,9 @@ export function NewFarmerForm() {
       />
       <Field
         label="Certificate valid until"
-        hint="optional"
         name="certifiedUntil"
         type="date"
+        required
       />
       <Field
         label="Organic certificate link"

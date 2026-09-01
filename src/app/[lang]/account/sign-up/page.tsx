@@ -2,8 +2,10 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 import { AccountForm } from "@/components/account-form";
-import { GlassPanel } from "@/components/glass-panel";
+import { AccountShell } from "@/components/account-shell";
+import { GoogleSignIn } from "@/components/google-sign-in";
 import { accountsEnabled, getCustomer } from "@/lib/customer-auth";
+import { googleOAuthEnabled } from "@/lib/google-auth";
 import { localePath, safeNext } from "@/lib/i18n/config";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
 
@@ -23,10 +25,17 @@ export default async function SignUpPage({ searchParams }: PageProps<"/[lang]/ac
   const next = safeNext(typeof params.next === "string" ? params.next : undefined, locale);
 
   return (
-    <div className="mx-auto max-w-md px-4 py-14 sm:px-6">
-      <GlassPanel className="rounded-3xl p-7 sm:p-8">
-        <h1 className="font-display text-3xl">{t.account.signUpTitle}</h1>
-        <p className="mt-2 leading-relaxed text-ink">{t.account.signUpIntro}</p>
+    <AccountShell t={t} title={t.account.signUpTitle} intro={t.account.signUpIntro}>
+        {googleOAuthEnabled() ? (
+          <div className="mt-6">
+            <GoogleSignIn
+              locale={locale}
+              next={next ?? localePath(locale, "/account")}
+              label={t.account.continueGoogle}
+            />
+            <p className="my-4 text-center text-sm text-bark-600">{t.account.orPassword}</p>
+          </div>
+        ) : null}
         <AccountForm mode="signUp" next={next ?? undefined} />
         <p className="mt-6 border-t border-bark-200/60 pt-4 text-sm leading-relaxed text-bark-600">
           {t.account.privacyNote}{" "}
@@ -37,7 +46,6 @@ export default async function SignUpPage({ searchParams }: PageProps<"/[lang]/ac
             {t.footer.privacy}
           </Link>
         </p>
-      </GlassPanel>
-    </div>
+    </AccountShell>
   );
 }

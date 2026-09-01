@@ -8,10 +8,15 @@ import { prisma } from "./prisma";
 // A listing is public only if its farm has passed verification. Every product has
 // a farm, so there is no first-party escape hatch: a pending or suspended farm
 // cannot get its product pages indexed. Applied to EVERY public read.
-export const publicProductWhere = {
-  isActive: true,
-  farmer: { status: "VERIFIED" as const },
-} satisfies Prisma.ProductWhereInput;
+export function publicProductWhere(now = new Date()): Prisma.ProductWhereInput {
+  return {
+    isActive: true,
+    farmer: {
+      status: "VERIFIED",
+      certifiedUntil: { gte: now },
+    },
+  };
+}
 
 export const productSummarySelect = {
   id: true,
@@ -29,6 +34,7 @@ export const productSummarySelect = {
   category: { select: { name: true, nameTa: true, slug: true } },
   farmer: {
     select: {
+      id: true,
       slug: true,
       farmName: true,
       verifiedAt: true,
@@ -45,6 +51,7 @@ const productDetailSelect = {
   },
   farmer: {
     select: {
+      id: true,
       slug: true,
       farmName: true,
       contactName: true,
@@ -71,7 +78,7 @@ export type ProductDetail = Prisma.ProductGetPayload<{
 
 export function getFeaturedProducts(limit = 4) {
   return prisma.product.findMany({
-    where: { ...publicProductWhere, isFeatured: true },
+    where: { ...publicProductWhere(), isFeatured: true },
     select: productSummarySelect,
     orderBy: { name: "asc" },
     take: limit,
@@ -81,7 +88,7 @@ export function getFeaturedProducts(limit = 4) {
 /** Other listings from the same farm, so a product page is not a dead end. */
 export function getMoreFromFarm(farmerSlug: string, excludeSlug: string, limit = 4) {
   return prisma.product.findMany({
-    where: { ...publicProductWhere, farmer: { slug: farmerSlug }, slug: { not: excludeSlug } },
+    where: { ...publicProductWhere(), farmer: { slug: farmerSlug }, slug: { not: excludeSlug } },
     select: productSummarySelect,
     orderBy: { name: "asc" },
     take: limit,
@@ -165,7 +172,7 @@ export async function getProducts(options: {
 
   return prisma.product.findMany({
     where: {
-      ...publicProductWhere,
+      ...publicProductWhere(),
       ...(categorySlug ? { category: { slug: categorySlug } } : {}),
       ...(region ? { region: { slug: region } } : {}),
       ...(searchIds ? { id: { in: searchIds } } : {}),
@@ -182,7 +189,7 @@ export const getRegions = unstable_cache(
   async () =>
     prisma.region.findMany({
       // Only districts that actually have something listed.
-      where: { products: { some: publicProductWhere } },
+      where: { products: { some: publicProductWhere() } },
       select: { slug: true, name: true, nameTa: true },
       // Ordered by the Tamil name, because that is what the chips display. By
       // English name the row read குடகு, ஈரோடு, இமாசலம், நீலகிரி — sorted by a
@@ -210,7 +217,7 @@ export function decodeSlug(raw: string): string {
 
 export function getProductBySlug(slug: string) {
   return prisma.product.findFirst({
-    where: { ...publicProductWhere, slug: decodeSlug(slug) },
+    where: { ...publicProductWhere(), slug: decodeSlug(slug) },
     select: productDetailSelect,
   });
 }
@@ -228,7 +235,7 @@ export const getCategories = unstable_cache(
         // One representative listing, so the category tiles show produce rather
         // than six identically shaped boxes of text.
         products: {
-          where: publicProductWhere,
+          where: publicProductWhere(),
           select: { imageUrl: true },
           orderBy: { name: "asc" },
           take: 1,

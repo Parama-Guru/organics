@@ -2,13 +2,16 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ProductCard } from "@/components/product-card";
+import { FarmerEnquiryForm } from "@/components/farmer-enquiry-form";
 import { FarmerContact, dialNumber, showFarmerPhone } from "@/components/farmer-contact";
+import { MemberGate } from "@/components/member-gate";
 import { ProductGallery } from "@/components/product-gallery";
 import { SaveButton } from "@/components/save-button";
 import { StickyCallBar } from "@/components/sticky-call-bar";
 import { Button } from "@/components/ui/button";
 import { ArrowLeftIcon, BookmarkIcon, LeafMark, MapPinIcon, PhoneIcon, ShieldCheckIcon } from "@/components/ui/icons";
 import { accountsEnabled, getCustomer } from "@/lib/customer-auth";
+import { getCustomerAccess } from "@/lib/customer-access";
 import { format, localePath } from "@/lib/i18n/config";
 import { localised, regionLabel, unitLabel } from "@/lib/i18n/content";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
@@ -49,10 +52,13 @@ export default async function ProductPage({ params }: PageProps<"/[lang]/product
   const accountsOn = accountsEnabled();
   const customer = accountsOn ? await getCustomer() : null;
   const phoneShown = showFarmerPhone();
-  const [more, saved] = await Promise.all([
+  const returnPath = localePath(locale, `/products/${product.slug}`);
+  const [more, saved, access] = await Promise.all([
     getMoreFromFarm(product.farmer.slug, product.slug, 4),
     customer ? isProductSaved(customer.id, product.id) : Promise.resolve(false),
+    customer ? getCustomerAccess(customer.id) : Promise.resolve(null),
   ]);
+  const sellerUnlocked = Boolean(customer && access?.allowed);
 
   return (
     <div className="mx-auto max-w-5xl px-4 pb-24 pt-8 sm:px-6 sm:pb-10">
@@ -118,7 +124,7 @@ export default async function ProductPage({ params }: PageProps<"/[lang]/product
           {/* The point of the site is the call, so the number is the button rather
               than an anchor that scrolls to one. */}
           <div className="mt-7 flex flex-wrap gap-3">
-            {showFarmerPhone() ? (
+            {sellerUnlocked && phoneShown ? (
               <Button as="a" href={`tel:${dialNumber(product.farmer.phone)}`} size="lg">
                 <PhoneIcon /> {product.farmer.phone}
               </Button>
@@ -126,7 +132,7 @@ export default async function ProductPage({ params }: PageProps<"/[lang]/product
             <Button
               as="a"
               href="#contact"
-              variant={showFarmerPhone() ? "secondary" : "primary"}
+              variant={sellerUnlocked && phoneShown ? "secondary" : "primary"}
               size="lg"
             >
               {format(t.product.aboutFarm, { farm: product.farmer.farmName })}
@@ -166,7 +172,21 @@ export default async function ProductPage({ params }: PageProps<"/[lang]/product
         </div>
       </div>
 
-      <FarmerContact farmer={product.farmer} />
+      {sellerUnlocked ? (
+        <>
+          <FarmerContact farmer={product.farmer} />
+          <FarmerEnquiryForm
+            recipientType="FARMER"
+            recipientId={product.farmer.id}
+            recipientName={product.farmer.farmName}
+            canShareEmail={Boolean(customer?.emailVerifiedAt)}
+          />
+        </>
+      ) : (
+        <div id="contact" className="scroll-mt-24">
+          <MemberGate locale={locale} t={t} returnPath={returnPath} />
+        </div>
+      )}
 
       {more.length > 0 ? (
         <section className="mt-14">
@@ -182,7 +202,7 @@ export default async function ProductPage({ params }: PageProps<"/[lang]/product
         </section>
       ) : null}
 
-      <StickyCallBar phone={product.farmer.phone} />
+      {sellerUnlocked ? <StickyCallBar phone={product.farmer.phone} /> : null}
     </div>
   );
 }

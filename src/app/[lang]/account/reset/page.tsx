@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { GlassPanel } from "@/components/glass-panel";
+import { AccountShell } from "@/components/account-shell";
 import { ResetForm } from "@/components/reset-forms";
 import { accountsEnabled } from "@/lib/customer-auth";
 import { resetAvailable } from "@/lib/password-reset";
@@ -24,9 +24,7 @@ export default async function ResetPasswordPage({
   const token = typeof params.token === "string" ? params.token : "";
 
   return (
-    <div className="mx-auto max-w-md px-4 py-14 sm:px-6">
-      <GlassPanel className="rounded-3xl p-7 sm:p-8">
-        <h1 className="font-display text-3xl">{t.account.resetTitle}</h1>
+    <AccountShell t={t} title={t.account.resetTitle} intro={token ? t.account.passwordHint : t.account.resetExpired}>
         {token ? (
           <ResetForm token={token} />
         ) : (
@@ -40,7 +38,6 @@ export default async function ResetPasswordPage({
             </Link>
           </>
         )}
-      </GlassPanel>
-    </div>
+    </AccountShell>
   );
 }

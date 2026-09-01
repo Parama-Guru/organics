@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { dialNumber, showFarmerPhone, whatsappNumber } from "@/components/farmer-contact";
+import { FarmerEnquiryForm } from "@/components/farmer-enquiry-form";
 import { JsonLd } from "@/components/json-ld";
 import { SaveButton } from "@/components/save-button";
 import { ProductCard } from "@/components/product-card";
@@ -11,12 +12,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowLeftIcon, ArrowRightIcon, MapPinIcon, PhoneIcon, ShieldCheckIcon, WhatsAppIcon } from "@/components/ui/icons";
 import { getFarmerBySlug } from "@/lib/farmers";
-import { accountsEnabled, getCustomer } from "@/lib/customer-auth";
 import { isFarmerSaved } from "@/lib/saved";
 import { format, localePath } from "@/lib/i18n/config";
 import { checkedOn } from "@/lib/i18n/dates";
 import { localisedOrNull, regionLabel } from "@/lib/i18n/content";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
+import { requireMemberAccess } from "@/lib/member-access";
+import { isFarmerSponsored } from "@/lib/sponsorships";
 
 export const dynamic = "force-dynamic";
 
@@ -27,8 +29,9 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/farmers/[s
   if (!result) return { title: t.meta.farmNotFound };
 
   return {
-    title: result.farmer.farmName,
-    description: result.farmer.about ?? result.farmer.farmName,
+    title: t.account.detailGateTitle,
+    description: t.account.detailGateBody,
+    robots: { index: false, follow: false },
   };
 }
 
@@ -43,9 +46,12 @@ export default async function FarmerPage({ params }: PageProps<"/[lang]/farmers/
   if (!result) notFound();
 
   const { farmer, products } = result;
-  const accountsOn = accountsEnabled();
-  const customer = accountsOn ? await getCustomer() : null;
-  const saved = customer ? await isFarmerSaved(customer.id, farmer.id) : false;
+  const returnPath = localePath(locale, `/farmers/${farmer.slug}`);
+  const { customer } = await requireMemberAccess(locale, returnPath);
+  const [saved, sponsored] = await Promise.all([
+    isFarmerSaved(customer.id, farmer.id),
+    isFarmerSponsored(farmer.id),
+  ]);
 
   return (
     <div className="mx-auto max-w-6xl px-4 pb-24 pt-8 sm:px-6 sm:pb-10">
@@ -93,6 +99,7 @@ export default async function FarmerPage({ params }: PageProps<"/[lang]/farmers/
 
         <div className="p-6 sm:p-8">
             <div className="flex flex-wrap items-center gap-2">
+              {sponsored ? <Badge tone="marigold">{t.farmers.sponsored}</Badge> : null}
               <Badge tone="leaf">
                 <ShieldCheckIcon /> {t.farmers.verified}
               </Badge>
@@ -185,24 +192,7 @@ export default async function FarmerPage({ params }: PageProps<"/[lang]/farmers/
                   <Badge tone="neutral">{t.contact.callWindow}</Badge>
                 </>
               ) : null}
-              {accountsOn ? (
-                customer ? (
-                  <SaveButton kind="farmer" id={farmer.id} initialSaved={saved} size="lg" />
-                ) : (
-                  // Without the return path, signing in lands on the account page
-                  // and the farm they meant to save is gone.
-                  <Button
-                    as={Link}
-                    href={`${localePath(locale, "/account/sign-in")}?next=${encodeURIComponent(
-                      localePath(locale, `/farmers/${farmer.slug}`),
-                    )}`}
-                    variant="ghost"
-                    size="lg"
-                  >
-                    {t.account.signInToSave}
-                  </Button>
-                )
-              ) : null}
+              <SaveButton kind="farmer" id={farmer.id} initialSaved={saved} size="lg" />
             </div>
 
             {showFarmerPhone() ? null : (
@@ -213,6 +203,13 @@ export default async function FarmerPage({ params }: PageProps<"/[lang]/farmers/
             )}
         </div>
       </header>
+
+      <FarmerEnquiryForm
+        recipientType="FARMER"
+        recipientId={farmer.id}
+        recipientName={farmer.farmName}
+        canShareEmail={customer.emailVerifiedAt !== null}
+      />
 
       <h2 className="mt-12 font-display text-2xl sm:text-3xl">
         {t.farmers.fromThisFarm}

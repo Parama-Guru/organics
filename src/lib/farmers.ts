@@ -3,7 +3,7 @@ import type { Prisma } from "@prisma/client";
 import { prisma } from "./prisma";
 import { publicProductWhere, productSummarySelect, decodeSlug } from "./products";
 
-const farmerCardSelect = {
+const farmerCardSelect = () => ({
   id: true,
   slug: true,
   farmName: true,
@@ -18,16 +18,23 @@ const farmerCardSelect = {
   certificateNo: true,
   certificateUrl: true,
   certifiedUntil: true,
-  _count: { select: { products: { where: publicProductWhere } } },
-} satisfies Prisma.FarmerSelect;
+  _count: { select: { products: { where: publicProductWhere() } } },
+}) satisfies Prisma.FarmerSelect;
 
-export type FarmerCard = Prisma.FarmerGetPayload<{ select: typeof farmerCardSelect }>;
+export type FarmerCard = Prisma.FarmerGetPayload<{
+  select: ReturnType<typeof farmerCardSelect>;
+}>;
 
-// Only VERIFIED farmers are ever listed; PENDING/REJECTED/SUSPENDED stay invisible.
+const publicFarmerWhere = (now = new Date()): Prisma.FarmerWhereInput => ({
+  status: "VERIFIED",
+  certifiedUntil: { gte: now },
+});
+
+// Only VERIFIED farms with a current certificate are ever listed.
 export function getVerifiedFarmers() {
   return prisma.farmer.findMany({
-    where: { status: "VERIFIED" },
-    select: farmerCardSelect,
+    where: publicFarmerWhere(),
+    select: farmerCardSelect(),
     orderBy: { farmName: "asc" },
   });
 }
@@ -37,14 +44,14 @@ export async function getFarmerBySlug(rawSlug: string) {
   const slug = decodeSlug(rawSlug);
 
   const farmer = await prisma.farmer.findFirst({
-    where: { slug, status: "VERIFIED" },
-    select: farmerCardSelect,
+    where: { slug, ...publicFarmerWhere() },
+    select: farmerCardSelect(),
   });
 
   if (!farmer) return null;
 
   const products = await prisma.product.findMany({
-    where: { ...publicProductWhere, farmer: { slug } },
+    where: { ...publicProductWhere(), farmer: { slug } },
     select: productSummarySelect,
     orderBy: [{ category: { name: "asc" } }, { name: "asc" }],
   });

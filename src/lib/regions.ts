@@ -41,7 +41,12 @@ async function uniqueRegionSlug(name: string): Promise<string> {
 export async function regionIdForName(name: string): Promise<string> {
   const trimmed = name.trim();
   const existing = await prisma.region.findFirst({
-    where: { name: { equals: trimmed, mode: "insensitive" } },
+    where: {
+      OR: [
+        { name: { equals: trimmed, mode: "insensitive" } },
+        { nameTa: { equals: trimmed, mode: "insensitive" } },
+      ],
+    },
     select: { id: true },
   });
   if (existing) return existing.id;
@@ -73,7 +78,12 @@ export async function regionIdForCustomer(name: string | undefined): Promise<str
   if (!trimmed) return null;
 
   const match = await prisma.region.findFirst({
-    where: { name: { equals: trimmed, mode: "insensitive" } },
+    where: {
+      OR: [
+        { name: { equals: trimmed, mode: "insensitive" } },
+        { nameTa: { equals: trimmed, mode: "insensitive" } },
+      ],
+    },
     select: { id: true },
   });
   return match?.id ?? null;

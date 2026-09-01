@@ -27,20 +27,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   });
 
-  const [products, farmers, stores] = await Promise.all([
-    prisma.product.findMany({
-      where: publicProductWhere,
-      select: { slug: true, updatedAt: true },
-    }),
-    prisma.farmer.findMany({
-      where: { status: "VERIFIED" },
-      select: { slug: true, updatedAt: true },
-    }),
-    prisma.organicStore.findMany({
-      where: { status: "VERIFIED" },
-      select: { slug: true, updatedAt: true },
-    }),
-  ]);
+  const products = await prisma.product.findMany({
+    where: publicProductWhere(),
+    select: { slug: true, updatedAt: true },
+  });
 
   return [
     entry("/", { changeFrequency: "daily", priority: 1 }),
@@ -58,20 +48,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         lastModified: p.updatedAt,
         changeFrequency: "weekly",
         priority: 0.8,
-      }),
-    ),
-    ...farmers.map((f) =>
-      entry(`/farmers/${f.slug}`, {
-        lastModified: f.updatedAt,
-        changeFrequency: "weekly",
-        priority: 0.8,
-      }),
-    ),
-    ...stores.map((s) =>
-      entry(`/stores/${s.slug}`, {
-        lastModified: s.updatedAt,
-        changeFrequency: "weekly",
-        priority: 0.7,
       }),
     ),
   ];

@@ -25,7 +25,7 @@ function remember(locale: Locale) {
 export function LanguageToggle() {
   const { locale, t } = useI18n();
   const pathname = usePathname();
-  const query = useSearchParams().toString();
+  const searchParams = useSearchParams();
 
   // Nothing to choose between while only Tamil is served.
   if (ENABLED_LOCALES.length < 2) return null;
@@ -38,10 +38,16 @@ export function LanguageToggle() {
     >
       {ENABLED_LOCALES.map((target) => {
         const active = target === locale;
+        const query = new URLSearchParams(searchParams);
+        const next = query.get("next");
+        if (next?.startsWith(`/${locale}/`) || next === `/${locale}`) {
+          query.set("next", withLocale(next, target));
+        }
+        const suffix = query.size > 0 ? `?${query}` : "";
         return (
           <Link
             key={target}
-            href={`${withLocale(pathname, target)}${query ? `?${query}` : ""}`}
+            href={`${withLocale(pathname, target)}${suffix}`}
             hrefLang={target}
             aria-current={active ? "true" : undefined}
             aria-label={
@@ -50,7 +56,7 @@ export function LanguageToggle() {
                 : format(t.nav.switchTo, { language: LOCALE_NAMES[target] })
             }
             onClick={() => remember(target)}
-            className={`flex min-h-11 min-w-11 items-center justifyw-11 items-center justify-center rounded-full px-2.5 text-xs font-semibold transition-colors ${
+            className={`flex min-h-11 min-w-11 items-center justify-center rounded-full px-2.5 text-xs font-semibold transition-colors ${
               active
                 ? "bg-bark-900 text-bark-50"
                 : "text-bark-600 hover:bg-bark-900/5 hover:text-bark-900"

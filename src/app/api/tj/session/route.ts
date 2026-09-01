@@ -5,6 +5,8 @@ import { loadConfig } from "@conf/config";
 import { ADMIN_COOKIE, isAdminEnabled, issueSession } from "@/lib/admin-auth";
 import { verifyPassphrase } from "@/lib/admin-hash";
 import { clientKeyFromHeaders, rateLimit } from "@/lib/rate-limit";
+import { readBoundedJson } from "@/lib/request-body";
+import { isSameOrigin } from "@/lib/same-origin";
 import { consumeRateLimit } from "@/lib/session-store";
 
 export const dynamic = "force-dynamic";
@@ -17,8 +19,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ code: "not_found" }, { status: 404 });
   }
 
-  const origin = request.headers.get("origin");
-  if (origin && new URL(origin).host !== request.headers.get("host")) {
+  if (!isSameOrigin(request)) {
     return NextResponse.json({ code: "forbidden_origin" }, { status: 403 });
   }
 
@@ -40,8 +41,9 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const parsed = bodySchema.safeParse(await request.json().catch(() => null));
-  if (!parsed.success) {
+  const body = await readBoundedJson(request, 1_024);
+  const parsed = body.ok ? bodySchema.safeParse(body.value) : null;
+  if (!parsed?.success) {
     return NextResponse.json({ code: "invalid_fields" }, { status: 400 });
   }
 

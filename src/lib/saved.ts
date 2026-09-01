@@ -10,7 +10,7 @@ import { productSummarySelect, publicProductWhere } from "./products";
  */
 export async function getSavedProducts(customerId: string) {
   const rows = await prisma.savedProduct.findMany({
-    where: { customerId, product: publicProductWhere },
+    where: { customerId, product: publicProductWhere() },
     select: { product: { select: productSummarySelect } },
     orderBy: { createdAt: "desc" },
     take: 60,
@@ -21,7 +21,10 @@ export async function getSavedProducts(customerId: string) {
 
 export async function getSavedFarmers(customerId: string) {
   const rows = await prisma.savedFarmer.findMany({
-    where: { customerId, farmer: { status: "VERIFIED" } },
+    where: {
+      customerId,
+      farmer: { status: "VERIFIED", certifiedUntil: { gte: new Date() } },
+    },
     select: {
       farmer: {
         select: {
@@ -31,7 +34,7 @@ export async function getSavedFarmers(customerId: string) {
           region: true,
           phone: true,
           photoUrl: true,
-          _count: { select: { products: { where: publicProductWhere } } },
+          _count: { select: { products: { where: publicProductWhere() } } },
         },
       },
     },

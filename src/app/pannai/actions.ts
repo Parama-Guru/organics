@@ -86,7 +86,13 @@ export async function farmerSignInAction(
 
   const farmer = await prisma.farmer.findUnique({
     where: { email },
-    select: { id: true, passwordHash: true, status: true, portalEnabledAt: true },
+    select: {
+      id: true,
+      passwordHash: true,
+      status: true,
+      portalEnabledAt: true,
+      portalSessionVersion: true,
+    },
   });
 
   // One message for every failure, so the form cannot be used to work out which
@@ -103,7 +109,7 @@ export async function farmerSignInAction(
     where: { id: farmer.id },
     data: { lastSignInAt: new Date() },
   });
-  await startFarmerSession(farmer.id);
+  await startFarmerSession(farmer.id, farmer.portalSessionVersion);
   redirect(FARMER_PORTAL);
 }
 
@@ -130,7 +136,7 @@ export async function acceptInviteAction(
   const password = String(form.get("password") ?? "");
   if (password.length < 10) return { error: "invalid", fields: ["password"] };
 
-  // Consumed whether or not it matches, so a wrong guess burns the attempt.
+  // Atomically consumed only when the supplied token exactly matches.
   const valid = await consumeFarmerInvite(farmId, token);
   if (!valid) return { error: "inviteExpired" };
 
@@ -142,12 +148,17 @@ export async function acceptInviteAction(
   });
   if (!farmer) return { error: "inviteExpired" };
 
-  await prisma.farmer.update({
+  const updated = await prisma.farmer.update({
     where: { id: farmer.id },
-    data: { passwordHash: await hashPassword(password), portalEnabledAt: new Date() },
+    data: {
+      passwordHash: await hashPassword(password),
+      portalEnabledAt: new Date(),
+      portalSessionVersion: { increment: 1 },
+    },
+    select: { portalSessionVersion: true },
   });
 
-  await startFarmerSession(farmer.id);
+  await startFarmerSession(farmer.id, updated.portalSessionVersion);
   redirect(FARMER_PORTAL);
 }
 

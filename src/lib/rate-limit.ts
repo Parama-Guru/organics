@@ -1,3 +1,5 @@
+import { loadConfig } from "@conf/config";
+
 type Bucket = { count: number; resetAt: number };
 
 const buckets = new Map<string, Bucket>();
@@ -49,20 +51,19 @@ export function rateLimit(key: string, limit: number, windowMs: number): RateLim
  * by sending a header, which is exactly what happened here: six failed admin
  * sign-ins, then `X-Forwarded-For: 203.0.113.9` and the limit was gone.
  *
- * So: read from the right. TRUSTED_PROXY_HOPS is how many proxies of our own
- * sit in front of the app; 0 means the right-most entry was written by the
- * proxy that terminated the client connection.
+ * So: read from the right. trusted_proxy_hops is how many proxy entries we
+ * deliberately skip from that side. A value of 0 means direct mode and ignores
+ * the forwarded header entirely.
  */
-const TRUSTED_PROXY_HOPS = 0;
-
 export function clientKeyFromHeaders(headers: Headers): string {
+  const trustedProxyHops = loadConfig().app.trusted_proxy_hops;
   const forwarded = headers.get("x-forwarded-for");
-  if (forwarded) {
+  if (forwarded && trustedProxyHops > 0) {
     const hops = forwarded
       .split(",")
       .map((hop) => hop.trim())
       .filter(Boolean);
-    const trusted = hops[hops.length - 1 - TRUSTED_PROXY_HOPS] ?? hops[hops.length - 1];
+    const trusted = hops[hops.length - trustedProxyHops] ?? hops[0];
     if (trusted) return trusted;
   }
 

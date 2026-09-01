@@ -7,7 +7,13 @@ import { cookies } from "next/headers";
 import { loadConfig } from "@conf/config";
 import { prisma } from "./prisma";
 import { getRedis, redisKey } from "./redis";
-import { dropSession, newSessionId, putSession, readSession } from "./session-store";
+import {
+  dropSession,
+  dropSessionStrict,
+  newSessionId,
+  putSession,
+  readSession,
+} from "./session-store";
 
 export const FARMER_COOKIE = "organics_farmer";
 export const FARMER_PORTAL = "/pannai";
@@ -50,10 +56,17 @@ export type SignedInFarmer = {
   email: string;
 };
 
-export async function startFarmerSession(farmerId: string): Promise<void> {
+export async function startFarmerSession(
+  farmerId: string,
+  portalSessionVersion: number,
+): Promise<void> {
   const { app } = loadConfig();
   const id = newSessionId();
-  await putSession(id, { customerId: farmerId, createdAt: Date.now() }, SESSION_TTL_SECONDS);
+  await putSession(
+    id,
+    { customerId: farmerId, createdAt: Date.now(), sessionVersion: portalSessionVersion },
+    SESSION_TTL_SECONDS,
+  );
 
   const jar = await cookies();
   jar.set(FARMER_COOKIE, `${id}.${sign(id)}`, {
@@ -69,7 +82,7 @@ export async function startFarmerSession(farmerId: string): Promise<void> {
 export async function endFarmerSession(): Promise<void> {
   const jar = await cookies();
   const id = unsign(jar.get(FARMER_COOKIE)?.value);
-  if (id) await dropSession(id);
+  if (id) await dropSessionStrict(id);
   jar.delete({ name: FARMER_COOKIE, path: FARMER_PORTAL });
 }
 
@@ -97,10 +110,23 @@ export async function getFarmer(): Promise<SignedInFarmer | null> {
       portalEnabledAt: { not: null },
       passwordHash: { not: null },
     },
-    select: { id: true, slug: true, farmName: true, contactName: true, email: true },
+    select: {
+      id: true,
+      slug: true,
+      farmName: true,
+      contactName: true,
+      email: true,
+      portalSessionVersion: true,
+    },
   });
 
-  return farmer;
+  if (!farmer || record.sessionVersion !== farmer.portalSessionVersion) {
+    await dropSession(id);
+    return null;
+  }
+  const { portalSessionVersion, ...safe } = farmer;
+  void portalSessionVersion;
+  return safe;
 }
 
 // ---- one-time invite, so a password is never chosen by anyone but the farmer --
@@ -142,7 +168,7 @@ export async function issueFarmerInvite(farmerId: string): Promise<string> {
 
 export async function cancelFarmerInvite(farmerId: string): Promise<void> {
   const redis = getRedis();
-  if (redis) await redis.del(inviteKey(farmerId)).catch(() => 0);
+  if (redis) await redis.del(inviteKey(farmerId));
   else inviteMemory.delete(inviteKey(farmerId));
 }
 
@@ -155,6 +181,26 @@ export async function inviteIsOutstanding(farmerId: string): Promise<boolean> {
 
   const entry = inviteMemory.get(key);
   return Boolean(entry && entry.expiresAt > Date.now());
+}
+
+/** Validate the exact token without consuming it; used before showing the form. */
+export async function farmerInviteMatches(
+  farmerId: string,
+  token: string,
+): Promise<boolean> {
+  const key = inviteKey(farmerId);
+  const redis = getRedis();
+  let stored: string | null | undefined;
+  if (redis) {
+    stored = await redis.get(key);
+  } else {
+    const entry = inviteMemory.get(key);
+    stored = entry && entry.expiresAt > Date.now() ? entry.tokenHash : null;
+  }
+  if (!stored) return false;
+  const provided = Buffer.from(digest(token));
+  const expected = Buffer.from(stored);
+  return provided.length === expected.length && timingSafeEqual(provided, expected);
 }
 
 /** The same question for a page full of farms, in one round trip. */
@@ -181,7 +227,7 @@ export async function inviteStates(farmerIds: string[]): Promise<Set<string>> {
   return live;
 }
 
-/** Single use: consumed on read, whether or not the caller succeeds after. */
+/** Single use: atomically consumes only the exact matching token. */
 export async function consumeFarmerInvite(
   farmerId: string,
   token: string,
@@ -191,12 +237,16 @@ export async function consumeFarmerInvite(
 
   let stored: string | null | undefined;
   if (redis) {
-    stored = await redis.get(key).catch(() => null);
-    if (stored) await redis.del(key).catch(() => 0);
+    stored = (await redis.eval(
+      "local v=redis.call('GET',KEYS[1]); if v and v==ARGV[1] then redis.call('DEL',KEYS[1]); return v; end; return nil",
+      1,
+      key,
+      digest(token),
+    )) as string | null;
   } else {
     const entry = inviteMemory.get(key);
-    inviteMemory.delete(key);
     stored = entry && entry.expiresAt > Date.now() ? entry.tokenHash : null;
+    if (stored === digest(token)) inviteMemory.delete(key);
   }
 
   if (!stored) return false;

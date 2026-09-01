@@ -3,9 +3,9 @@
 Updated as work lands. `[x]` = done and verified, `[ ]` = not done, `[~]` = done
 but blocked on something outside the code.
 
-**Score: 41 done · 7 blocked · 71 open**
+**Score: 89 done · 8 blocked · 32 open**
 
-Last updated: 2026-09-01 · customer access, billing and sponsorship phase planned
+Last updated: 2026-09-01 · full customer, seller, billing-safe and sponsorship phase verified
 
 ---
 
@@ -36,6 +36,10 @@ dashboard.
       application** and place `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in
       local config / Render Environment. Never paste the secret into chat or
       commit it. Redirect paths are listed below.
+- [ ] **The supplied Google Web credential does not register an Organics
+      callback.** Its redirects are for `127.0.0.1:5000` and two other Render
+      services. Add `http://localhost:3000/api/auth/google/callback` and the real
+      Organics Render/domain callbacks before Google can complete sign-in.
 - [ ] **Rotate the pasted AMCS `jwt_secret` if that other application still
       uses it.** It was posted in chat and is compromised. It will not be copied
       into Organics; this app keeps its existing Redis-backed customer session.
@@ -43,10 +47,10 @@ dashboard.
       Resend SMTP for the first launch. Verify `ossil.in`, then set
       `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` and `SMTP_FROM` in
       Render. Never paste the password/API key into chat.
-- [ ] **A payment gateway is required before paid access can charge anyone.**
-      Recommend Razorpay Subscriptions for INR recurring billing. Until its
-      keys and plan IDs exist, billing will remain disabled and customers will
-      retain access rather than being trapped behind an unpayable screen.
+- [ ] **Razorpay account configuration and provider-side testing are required
+      before paid access can charge anyone.** The dormant integration is coded,
+      but keys, plan IDs and a signed webhook test do not exist yet. Billing
+      remains disabled, so customers retain free access instead of being trapped.
 
 ## Open — decisions needed from you
 
@@ -54,25 +58,19 @@ dashboard.
       store lists stay public. Farm and organic-store detail pages require a
       customer account. During the 14-day trial or an active subscription they
       can see full details and contact actions.
-- [ ] **[DOUBT] Product detail scope.** Recommendation: leave product detail
-      pages public and gate only the farmer/store identity and contact action.
-      Reason: products are what search engines and shared links discover; hiding
-      them destroys most acquisition while adding little subscription value.
-- [ ] **[DOUBT] What happens after trial while billing is disabled?**
-      Recommendation: fail open — keep access free until Razorpay is configured.
-      Reason: showing a payment wall with no working payment route is a dead end.
-- [ ] **[DOUBT] Existing password account + same Google email.** Recommendation:
-      link automatically only when Google's `email_verified` is true and the
-      normalized email exactly matches. Reason: one customer record, no duplicate
-      shortlist; the verified Google identity is strong enough for this link.
-- [ ] **[DOUBT] User-to-farmer email privacy.** Recommendation: show the buyer a
-      clear checkbox before putting their account email in `Reply-To`. Without
-      consent, replies stay inside the Organics relay. Reason: neither party's
-      private email should become public by accident.
-- [ ] **[DOUBT] Sponsored placement ordering.** Recommendation: active sponsored
-      entries first, then the existing relevance/alphabetical order; every one
-      carries an unmistakable “Sponsored / விளம்பரம்” label. Reason: paid
-      placement must never masquerade as verification quality.
+- [x] **Product detail scope resolved.** Product pages remain public while seller
+      details and contact actions enforce member access server-side.
+- [x] **Disabled-billing behavior resolved.** Access fails open only when billing
+      is explicitly disabled; enabled billing refuses incomplete configuration.
+- [x] **Existing password account + same Google email resolved conservatively.**
+      Google sign-in does not silently change that account's sign-in methods.
+      The customer signs in with the password first and explicitly chooses
+      “Link Google” from account security.
+- [x] **User-to-seller email privacy resolved.** A verified buyer explicitly opts
+      in before their email becomes Reply-To; otherwise staff relay responses by
+      the stable enquiry reference.
+- [x] **Sponsored ordering resolved.** Active sponsored entries sort first by
+      priority and retain stable organic order, always labelled as advertising.
 - [ ] **Social URLs.** Instagram, Facebook, LinkedIn, YouTube, WhatsApp. Icons
       render dimmed and unclickable until each is set in config.
 - [ ] **Contact email.** Currently the literal `hello@ossil.in` in `render.yaml`.
@@ -87,12 +85,13 @@ dashboard.
 - [ ] Notify an admin when an application or message arrives. Today `/tj` has to
       be checked by hand.
 - [ ] Search on the farmers page. Shops have it, farms do not.
-- [ ] Automated tests. There are none.
+- [ ] Add a permanent automated test suite. This phase used disposable runtime,
+      migration, security and ownership harnesses; CI still lacks committed tests.
 - [ ] Rotate the Supabase password, Redis URL and admin passphrase — they were
       pasted into chat earlier.
 - [ ] Flip `SHOW_FARMER_PHONE` to `true` once farms consent. The whole value of
       the directory is gated behind it.
-- [ ] Password change signs you out with no explanation.
+- [x] Password change signs out every session and the sign-in page explains why.
 - [ ] Shop `photoUrl` column exists but is unused — wire it up when shopfront
       photos exist.
 
@@ -101,103 +100,108 @@ dashboard.
 ## Customer phase — access, Google sign-in and profile
 
 ### Access and entitlement
-- [ ] Add server-side entitlement states: `FREE_ACCESS`, `TRIAL`, `ACTIVE`,
+- [x] Add server-side entitlement states: `FREE_ACCESS`, `TRIAL`, `ACTIVE`,
       `PAST_DUE`, `CANCELLED`, `EXPIRED`.
-- [ ] Start one 14-day trial at the first completed customer sign-in; never reset
-      it by signing out, changing email or linking Google.
-- [ ] Gate VERIFIED farmer and organic-store detail pages for anonymous visitors.
-- [ ] Preserve `?next=` through sign-up, password sign-in and Google OAuth.
-- [ ] Redirect an expired customer to the plan page, not to a generic 404.
-- [ ] Enforce entitlement on the server for every protected read and contact
+- [x] Start one 14-day trial at the first completed customer sign-in once billing
+      is enabled; disabled billing remains `FREE_ACCESS` and creates no fake trial.
+- [x] Gate VERIFIED farmer and organic-store detail pages for anonymous visitors.
+- [x] Preserve `?next=` through sign-up, password sign-in and Google OAuth,
+      including onboarding and language changes.
+- [x] Redirect an expired customer to the plan page, not to a generic 404.
+- [x] Enforce entitlement on the server for every protected read and contact
       action; hiding a button in React is not access control.
-- [ ] Keep list pages public and remove protected detail URLs from the public
+- [x] Keep list pages public and remove protected detail URLs from the public
       sitemap if anonymous crawlers cannot read them.
 
 ### Google sign-in
 - [x] Downloaded `conf/client_secret*.json` files are ignored before any OAuth
       work; the current file was confirmed untracked and is no longer eligible
       for `git add -A`.
-- [ ] Add a provider-identity table keyed by `(provider, providerAccountId)` and
+- [x] Add a provider-identity table keyed by `(provider, providerAccountId)` and
       linked to the existing `Customer`; never use an email as the permanent
       Google identity key.
-- [ ] Allow password-only, Google-only and linked password+Google accounts.
-- [ ] Use Authorization Code + PKCE, state and nonce; store one-time state in
+- [x] Allow password-only, Google-only and linked password+Google accounts.
+- [x] Use Authorization Code + PKCE, state and nonce; store one-time state in
       Redis with a short TTL.
-- [ ] Validate Google's issuer, audience, signature, expiry, nonce and
+- [x] Validate Google's issuer, audience, signature, expiry, nonce and
       `email_verified` before linking an account.
-- [ ] Request only `openid email`; profile photo is not requested or stored.
-- [ ] After first Google sign-in, collect the normal profile fields in Organics:
+- [x] Request only `openid email`; profile photo is not requested or stored.
+- [x] After first Google sign-in, collect the normal profile fields in Organics:
       name, optional phone and district.
-- [ ] Add link/unlink Google controls to account security. Refuse to unlink the
+- [x] Add link/unlink Google controls to account security. Refuse to unlink the
       last sign-in method.
-- [ ] Record linked-provider status in the admin buyer view and CSV export, but
+- [x] Record linked-provider status in the admin buyer view and CSV export, but
       never export OAuth tokens — no access/refresh token needs to be stored.
 
 ### Customer profile and UX
-- [ ] Rebuild sign-up, sign-in, profile, security and plan pages as one coherent
+- [x] Rebuild sign-up, sign-in, profile, security and plan pages as one coherent
       glass-finished account experience, mobile first, with reduced-motion and
       opaque fallbacks.
-- [ ] Keep profile photo out entirely, as requested.
-- [ ] Add a clear trial/plan status card: days remaining, renewal date, price and
+- [x] Keep profile photo out entirely, as requested.
+- [x] Add a clear trial/plan status card: days remaining, renewal date, price and
       cancellation state — no surprise renewal.
-- [ ] Fix password-change redirect so the customer sees why they were signed out.
-- [ ] Add account email verification for local password registrations.
+- [x] Fix password-change redirect so the customer sees why they were signed out.
+- [x] Add account email verification for local password registrations.
 
 ---
 
 ## Customer phase — plans and billing
 
-- [ ] Plans: 14 days free, Starter Monthly ₹49/month, Starter Annual ₹499/year.
+- [x] Plans: 14 days free, Starter Monthly ₹49/month, Starter Annual ₹499/year.
       Annual saves ₹89 versus twelve monthly payments (about 15%).
-- [ ] Add billing config with `enabled: false` by default; disabling billing must
+- [x] Add billing config with `enabled: false` by default; disabling billing must
       not strand customers behind an unusable paywall.
-- [ ] Add subscription/customer/payment-event records with provider IDs,
+- [x] Add subscription/customer/payment-event records with provider IDs,
       idempotency keys, trial dates, current period and cancellation dates.
-- [ ] Integrate Razorpay Checkout / Subscriptions once keys and plan IDs exist.
-- [ ] Verify checkout signatures server-side; never trust plan, amount or status
-      returned by the browser.
-- [ ] Add a webhook endpoint with signature verification, replay protection and
-      idempotent event processing.
-- [ ] Handle active, cancelled, past-due and expired states; access follows the
+- [x] Add a dormant Razorpay Subscriptions path: server-created hosted
+      authorization, durable provisioning attempts, reconciliation and safe
+      cancellation. It remains inaccessible while billing is disabled.
+- [x] Derive plan and price server-side and grant paid access only from a signed
+      captured-charge webhook whose plan, amount, currency and cadence match.
+- [x] Add a bounded raw-body webhook with current/previous-secret HMAC checking,
+      event-ID replay protection, serialized out-of-order handling and monotonic
+      paid-through entitlement.
+- [x] Handle active, cancelled, past-due and expired states; access follows the
       stored server entitlement, not a client callback.
-- [ ] Add plan selection, checkout result, billing history and cancel-renewal UI.
+- [x] Add plan selection, hosted authorization result, localized billing history,
+      exact access dates, persisted cancellation state and cancel-renewal UI.
 - [ ] Update privacy/terms/refund copy before enabling real charges.
 
 ---
 
 ## Email phase — transactional mail and private contact relay
 
-- [ ] Extract one mail service from the password-reset-only implementation.
-- [ ] Send from `Organics <no-reply@ossil.in>`; never forge a buyer's address in
+- [x] Extract one mail service from the password-reset-only implementation.
+- [x] Send from the configured Organics sender; never forge a buyer's address in
       `From` because SPF/DMARC will reject it.
-- [ ] Keep password reset, then add local-account email verification.
-- [ ] Send application acknowledgements to farmers and organic stores.
-- [ ] Notify the admin address of new applications and contact messages.
-- [ ] Add an authenticated buyer-to-farmer/store enquiry model and form. Resolve
+- [x] Keep password reset, then add local-account email verification.
+- [x] Send application acknowledgements to farmers and organic stores.
+- [x] Notify the admin address of new applications and contact messages.
+- [x] Add an authenticated buyer-to-farmer/store enquiry model and form. Resolve
       sender from the session and recipient from a VERIFIED database record —
       never accept either email address from request JSON.
-- [ ] Store the enquiry before attempting SMTP, so a mail outage does not erase
+- [x] Store the enquiry before attempting SMTP, so a mail outage does not erase
       what the buyer wrote.
-- [ ] Plain text only for the first version; no attachments; rate limit per
+- [x] Plain text only for the first version; no attachments; rate limit per
       customer, IP and recipient.
-- [ ] Add delivery status, retry-safe message IDs and an admin view for failed
+- [x] Add delivery status, retry-safe message IDs and an admin view for failed
       deliveries.
-- [ ] Add trial-ending / payment-failed mail only after billing exists. Razorpay
+- [ ] Add trial-ending / payment-failed mail only after live billing is tested. Razorpay
       invoices remain the gateway's responsibility.
 
 ---
 
 ## Sponsored placement and advertising
 
-- [ ] Add time-bounded promotions for either a VERIFIED farmer or VERIFIED
+- [x] Add time-bounded promotions for either a VERIFIED farmer or VERIFIED
       organic store: starts, ends, priority, status and internal note.
-- [ ] Admin can create, pause and end a promotion; expired promotions disappear
+- [x] Admin can create, pause and end a promotion; expired promotions disappear
       automatically.
-- [ ] Sponsored entries appear above organic results but preserve normal ordering
+- [x] Sponsored entries appear above organic results but preserve normal ordering
       within each group.
-- [ ] Label every paid placement “Sponsored / விளம்பரம்” in the card and detail
+- [x] Label every paid placement “Sponsored / விளம்பரம்” in the card and detail
       page; verification badges remain visually separate.
-- [ ] Do not accept third-party ad scripts initially. First-party sponsored cards
+- [x] Do not accept third-party ad scripts initially. First-party sponsored cards
       avoid tracking, layout shift, inappropriate ads and consent-banner work.
 - [ ] Add impression/click counters without cross-site tracking; aggregate only.
 - [ ] Add paid self-service promotion later, after customer subscriptions and

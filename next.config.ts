@@ -10,7 +10,7 @@ const isDev = process.env.NODE_ENV === "development";
 const contentSecurityPolicy = [
   "default-src 'self'",
   "base-uri 'self'",
-  "form-action 'self'",
+  "form-action 'self' https://accounts.google.com",
   "frame-ancestors 'none'",
   "object-src 'none'",
   // Every image is a local asset, so no third-party origin is allowed at all.

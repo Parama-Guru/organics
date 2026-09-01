@@ -110,10 +110,47 @@ const configSchema = z
         session_ttl_days: envInt(30, 1, 90),
       })
       .prefault({}),
+    auth: z
+      .object({
+        google: z
+          .object({
+            // Both are required for the server-side authorization-code flow.
+            // No token or profile photograph is stored after sign-in.
+            client_id: z.string().default(""),
+            client_secret: z.string().default(""),
+            // Local-only downloaded JSON. Ignored by Git and Docker; hosted
+            // deployments always use the two environment variables above.
+            client_secret_file: z.string().default(""),
+          })
+          .prefault({}),
+      })
+      .prefault({}),
+    billing: z
+      .object({
+        // False means everyone signed in has access. It stays false until a
+        // real checkout and webhook can both be exercised end to end.
+        enabled: envBool(false),
+        trial_days: envInt(14, 1, 90),
+        monthly_paise: envInt(4_900, 100, 1_000_000),
+        annual_paise: envInt(49_900, 100, 10_000_000),
+        razorpay_key_id: z.string().default(""),
+        razorpay_key_secret: z.string().default(""),
+        razorpay_webhook_secret: z
+          .string()
+          .refine((value) => !value || value.length >= 32, "must be empty or at least 32 characters")
+          .default(""),
+        razorpay_previous_webhook_secret: z
+          .string()
+          .refine((value) => !value || value.length >= 32, "must be empty or at least 32 characters")
+          .default(""),
+        razorpay_monthly_plan_id: z.string().default(""),
+        razorpay_annual_plan_id: z.string().default(""),
+      })
+      .prefault({}),
     mail: z
       .object({
-        // Password reset is the only thing that sends mail. With no host the
-        // reset link is not offered at all rather than half-working.
+        // Shared transactional transport for password/email verification,
+        // enquiry relay, and operational notices. Empty disables delivery.
         host: z.string().default(""),
         port: envInt(587, 1, 65535),
         user: z.string().default(""),
@@ -157,6 +194,25 @@ const configSchema = z
           "means the blueprint has not been applied since that service was added — sync it, or " +
           "set ACCOUNTS_ENABLED=false to run the directory without buyer accounts",
       });
+    }
+
+    if (ctx.value.billing.enabled) {
+      for (const key of [
+        "razorpay_key_id",
+        "razorpay_key_secret",
+        "razorpay_webhook_secret",
+        "razorpay_monthly_plan_id",
+        "razorpay_annual_plan_id",
+      ] as const) {
+        if (!ctx.value.billing[key]) {
+          ctx.issues.push({
+            code: "custom",
+            input: ctx.value.billing[key],
+            path: ["billing", key],
+            message: "required when billing.enabled is true",
+          });
+        }
+      }
     }
 
     // The trust page invites people to report a bad listing and the privacy

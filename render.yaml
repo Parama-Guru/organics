@@ -17,7 +17,7 @@ services:
     dockerfilePath: ./Dockerfile
     dockerContext: .
     healthCheckPath: /api/health
-    autoDeployTrigger: commit
+    autoDeployTrigger: checksPass
     envVars:
       # ---- secrets: prompted once in the dashboard when the blueprint is created
       # Transaction pooler, port 6543, must end with ?pgbouncer=true
@@ -45,8 +45,40 @@ services:
           type: keyvalue
           property: connectionString
 
-      # ---- password reset. With SMTP_HOST unset the reset route is not offered
-      # at all, rather than sending mail nowhere.
+      # ---- Google sign-in. The client ID is public. The secret must be set by
+      # hand on this existing service because Render ignores new sync:false
+      # values when a blueprint is re-synced.
+      - key: GOOGLE_CLIENT_ID
+        value: 166380570658-qlbuk355ftqqkljo92ggrsvbv4tj1hca.apps.googleusercontent.com
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+
+      # ---- customer plans. Access remains free until this is deliberately
+      # changed after Razorpay checkout and webhooks pass in test mode.
+      - key: BILLING_ENABLED
+        value: "false"
+      - key: BILLING_TRIAL_DAYS
+        value: "14"
+      - key: BILLING_MONTHLY_PAISE
+        value: "4900"
+      - key: BILLING_ANNUAL_PAISE
+        value: "49900"
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: RAZORPAY_WEBHOOK_SECRET
+        sync: false
+      - key: RAZORPAY_PREVIOUS_WEBHOOK_SECRET
+        sync: false
+      - key: RAZORPAY_MONTHLY_PLAN_ID
+        sync: false
+      - key: RAZORPAY_ANNUAL_PLAN_ID
+        sync: false
+
+      # ---- transactional mail: password and email verification, private
+      # enquiry delivery, and operational notices. With SMTP_HOST unset,
+      # externally delivered mail remains unavailable.
       - key: SMTP_HOST
         sync: false
       - key: SMTP_USER
@@ -56,7 +88,7 @@ services:
       - key: SMTP_FROM
         sync: false
 
-      # ---- staff-only admin tree. Leave ADMIN_PASSWORD_HASH unset and it 404s,
+      # ---- staff-only /tj tree. Leave ADMIN_PASSWORD_HASH unset and it 404s,
       # so the area is never live before you mean it to be.
       # Generate the hash with `npm run admin:hash`.
       - key: ADMIN_PASSWORD_HASH

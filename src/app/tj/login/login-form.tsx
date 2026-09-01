@@ -53,7 +53,7 @@ export function AdminLoginForm() {
     >
       <h1 className="font-display text-2xl text-bark-900">Sign in</h1>
       <p className="mt-1 text-sm text-bark-600">
-        This area manages farm verification. It is not linked from the public site.
+        This area manages verification, listings, enquiries, sponsorships and buyer support. It is not linked from the public site.
       </p>
 
       <div className="mt-5">

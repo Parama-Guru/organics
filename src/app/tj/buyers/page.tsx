@@ -42,9 +42,20 @@ export default async function AdminBuyersPage({ searchParams }: PageProps<"/tj/b
         phone: true,
         status: true,
         locale: true,
+        emailVerifiedAt: true,
+        profileCompletedAt: true,
         createdAt: true,
         lastSeenAt: true,
         region: { select: { name: true } },
+        identities: { select: { provider: true, linkedAt: true } },
+        subscription: {
+          select: {
+            plan: true,
+            status: true,
+            trialEndsAt: true,
+            currentPeriodEndsAt: true,
+          },
+        },
         _count: { select: { savedProducts: true, savedFarmers: true } },
       },
     }),
@@ -78,6 +89,11 @@ export default async function AdminBuyersPage({ searchParams }: PageProps<"/tj/b
                   {customer.status === "SUSPENDED" ? (
                     <Badge tone="neutral">SUSPENDED</Badge>
                   ) : null}
+                  {customer.identities.some((identity) => identity.provider === "GOOGLE") ? (
+                    <Badge tone="leaf">GOOGLE</Badge>
+                  ) : (
+                    <Badge tone="neutral">PASSWORD</Badge>
+                  )}
                 </div>
                 <p className="mt-1 text-sm break-all text-bark-600">{customer.email}</p>
                 <p className="mt-1 text-sm text-bark-600">
@@ -92,6 +108,13 @@ export default async function AdminBuyersPage({ searchParams }: PageProps<"/tj/b
                   {customer._count.savedProducts === 1 ? "" : "s"} ·{" "}
                   {customer._count.savedFarmers} saved farm
                   {customer._count.savedFarmers === 1 ? "" : "s"}
+                </p>
+                <p className="mt-1 text-sm text-bark-600">
+                  Email {customer.emailVerifiedAt ? "verified" : "unverified"} · profile{
+                    customer.profileCompletedAt ? " complete" : " incomplete"
+                  } · {customer.subscription
+                    ? `${customer.subscription.plan} / ${customer.subscription.status}`
+                    : "free access (billing off)"}
                 </p>
               </div>
               <CustomerControls

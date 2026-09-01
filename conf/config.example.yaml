@@ -72,6 +72,30 @@ accounts:
   session_secret: "${ACCOUNTS_SESSION_SECRET:-}"
   session_ttl_days: 30
 
+# Direct Google OpenID Connect. Both values stay server-side; the code uses an
+# authorization-code flow with PKCE rather than accepting a browser-made login.
+auth:
+  google:
+    client_id: "${GOOGLE_CLIENT_ID:-}"
+    client_secret: "${GOOGLE_CLIENT_SECRET:-}"
+    # Relative to conf/. Local only; conf/client_secret*.json is gitignored.
+    client_secret_file: "${GOOGLE_CLIENT_SECRET_FILE:-}"
+
+# Access is free while disabled. Enabling billing is a separate launch step only
+# after checkout and the signed webhook have both been tested in Razorpay test mode.
+billing:
+  enabled: ${BILLING_ENABLED:-false}
+  trial_days: ${BILLING_TRIAL_DAYS:-14}
+  monthly_paise: ${BILLING_MONTHLY_PAISE:-4900} # ₹49
+  annual_paise: ${BILLING_ANNUAL_PAISE:-49900} # ₹499
+  razorpay_key_id: "${RAZORPAY_KEY_ID:-}"
+  razorpay_key_secret: "${RAZORPAY_KEY_SECRET:-}"
+  razorpay_webhook_secret: "${RAZORPAY_WEBHOOK_SECRET:-}"
+  # Keep the old value here during Razorpay's retry window when rotating.
+  razorpay_previous_webhook_secret: "${RAZORPAY_PREVIOUS_WEBHOOK_SECRET:-}"
+  razorpay_monthly_plan_id: "${RAZORPAY_MONTHLY_PLAN_ID:-}"
+  razorpay_annual_plan_id: "${RAZORPAY_ANNUAL_PLAN_ID:-}"
+
 # Session store and the login rate limiter. Both have to be shared across
 # instances, which process memory cannot do. Required once app.env is prod and
 # accounts are enabled; in dev an in-process store stands in.
@@ -79,8 +103,8 @@ redis:
   url: "${REDIS_URL:-}"
   key_prefix: "${REDIS_KEY_PREFIX:-organics:}"
 
-# Sends the password-reset link, and nothing else. Leave host empty and the
-# "forgot password" route is not offered, rather than sending nowhere.
+# Sends password-reset and verification links, enquiry relays, and operational
+# notices. Leave host empty and externally delivered mail remains unavailable.
 # In dev with no host, the link is written to the server log so the flow is
 # still testable; that never happens when app.env is prod.
 mail:
@@ -90,7 +114,7 @@ mail:
   password: "${SMTP_PASSWORD:-}"
   from: "${SMTP_FROM:-}"
 
-# Staff-only farm verification area at /admin. Not linked from the site and
+# Staff-only operations area at /tj. Not linked from the site and
 # disallowed in robots.txt. Leave password_hash empty and the whole tree 404s,
 # so a deployment is never accidentally left open.
 admin:

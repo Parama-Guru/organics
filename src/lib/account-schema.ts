@@ -56,6 +56,8 @@ export const passwordChangeSchema = z.object({
   newPassword: password,
 });
 
+export const passwordSetSchema = z.object({ newPassword: password });
+
 export type SignUpInput = z.infer<typeof signUpSchema>;
 export type SignInInput = z.infer<typeof signInSchema>;
 export type ProfileInput = z.infer<typeof profileSchema>;

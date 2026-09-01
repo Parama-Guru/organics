@@ -2,7 +2,9 @@ import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 
 import { contactMessageSchema } from "@/lib/contact-schema";
+import { notifyContactMessage } from "@/lib/notifications";
 import { prisma } from "@/lib/prisma";
+import { readBoundedJson } from "@/lib/request-body";
 import { clientKeyFromHeaders, rateLimit } from "@/lib/rate-limit";
 import { isSameOrigin } from "@/lib/same-origin";
 
@@ -33,24 +35,18 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (Number(request.headers.get("content-length") ?? 0) > MAX_BODY_BYTES) {
+  const body = await readBoundedJson(request, MAX_BODY_BYTES);
+  if (!body.ok) {
     return NextResponse.json(
-      { code: "body_too_large", error: "Request body is too large." },
-      { status: 413 },
+      {
+        code: body.tooLarge ? "body_too_large" : "invalid_json",
+        error: body.tooLarge ? "Request body is too large." : "Request body must be valid JSON.",
+      },
+      { status: body.tooLarge ? 413 : 400 },
     );
   }
 
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json(
-      { code: "invalid_json", error: "Request body must be valid JSON." },
-      { status: 400 },
-    );
-  }
-
-  const parsed = contactMessageSchema.safeParse(body);
+  const parsed = contactMessageSchema.safeParse(body.value);
   if (!parsed.success) {
     return NextResponse.json(
       {
@@ -71,6 +67,12 @@ export async function POST(request: NextRequest) {
       phone: input.phone || null,
       message: input.message,
     },
+  });
+  await notifyContactMessage({
+    name: input.name,
+    email: input.email,
+    role: input.role,
+    message: input.message,
   });
 
   return NextResponse.json({ received: true }, { status: 201 });

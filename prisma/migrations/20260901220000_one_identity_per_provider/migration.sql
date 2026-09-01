@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "CustomerIdentity_customerId_provider_key" ON "CustomerIdentity"("customerId", "provider");

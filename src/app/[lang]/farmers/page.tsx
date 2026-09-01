@@ -10,10 +10,12 @@ import { Button } from "@/components/ui/button";
 import { ArrowRightIcon, CheckIcon, MapPinIcon, PhoneIcon } from "@/components/ui/icons";
 import { getVerifiedFarmers } from "@/lib/farmers";
 import { accountsEnabled, getCustomer } from "@/lib/customer-auth";
+import { getCustomerAccess } from "@/lib/customer-access";
 import { prisma } from "@/lib/prisma";
 import { format, localePath } from "@/lib/i18n/config";
 import { localisedOrNull, regionLabel } from "@/lib/i18n/content";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
+import { activeSponsoredIds, sponsoredFirst } from "@/lib/sponsorships";
 
 export const dynamic = "force-dynamic";
 
@@ -23,15 +25,19 @@ export async function generateMetadata() {
 }
 
 export default async function FarmersPage() {
-  const [farmers, locale, t] = await Promise.all([
+  const [baseFarmers, locale, t, sponsorships] = await Promise.all([
     getVerifiedFarmers(),
     getLocale(),
     getDictionary(),
+    activeSponsoredIds(),
   ]);
+  const farmers = sponsoredFirst(baseFarmers, sponsorships.farmer);
 
   const customer = accountsEnabled() ? await getCustomer() : null;
   const accountsOn = accountsEnabled();
   const phoneShown = showFarmerPhone();
+  const access = customer ? await getCustomerAccess(customer.id) : null;
+  const canContact = phoneShown && Boolean(access?.allowed);
   // One query for the whole grid rather than one per card.
   const savedIds = customer
     ? new Set(
@@ -125,6 +131,7 @@ export default async function FarmersPage() {
                 {/* Below the picture rather than over it: these sat on the farm
                     scene and covered the part that says what the farm grows. */}
                 <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+                  {farmer.sponsored ? <Badge tone="marigold">{t.farmers.sponsored}</Badge> : null}
                   <span className="inline-flex items-center gap-1.5 font-semibold text-leaf-700">
                     <CheckIcon /> {t.farmers.verified}
                   </span>
@@ -141,7 +148,6 @@ export default async function FarmersPage() {
                     {farmer.farmName}
                   </Link>
                 </h2>
-                <p className="text-sm text-bark-600">{farmer.contactName}</p>
                 {farmer.about ? (
                   <p className="mt-3 line-clamp-3 min-h-[4.1rem] text-sm leading-relaxed text-bark-600">
                     {localisedOrNull(locale, farmer.about, farmer.aboutTa)}
@@ -158,7 +164,7 @@ export default async function FarmersPage() {
                 </p>
 
                 <div className="mt-auto flex flex-wrap gap-2 border-t border-bark-200/60 pt-4">
-                  {showFarmerPhone() ? (
+                  {canContact ? (
                     <Button as="a" href={`tel:${dialNumber(farmer.phone)}`} size="sm">
                       <PhoneIcon /> {farmer.phone}
                     </Button>

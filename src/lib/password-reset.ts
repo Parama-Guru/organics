@@ -4,6 +4,7 @@ import { createHash, randomBytes } from "node:crypto";
 
 import { loadConfig } from "@conf/config";
 import { getRedis, redisKey } from "./redis";
+import { mailConfigured, sendTextEmail } from "./mail";
 
 const TTL_SECONDS = 30 * 60;
 
@@ -15,44 +16,58 @@ const TTL_SECONDS = 30 * 60;
  * SHA-256 of the token is stored, so a Redis dump cannot be used to reset
  * anyone's password.
  */
-const memory = new Map<string, { customerId: string; expiresAt: number }>();
+type ResetGrant = { customerId: string; sessionVersion: number };
+
+const memory = new Map<string, { value: ResetGrant; expiresAt: number }>();
 
 function keyFor(token: string): string {
   return redisKey("pwreset", createHash("sha256").update(token).digest("hex"));
 }
 
-export async function issueResetToken(customerId: string): Promise<string> {
+export async function issueResetToken(
+  customerId: string,
+  sessionVersion: number,
+): Promise<string> {
   const token = randomBytes(32).toString("base64url");
   const redis = getRedis();
+  const value: ResetGrant = { customerId, sessionVersion };
 
   if (redis) {
-    await redis.set(keyFor(token), customerId, "EX", TTL_SECONDS);
+    await redis.set(keyFor(token), JSON.stringify(value), "EX", TTL_SECONDS);
   } else {
-    memory.set(keyFor(token), { customerId, expiresAt: Date.now() + TTL_SECONDS * 1000 });
+    memory.set(keyFor(token), { value, expiresAt: Date.now() + TTL_SECONDS * 1000 });
   }
 
   return token;
 }
 
 /** Single use: the token is consumed whether or not the caller succeeds after. */
-export async function consumeResetToken(token: string): Promise<string | null> {
+export async function consumeResetToken(token: string): Promise<ResetGrant | null> {
   const key = keyFor(token);
   const redis = getRedis();
 
   if (redis) {
-    const customerId = await redis.get(key).catch(() => null);
-    if (customerId) await redis.del(key).catch(() => 0);
-    return customerId;
+    const raw = (await redis
+      .eval(
+        "local v=redis.call('GET',KEYS[1]); if v then redis.call('DEL',KEYS[1]); end; return v",
+        1,
+        key,
+      )
+      .catch(() => null)) as string | null;
+    if (!raw) return null;
+    try {
+      const parsed = JSON.parse(raw) as Partial<ResetGrant>;
+      return typeof parsed.customerId === "string" && Number.isInteger(parsed.sessionVersion)
+        ? { customerId: parsed.customerId, sessionVersion: parsed.sessionVersion! }
+        : null;
+    } catch {
+      return null;
+    }
   }
 
   const entry = memory.get(key);
   memory.delete(key);
-  return entry && entry.expiresAt > Date.now() ? entry.customerId : null;
-}
-
-function mailConfigured(): boolean {
-  const { mail } = loadConfig();
-  return Boolean(mail.host && mail.from);
+  return entry && entry.expiresAt > Date.now() ? entry.value : null;
 }
 
 /**
@@ -65,7 +80,7 @@ export function resetAvailable(): boolean {
 }
 
 export async function sendResetEmail(to: string, url: string, subject: string, body: string) {
-  const { mail, app } = loadConfig();
+  const { app } = loadConfig();
 
   if (!mailConfigured()) {
     if (app.env === "dev") {
@@ -75,19 +90,8 @@ export async function sendResetEmail(to: string, url: string, subject: string, b
     throw new Error("mail is not configured");
   }
 
-  // Imported lazily: nothing else in the app sends mail, and this keeps the
-  // SMTP client out of every other server bundle.
-  const { createTransport } = await import("nodemailer");
-  const transport = createTransport({
-    host: mail.host,
-    port: mail.port,
-    secure: mail.port === 465,
-    auth: mail.user ? { user: mail.user, pass: mail.password } : undefined,
-  });
-
-  await transport.sendMail({
+  await sendTextEmail({
     to,
-    from: mail.from,
     subject,
     text: `${body}\n\n${url}\n`,
   });

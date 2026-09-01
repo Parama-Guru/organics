@@ -127,6 +127,12 @@ export function FarmerApplicationForm() {
         maxLength={80}
       />
       <Field
+        label={t.application.certifiedUntil}
+        name="certifiedUntil"
+        type="date"
+        required
+      />
+      <Field
         label={t.application.certificate}
         hint={t.application.optional}
         name="certificateUrl"

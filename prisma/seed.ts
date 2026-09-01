@@ -1,6 +1,8 @@
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 
+import { endOfIndiaDate } from "../src/lib/india-date";
+
 import { loadConfig } from "../conf/config";
 
 // tsx runs this file directly, so prisma.config.ts never loads. Resolve the
@@ -911,7 +913,7 @@ async function main() {
       regionId,
       status,
       photoUrl: `/farms/${farmer.slug}.svg`,
-      certifiedUntil: certifiedUntil ? new Date(certifiedUntil) : null,
+      certifiedUntil: certifiedUntil ? endOfIndiaDate(certifiedUntil) : null,
       verifiedAt:
         status === "VERIFIED"
           ? new Date(Date.now() - (checkedDaysAgo ?? 0) * 86_400_000)
@@ -934,7 +936,7 @@ async function main() {
       ...rest,
       regionId,
       status,
-      certifiedUntil: certifiedUntil ? new Date(certifiedUntil) : null,
+      certifiedUntil: certifiedUntil ? endOfIndiaDate(certifiedUntil) : null,
       verifiedAt:
         status === "VERIFIED" ? new Date(Date.now() - (checkedDaysAgo ?? 0) * 86_400_000) : null,
     };

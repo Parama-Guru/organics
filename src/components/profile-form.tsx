@@ -13,15 +13,17 @@ export function ProfileForm({
   phone,
   region,
   profileLocale,
+  next,
 }: {
   name: string;
   phone: string;
   region: string;
   profileLocale: string;
+  next?: string;
 }) {
   const { locale, t } = useI18n();
   const [state, formAction, pending] = useActionState<ActionState, FormData>(
-    updateProfileAction.bind(null, locale),
+    updateProfileAction.bind(null, locale, next ?? null),
     {},
   );
   const bad = new Set(state.fields ?? []);

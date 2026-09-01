@@ -5,16 +5,21 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 import { loadConfig } from "@conf/config";
-import { passwordChangeSchema, profileSchema, signInSchema, signUpSchema } from "@/lib/account-schema";
+import { passwordChangeSchema, passwordSetSchema, profileSchema, signInSchema, signUpSchema } from "@/lib/account-schema";
 import {
   accountsEnabled,
   endSession,
   getCustomer,
   startSession,
 } from "@/lib/customer-auth";
+import { deleteCustomerAccount } from "@/lib/customer-delete";
 import { en } from "@/lib/i18n/dictionaries/en";
 import { ta } from "@/lib/i18n/dictionaries/ta";
-import { localePath, safeNext, type Locale } from "@/lib/i18n/config";
+import {
+  emailVerificationAvailable,
+  sendEmailVerification,
+} from "@/lib/email-verification";
+import { localePath, safeNext, withLocale, type Locale } from "@/lib/i18n/config";
 import { fakeVerify, hashPassword, verifyPassword } from "@/lib/password";
 import {
   consumeResetToken,
@@ -82,27 +87,57 @@ export async function signUpAction(
   const { name, email, password, phone, region } = parsed.data;
   const passwordHash = await hashPassword(password);
 
+  let customerId: string;
   try {
     const customer = await prisma.customer.create({
       data: {
         email,
         passwordHash,
         passwordSetAt: new Date(),
+        profileCompletedAt: new Date(),
         name,
         phone: phone || null,
         regionId: await regionIdForCustomer(region),
         locale,
       },
-      select: { id: true },
+      select: { id: true, sessionVersion: true },
     });
-    await startSession(customer.id);
+    customerId = customer.id;
+    await startSession(customer.id, customer.sessionVersion);
   } catch {
     // Includes the unique-email violation. Deliberately the same message as any
     // other failure: "that email is taken" tells a stranger who has an account.
     return { error: "signUpFailed", values };
   }
 
+  if (emailVerificationAvailable()) {
+    await sendEmailVerification({ customerId, email, locale }).catch(() => undefined);
+  }
+
   redirect(safeNext(next ?? undefined, locale) ?? localePath(locale, "/account"));
+}
+
+export async function resendVerificationAction(
+  locale: Locale,
+  prev: ActionState,
+  form: FormData,
+): Promise<ActionState> {
+  void prev;
+  void form;
+  const customer = await getCustomer();
+  if (!customer || customer.emailVerifiedAt || !emailVerificationAvailable()) {
+    return { error: "unavailable" };
+  }
+
+  const gate = await limit("email-verification", 3, 3_600);
+  if (!gate.allowed) return { error: "rateLimited" };
+
+  try {
+    await sendEmailVerification({ customerId: customer.id, email: customer.email, locale });
+  } catch {
+    return { error: "unavailable" };
+  }
+  return { ok: true };
 }
 
 export async function signInAction(
@@ -132,12 +167,17 @@ export async function signInAction(
 
   const customer = await prisma.customer.findUnique({
     where: { email },
-    select: { id: true, passwordHash: true },
+    select: { id: true, passwordHash: true, sessionVersion: true, status: true },
   });
 
-  if (!customer) {
+  if (!customer || customer.status !== "ACTIVE") {
     // Spend the same time as a real verification so the response cannot be used
     // to work out which addresses are registered.
+    await fakeVerify(password);
+    return { error: "badCredentials", values };
+  }
+
+  if (!customer.passwordHash) {
     await fakeVerify(password);
     return { error: "badCredentials", values };
   }
@@ -150,7 +190,7 @@ export async function signInAction(
     where: { id: customer.id },
     data: { lastSeenAt: new Date() },
   });
-  await startSession(customer.id);
+  await startSession(customer.id, customer.sessionVersion);
 
   redirect(safeNext(next ?? undefined, locale) ?? localePath(locale, "/account"));
 }
@@ -182,16 +222,31 @@ export async function changePasswordAction(
 
   const row = await prisma.customer.findUnique({
     where: { id: customer.id },
-    select: { passwordHash: true },
+    select: { passwordHash: true, sessionVersion: true, status: true },
   });
-  if (!row || !(await verifyPassword(parsed.data.currentPassword, row.passwordHash))) {
+  if (
+    !row?.passwordHash ||
+    row.status !== "ACTIVE" ||
+    row.sessionVersion !== customer.sessionVersion ||
+    !(await verifyPassword(parsed.data.currentPassword, row.passwordHash))
+  ) {
     return { error: "badCurrentPassword", fields: ["currentPassword"] };
   }
 
-  await prisma.customer.update({
-    where: { id: customer.id },
-    data: { passwordHash: await hashPassword(parsed.data.newPassword), passwordSetAt: new Date() },
+  const changed = await prisma.customer.updateMany({
+    where: {
+      id: customer.id,
+      status: "ACTIVE",
+      passwordHash: row.passwordHash,
+      sessionVersion: row.sessionVersion,
+    },
+    data: {
+      passwordHash: await hashPassword(parsed.data.newPassword),
+      passwordSetAt: new Date(),
+      sessionVersion: { increment: 1 },
+    },
   });
+  if (changed.count !== 1) return { error: "badCurrentPassword", fields: ["currentPassword"] };
 
   // Everything else stays signed in on purpose: the point of changing a password
   // is usually that someone else may have it, so the old sessions have to go.
@@ -203,6 +258,14 @@ export async function deleteAccountAction(locale: Locale, form: FormData): Promi
   const customer = await getCustomer();
   if (!customer) redirect(localePath(locale, "/"));
 
+  const [byAccount, byIp] = await Promise.all([
+    consumeRateLimit(`account-delete:${customer.id}`, 5, 900),
+    limit("account-delete-ip", 15, 900),
+  ]);
+  if (!byAccount.allowed || !byIp.allowed) {
+    redirect(localePath(locale, "/account?oauth=rateLimited"));
+  }
+
   // Typed confirmation and the password, matching the bar already set for the
   // far less destructive password change. Either language's word is accepted:
   // a Tamil-first product should not demand an English one.
@@ -213,15 +276,30 @@ export async function deleteAccountAction(locale: Locale, form: FormData): Promi
 
   const row = await prisma.customer.findUnique({
     where: { id: customer.id },
-    select: { passwordHash: true },
+    select: { passwordHash: true, sessionVersion: true, status: true },
   });
-  if (!row || !(await verifyPassword(password, row.passwordHash))) {
+  if (
+    !row?.passwordHash ||
+    row.status !== "ACTIVE" ||
+    row.sessionVersion !== customer.sessionVersion ||
+    !(await verifyPassword(password, row.passwordHash))
+  ) {
     redirect(localePath(locale, "/account?problem=password"));
   }
 
+  const stillCurrent = await prisma.customer.count({
+    where: {
+      id: customer.id,
+      status: "ACTIVE",
+      passwordHash: row.passwordHash,
+      sessionVersion: row.sessionVersion,
+    },
+  });
+  if (stillCurrent !== 1) redirect(localePath(locale, "/account?problem=password"));
+
+  const deleted = await deleteCustomerAccount(customer.id, row.sessionVersion);
+  if (!deleted.ok) redirect(localePath(locale, "/account?problem=billing"));
   await endSession();
-  // Saved rows go with it: both join tables are ON DELETE CASCADE.
-  await prisma.customer.delete({ where: { id: customer.id } });
   redirect(localePath(locale, "/?deleted=1"));
 }
 
@@ -240,11 +318,11 @@ export async function requestResetAction(
 
   const customer = await prisma.customer.findUnique({
     where: { email },
-    select: { id: true },
+    select: { id: true, sessionVersion: true },
   });
 
   if (customer) {
-    const token = await issueResetToken(customer.id);
+    const token = await issueResetToken(customer.id, customer.sessionVersion);
     const { app } = loadConfig();
     const url = `${app.site_url}${localePath(locale, "/account/reset")}?token=${token}`;
     const t = locale === "ta" ? ta : en;
@@ -270,22 +348,28 @@ export async function performResetAction(
   const gate = await limit("reset-do", 10, 900);
   if (!gate.allowed) return { error: "rateLimited" };
 
-  const password = String(form.get("password") ?? "");
-  if (password.length < 10) return { error: "invalid", fields: ["password"] };
+  const parsed = passwordSetSchema.safeParse({ newPassword: form.get("password") });
+  if (!parsed.success) return { error: "invalid", fields: ["password"] };
 
-  const customerId = await consumeResetToken(token);
-  if (!customerId) return { error: "resetExpired" };
+  const grant = await consumeResetToken(token);
+  if (!grant) return { error: "resetExpired" };
 
-  await prisma.customer.update({
-    where: { id: customerId },
-    data: { passwordHash: await hashPassword(password), passwordSetAt: new Date() },
+  const changed = await prisma.customer.updateMany({
+    where: { id: grant.customerId, sessionVersion: grant.sessionVersion },
+    data: {
+      passwordHash: await hashPassword(parsed.data.newPassword),
+      passwordSetAt: new Date(),
+      sessionVersion: { increment: 1 },
+    },
   });
+  if (changed.count === 0) return { error: "resetExpired" };
 
   redirect(localePath(locale, "/account/sign-in?reset=1"));
 }
 
 export async function updateProfileAction(
   locale: Locale,
+  afterSave: string | null,
   _prev: ActionState,
   form: FormData,
 ): Promise<ActionState> {
@@ -315,11 +399,17 @@ export async function updateProfileAction(
       phone: next.phone || null,
       regionId: await regionIdForCustomer(next.region),
       locale: next.locale,
+      profileCompletedAt: new Date(),
     },
   });
 
   // Language is part of the profile, so saving a different one moves the user
   // to that version of the site rather than quietly disagreeing with the toggle.
+  if (afterSave) {
+    const destination = safeNext(afterSave, locale) ?? localePath(locale, "/account");
+    redirect(next.locale === locale ? destination : withLocale(destination, next.locale));
+  }
+
   if (next.locale !== locale) redirect(localePath(next.locale, "/account"));
 
   revalidatePath(localePath(locale, "/account"));

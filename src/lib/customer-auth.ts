@@ -5,8 +5,15 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 
 import { loadConfig } from "@conf/config";
+import { ensureCustomerSubscription } from "./customer-access";
 import { prisma } from "./prisma";
-import { dropSession, newSessionId, putSession, readSession } from "./session-store";
+import {
+  dropSession,
+  dropSessionStrict,
+  newSessionId,
+  putSession,
+  readSession,
+} from "./session-store";
 
 export const CUSTOMER_COOKIE = "organics_session";
 
@@ -44,14 +51,20 @@ export type SignedInCustomer = {
   phone: string | null;
   region: { slug: string; name: string; nameTa: string | null } | null;
   locale: string;
+  emailVerifiedAt: Date | null;
+  profileCompletedAt: Date | null;
+  hasPassword: boolean;
+  googleLinked: boolean;
+  sessionVersion: number;
 };
 
-export async function startSession(customerId: string): Promise<void> {
+export async function startSession(customerId: string, sessionVersion: number): Promise<void> {
   const { accounts, app } = loadConfig();
   const ttlSeconds = accounts.session_ttl_days * 86_400;
   const id = newSessionId();
 
-  await putSession(id, { customerId, createdAt: Date.now() }, ttlSeconds);
+  await ensureCustomerSubscription(customerId);
+  await putSession(id, { customerId, createdAt: Date.now(), sessionVersion }, ttlSeconds);
 
   const jar = await cookies();
   jar.set(CUSTOMER_COOKIE, `${id}.${sign(id, accounts.session_secret)}`, {
@@ -70,7 +83,7 @@ export async function endSession(): Promise<void> {
 
   // Delete the record first: clearing only the cookie would leave a live
   // session behind for anyone who had already copied the value.
-  if (id) await dropSession(id);
+  if (id) await dropSessionStrict(id);
   jar.delete(CUSTOMER_COOKIE);
 }
 
@@ -87,7 +100,7 @@ export async function getCustomer(): Promise<SignedInCustomer | null> {
 
   // Read through to the database every time. A cached copy would keep serving a
   // deleted or suspended account until its session expired.
-  return prisma.customer.findFirst({
+  const customer = await prisma.customer.findFirst({
     where: { id: record.customerId, status: "ACTIVE" },
     select: {
       id: true,
@@ -95,9 +108,33 @@ export async function getCustomer(): Promise<SignedInCustomer | null> {
       name: true,
       phone: true,
       locale: true,
+      passwordHash: true,
+      passwordSetAt: true,
+      sessionVersion: true,
+      emailVerifiedAt: true,
+      profileCompletedAt: true,
+      identities: { where: { provider: "GOOGLE" }, select: { id: true }, take: 1 },
       region: { select: { slug: true, name: true, nameTa: true } },
     },
   });
+
+  if (!customer) return null;
+
+  // Exact version equality closes the in-flight-login race that a wall-clock
+  // timestamp cannot: a session always retains the version of the credential
+  // it actually verified.
+  if (record.sessionVersion !== customer.sessionVersion) {
+    await dropSession(id);
+    return null;
+  }
+
+  const { passwordHash, passwordSetAt, identities, ...safe } = customer;
+  void passwordSetAt;
+  return {
+    ...safe,
+    hasPassword: passwordHash !== null,
+    googleLinked: identities.length > 0,
+  };
 }
 
 export async function requireCustomer(): Promise<SignedInCustomer> {

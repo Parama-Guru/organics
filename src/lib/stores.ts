@@ -67,7 +67,9 @@ export async function getStoreBySlug(rawSlug: string) {
  */
 export async function getRegisteredCounts() {
   const [farmers, customers, stores] = await Promise.all([
-    prisma.farmer.count({ where: { status: "VERIFIED" } }),
+    prisma.farmer.count({
+      where: { status: "VERIFIED", certifiedUntil: { gte: new Date() } },
+    }),
     prisma.customer.count({ where: { status: "ACTIVE" } }),
     prisma.organicStore.count({ where: { status: "VERIFIED" } }),
   ]);

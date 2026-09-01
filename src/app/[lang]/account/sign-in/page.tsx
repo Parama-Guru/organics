@@ -2,9 +2,11 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 import { AccountForm } from "@/components/account-form";
-import { GlassPanel } from "@/components/glass-panel";
+import { AccountShell } from "@/components/account-shell";
+import { GoogleSignIn } from "@/components/google-sign-in";
 import { CheckIcon } from "@/components/ui/icons";
 import { accountsEnabled, getCustomer } from "@/lib/customer-auth";
+import { googleOAuthEnabled } from "@/lib/google-auth";
 import { resetAvailable } from "@/lib/password-reset";
 import { localePath, safeNext } from "@/lib/i18n/config";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
@@ -23,12 +25,36 @@ export default async function SignInPage({ searchParams }: PageProps<"/[lang]/ac
   if (await getCustomer()) redirect(localePath(locale, "/account"));
 
   const next = safeNext(typeof params.next === "string" ? params.next : undefined, locale);
+  const oauthErrors = {
+    unverified: t.account.oauthUnverified,
+    alreadyLinked: t.account.oauthLinkedElsewhere,
+    emailInUse: t.account.oauthEmailInUse,
+    wrongGoogle: t.account.oauthWrongGoogle,
+    unavailable: t.account.oauthUnavailable,
+  } as const;
+  const oauthCode = typeof params.oauth === "string" ? params.oauth : "";
+  const oauthError = oauthErrors[oauthCode as keyof typeof oauthErrors] ??
+    (oauthCode ? t.account.oauthInvalid : null);
 
   return (
-    <div className="mx-auto max-w-md px-4 py-14 sm:px-6">
-      <GlassPanel className="rounded-3xl p-7 sm:p-8">
-        <h1 className="font-display text-3xl">{t.account.signInTitle}</h1>
-        <p className="mt-2 leading-relaxed text-ink">{t.account.signInIntro}</p>
+    <AccountShell t={t} title={t.account.signInTitle} intro={t.account.signInIntro}>
+
+        {googleOAuthEnabled() ? (
+          <div className="mt-6">
+            <GoogleSignIn
+              locale={locale}
+              next={next ?? localePath(locale, "/account")}
+              label={t.account.continueGoogle}
+            />
+            <p className="my-4 text-center text-sm text-bark-600">{t.account.orPassword}</p>
+          </div>
+        ) : null}
+
+        {oauthError ? (
+          <p role="alert" className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            {oauthError}
+          </p>
+        ) : null}
 
         {/* Arriving straight from a reset or a password change, saying nothing
             would look like the change had failed. */}
@@ -52,7 +78,6 @@ export default async function SignInPage({ searchParams }: PageProps<"/[lang]/ac
             {t.account.forgot}
           </Link>
         ) : null}
-      </GlassPanel>
-    </div>
+    </AccountShell>
   );
 }

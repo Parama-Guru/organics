@@ -4,8 +4,11 @@ import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 
 import { farmerApplicationSchema } from "@/lib/farmer-application-schema";
+import { endOfIndiaDate } from "@/lib/india-date";
+import { notifyApplication } from "@/lib/notifications";
 import { prisma } from "@/lib/prisma";
 import { regionIdForName } from "@/lib/regions";
+import { readBoundedJson } from "@/lib/request-body";
 import { clientKeyFromHeaders, rateLimit } from "@/lib/rate-limit";
 import { isSameOrigin } from "@/lib/same-origin";
 
@@ -41,24 +44,18 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (Number(request.headers.get("content-length") ?? 0) > MAX_BODY_BYTES) {
+  const body = await readBoundedJson(request, MAX_BODY_BYTES);
+  if (!body.ok) {
     return NextResponse.json(
-      { code: "body_too_large", error: "Request body is too large." },
-      { status: 413 },
+      {
+        code: body.tooLarge ? "body_too_large" : "invalid_json",
+        error: body.tooLarge ? "Request body is too large." : "Request body must be valid JSON.",
+      },
+      { status: body.tooLarge ? 413 : 400 },
     );
   }
 
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json(
-      { code: "invalid_json", error: "Request body must be valid JSON." },
-      { status: 400 },
-    );
-  }
-
-  const parsed = farmerApplicationSchema.safeParse(body);
+  const parsed = farmerApplicationSchema.safeParse(body.value);
   if (!parsed.success) {
     return NextResponse.json(
       {
@@ -93,10 +90,17 @@ export async function POST(request: NextRequest) {
         govtIdLast4: input.govtIdLast4,
         certifier: input.certifier,
         certificateNo: input.certificateNo,
+        certifiedUntil: endOfIndiaDate(input.certifiedUntil)!,
         certificateUrl: input.certificateUrl || null,
         // Status is never taken from the request; an admin promotes to VERIFIED.
         status: "PENDING",
       },
+    });
+    await notifyApplication({
+      kind: "farmer",
+      applicantEmail: input.email,
+      applicantName: input.contactName,
+      entityName: input.farmName,
     });
   }
 

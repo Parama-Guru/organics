@@ -87,10 +87,13 @@ model Farmer {
   // a farm's listings without handing over a login, and can revoke the login
   // without unpublishing the farm.
   passwordHash   String?
+  portalSessionVersion Int        @default(0)
   portalEnabledAt DateTime?
   lastSignInAt   DateTime?
   products       Product[]
   savedBy        SavedFarmer[]
+  enquiries      PrivateEnquiry[]
+  sponsoredPlacements SponsoredPlacement[]
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
@@ -189,6 +192,8 @@ model OrganicStore {
   certifiedUntil DateTime?
   verifiedAt     DateTime?
   reviewNote     String?
+  enquiries      PrivateEnquiry[]
+  sponsoredPlacements SponsoredPlacement[]
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
 
@@ -224,15 +229,21 @@ model ContactMessage {
   @@index([role])
 }
 
-// A buyer account. The site takes no payment, so an account exists only to keep
-// a shortlist of produce and farms to ring later — which is why it stores no
-// address and no card.
+// A buyer account unlocks checked seller details, private enquiries, and a
+// shortlist. Payment authorization is provider-hosted, so no address or card
+// details are stored here.
 model Customer {
   id            String         @id @default(cuid())
   // Stored lower-cased; the unique index is what stops duplicate signups.
   email         String         @unique
-  // scrypt:<salt-hex>:<key-hex>. Never a plaintext or reversible value.
-  passwordHash  String
+  // Null for Google-only accounts. Otherwise scrypt:<salt-hex>:<key-hex>.
+  passwordHash  String?
+  // Google supplies a verified email; local accounts set this through a
+  // single-use email-verification link.
+  emailVerifiedAt DateTime?
+  // Local sign-up already collects the normal details. Google sign-in only
+  // returns an email, so a new Google account completes them on the next page.
+  profileCompletedAt DateTime?
   name          String
   phone         String?
   // Their own district, used to sort nearby farms first. Same table the farms
@@ -242,11 +253,17 @@ model Customer {
   // Which language to serve after sign-in, so the choice survives a new device.
   locale        String         @default("ta")
   status        CustomerStatus @default(ACTIVE)
+  identities    CustomerIdentity[]
+  subscription  CustomerSubscription?
+  enquiries      PrivateEnquiry[]
   savedProducts SavedProduct[]
   savedFarmers  SavedFarmer[]
   // Set when the password last changed, so a support question about "why was I
   // signed out" has an answer.
   passwordSetAt DateTime?
+  // Incremented whenever credentials change. Every session carries the value
+  // it authenticated against, so old and in-flight logins are rejected.
+  sessionVersion Int             @default(0)
   lastSeenAt    DateTime?
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
@@ -261,6 +278,198 @@ model Customer {
 enum CustomerStatus {
   ACTIVE
   SUSPENDED
+}
+
+enum EnquiryDeliveryStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+enum PromotionStatus {
+  ACTIVE
+  PAUSED
+  ENDED
+}
+
+model SponsoredPlacement {
+  id           String          @id @default(cuid())
+  farmerId     String?
+  farmer       Farmer?         @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  storeId      String?
+  store        OrganicStore?   @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  startsAt     DateTime
+  endsAt       DateTime
+  priority     Int             @default(0)
+  status       PromotionStatus @default(ACTIVE)
+  internalNote String?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  @@index([status, startsAt, endsAt])
+  @@index([farmerId])
+  @@index([storeId])
+}
+
+// Stored before SMTP is attempted. The recipient address is resolved from a
+// VERIFIED database row and never accepted from browser JSON.
+model PrivateEnquiry {
+  id                String                @id @default(cuid())
+  customerId        String
+  customer          Customer              @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  farmerId          String?
+  farmer            Farmer?               @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  storeId           String?
+  store              OrganicStore?         @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  senderEmail        String
+  recipientName     String
+  recipientEmail    String
+  subject            String
+  message            String
+  shareEmail         Boolean               @default(false)
+  deliveryStatus     EnquiryDeliveryStatus @default(PENDING)
+  deliveryAttempts   Int                   @default(0)
+  lastDeliveryError  String?
+  sentAt             DateTime?
+  handledAt          DateTime?
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+
+  @@index([customerId, createdAt])
+  @@index([farmerId, createdAt])
+  @@index([storeId, createdAt])
+  @@index([deliveryStatus, createdAt])
+  @@index([handledAt, createdAt])
+}
+
+enum AuthProvider {
+  GOOGLE
+}
+
+// Provider account ids, not emails, are the durable identity. A Google email
+// can change while its `sub` claim does not.
+model CustomerIdentity {
+  id                String       @id @default(cuid())
+  customerId        String
+  customer          Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  provider          AuthProvider
+  providerAccountId String
+  emailAtLink       String
+  linkedAt          DateTime     @default(now())
+  lastUsedAt        DateTime?
+
+  @@unique([provider, providerAccountId])
+  @@unique([customerId, provider])
+  @@index([customerId])
+}
+
+enum SubscriptionPlan {
+  TRIAL
+  STARTER_MONTHLY
+  STARTER_ANNUAL
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  EXPIRED
+}
+
+// One current subscription per customer. Billing is disabled initially; this
+// records the trial and provider state for the deliberately dormant paid path.
+model CustomerSubscription {
+  id                     String             @id @default(cuid())
+  customerId             String             @unique
+  customer               Customer           @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  plan                   SubscriptionPlan   @default(TRIAL)
+  status                 SubscriptionStatus @default(TRIALING)
+  trialStartedAt         DateTime
+  trialEndsAt            DateTime
+  currentPeriodStartedAt DateTime?
+  currentPeriodEndsAt    DateTime?
+  // Entitlement advances only after a validated captured charge, never merely
+  // because a mandate or future subscription became active.
+  paidThroughAt          DateTime?
+  cancelAtPeriodEnd      Boolean            @default(false)
+  cancellationRequestedAt DateTime?
+  cancelledAt            DateTime?
+  provider               String?
+  providerPlanId         String?
+  agreedAmountPaise      Int?
+  agreedCurrency         String?
+  providerCustomerId     String?            @unique
+  providerSubscriptionId String?            @unique
+  providerStatus         String?
+  providerLastEventAt    DateTime?
+  // Claimed before contacting Razorpay. It prevents concurrent creation and
+  // lets a webhook reconcile a response lost after remote creation.
+  provisioningToken      String?            @unique
+  provisioningStartedAt  DateTime?
+  provisioningError      String?
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+  paymentEvents          PaymentEvent[]
+  attempts               SubscriptionAttempt[]
+
+  @@index([status, currentPeriodEndsAt])
+}
+
+// One durable row per remote provisioning attempt. It survives deletion of the
+// customer subscription so delayed provider events can be acknowledged or a
+// remote mandate can still be found and cancelled without retaining buyer PII.
+model SubscriptionAttempt {
+  id                     String                @id
+  subscriptionId         String?
+  subscription           CustomerSubscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+  provider               String
+  plan                   SubscriptionPlan
+  providerPlanId         String
+  agreedAmountPaise      Int
+  agreedCurrency         String
+  providerSubscriptionId String?               @unique
+  providerStatus         String?
+  state                  String
+  failureCode            String?
+  startedAt              DateTime              @default(now())
+  resolvedAt             DateTime?
+  updatedAt              DateTime              @updatedAt
+
+  @@index([subscriptionId, startedAt])
+  @@index([state, startedAt])
+}
+
+enum PaymentEventStatus {
+  RECEIVED
+  PROCESSED
+  FAILED
+}
+
+// Raw provider payloads are intentionally not stored: the event type, durable
+// provider id and processing result are enough for replay protection and audit.
+model PaymentEvent {
+  id              String             @id @default(cuid())
+  provider        String
+  providerEventId String
+  eventType       String
+  providerSubscriptionId String?
+  providerCreatedAt DateTime?
+  providerPaymentId String?
+  providerInvoiceId String?
+  amountPaise      Int?
+  currency         String?
+  subscriptionId  String?
+  subscription    CustomerSubscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+  status          PaymentEventStatus @default(RECEIVED)
+  failureCode     String?
+  receivedAt      DateTime           @default(now())
+  processedAt     DateTime?
+
+  @@unique([provider, providerEventId])
+  @@index([providerSubscriptionId, providerCreatedAt])
+  @@index([subscriptionId, receivedAt])
+  @@index([status, receivedAt])
 }
 
 model SavedProduct {

@@ -1,8 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { AccessCard } from "@/components/access-card";
 import { GlassPanel } from "@/components/glass-panel";
-import { DeleteAccountForm, PasswordForm } from "@/components/account-security";
+import { DeleteAccountForm, EmailVerificationButton, GoogleDeleteForm, GoogleUnlinkButton, PasswordForm } from "@/components/account-security";
+import { GoogleSignIn } from "@/components/google-sign-in";
 import { ProductCard } from "@/components/product-card";
 import { ProfileForm } from "@/components/profile-form";
 import { SaveButton } from "@/components/save-button";
@@ -10,7 +12,10 @@ import { SignOutButton } from "@/components/sign-out-button";
 import { Button } from "@/components/ui/button";
 import { BasketIcon, LeafMark, MapPinIcon, PhoneIcon, UserIcon } from "@/components/ui/icons";
 import { dialNumber, showFarmerPhone } from "@/components/farmer-contact";
+import { getCustomerAccess } from "@/lib/customer-access";
 import { accountsEnabled, getCustomer } from "@/lib/customer-auth";
+import { emailVerificationAvailable } from "@/lib/email-verification";
+import { googleOAuthEnabled } from "@/lib/google-auth";
 import { format, localePath } from "@/lib/i18n/config";
 import { regionLabel } from "@/lib/i18n/content";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
@@ -34,13 +39,37 @@ export default async function AccountPage({ searchParams }: PageProps<"/[lang]/a
     searchParams,
   ]);
   if (!customer) redirect(localePath(locale, "/account/sign-in"));
+  if (!customer.profileCompletedAt) redirect(localePath(locale, "/account/onboarding"));
 
   const problem =
-    params.problem === "confirm" || params.problem === "password" ? params.problem : null;
+    params.problem === "confirm" ||
+    params.problem === "password" ||
+    params.problem === "billing"
+      ? params.problem
+      : null;
+  const verification = params.verified === "1" || params.verified === "expired"
+    ? params.verified
+    : null;
+  const oauthMessages = {
+    invalid: t.account.oauthInvalid,
+    unverified: t.account.oauthUnverified,
+    alreadyLinked: t.account.oauthLinkedElsewhere,
+    emailInUse: t.account.oauthEmailInUse,
+    wrongGoogle: t.account.oauthWrongGoogle,
+    unavailable: t.account.oauthUnavailable,
+    rateLimited: t.account.errorRateLimited,
+    lastSignInMethod: t.account.unlinkNeedsPassword,
+    badCurrentPassword: t.account.errorCurrentPassword,
+    billing: t.account.deleteBillingFailed,
+  } as const;
+  const oauthCode = typeof params.oauth === "string" ? params.oauth : "";
+  const oauthMessage = oauthMessages[oauthCode as keyof typeof oauthMessages] ?? null;
+  const invalidNewPassword = params.password === "invalid";
 
-  const [products, farmers] = await Promise.all([
+  const [products, farmers, access] = await Promise.all([
     getSavedProducts(customer.id),
     getSavedFarmers(customer.id),
+    getCustomerAccess(customer.id),
   ]);
 
   return (
@@ -77,6 +106,10 @@ export default async function AccountPage({ searchParams }: PageProps<"/[lang]/a
           </div>
         </dl>
       </GlassPanel>
+
+      <div className="mt-6">
+        <AccessCard access={access} locale={locale} t={t} compact />
+      </div>
 
       <section className="mt-12">
         <h2 className="font-display text-2xl sm:text-3xl">
@@ -150,7 +183,7 @@ export default async function AccountPage({ searchParams }: PageProps<"/[lang]/a
                       <MapPinIcon /> {regionLabel(locale, farmer.region)}
                     </p>
                     <div className="mt-auto flex flex-wrap items-center gap-2 pt-4">
-                      {showFarmerPhone() ? (
+                      {showFarmerPhone() && access.allowed ? (
                         <Button as="a" href={`tel:${dialNumber(farmer.phone)}`} size="sm">
                           <PhoneIcon /> {farmer.phone}
                         </Button>
@@ -168,6 +201,19 @@ export default async function AccountPage({ searchParams }: PageProps<"/[lang]/a
       <GlassPanel as="section" className="mt-12 rounded-3xl p-6 sm:p-8">
         <h2 className="font-display text-2xl sm:text-3xl">{t.account.profile}</h2>
         <p className="mt-2 text-ink">{t.account.profileIntro}</p>
+        <div className="mt-5 rounded-2xl border border-bark-200 bg-white/70 p-4">
+          <p className={customer.emailVerifiedAt ? "font-medium text-leaf-700" : "font-medium text-bark-900"}>
+            {customer.emailVerifiedAt ? t.account.emailVerified : t.account.emailUnverified}
+          </p>
+          {!customer.emailVerifiedAt ? (
+            <>
+              <p className="mt-1 text-sm text-bark-600">{t.account.emailVerifyWhy}</p>
+              {emailVerificationAvailable() ? <EmailVerificationButton /> : null}
+            </>
+          ) : null}
+          {verification === "1" ? <p className="mt-2 text-sm text-leaf-700">{t.account.emailVerified}</p> : null}
+          {verification === "expired" ? <p className="mt-2 text-sm text-red-700">{t.account.emailVerifyExpired}</p> : null}
+        </div>
         <ProfileForm
           name={customer.name}
           phone={customer.phone ?? ""}
@@ -181,13 +227,55 @@ export default async function AccountPage({ searchParams }: PageProps<"/[lang]/a
 
       <GlassPanel as="section" className="mt-8 rounded-3xl p-6 sm:p-8">
         <h2 className="font-display text-2xl sm:text-3xl">{t.account.security}</h2>
-        <PasswordForm />
+        {params.passwordAdded === "1" ? (
+          <p role="status" className="mt-3 text-sm font-medium text-leaf-700">
+            {t.account.savedChanges}
+          </p>
+        ) : null}
+        <PasswordForm
+          hasPassword={customer.hasPassword}
+          googleLinked={customer.googleLinked}
+          invalidNewPassword={invalidNewPassword}
+        />
+      </GlassPanel>
+
+      <GlassPanel as="section" className="mt-8 rounded-3xl p-6 sm:p-8">
+        <h2 className="font-display text-2xl sm:text-3xl">{t.account.googleSecurity}</h2>
+        {oauthMessage ? (
+          <p role="alert" className="mt-3 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            {oauthMessage}
+          </p>
+        ) : null}
+        {customer.googleLinked ? (
+          <>
+            <p className="mt-3 font-medium text-leaf-700">{t.account.googleLinked}</p>
+            <GoogleUnlinkButton canUnlink={customer.hasPassword} />
+          </>
+        ) : googleOAuthEnabled() ? (
+          <div className="mt-5 max-w-sm">
+            <GoogleSignIn
+              locale={locale}
+              next={localePath(locale, "/account")}
+              label={t.account.linkGoogle}
+              passwordLabel={t.account.currentPassword}
+              intent="link"
+            />
+          </div>
+        ) : (
+          <p className="mt-3 text-bark-600">{t.account.googleNotLinked}</p>
+        )}
       </GlassPanel>
 
       <section className="mt-8 rounded-3xl border border-red-200 bg-red-50/60 p-6 sm:p-8">
         <h2 className="font-display text-2xl text-red-900 sm:text-3xl">{t.account.dangerTitle}</h2>
         <p className="mt-2 max-w-2xl leading-relaxed text-red-900">{t.account.dangerBody}</p>
-        <DeleteAccountForm problem={problem} />
+        {customer.hasPassword ? (
+          <DeleteAccountForm problem={problem} />
+        ) : customer.googleLinked ? (
+          <GoogleDeleteForm invalid={problem === "confirm"} />
+        ) : (
+          <p className="mt-4 text-sm font-medium text-red-900">{t.account.deleteNeedsPassword}</p>
+        )}
       </section>
     </div>
   );

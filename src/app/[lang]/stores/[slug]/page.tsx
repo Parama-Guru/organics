@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { dialNumber, showFarmerPhone, whatsappNumber } from "@/components/farmer-contact";
+import { FarmerEnquiryForm } from "@/components/farmer-enquiry-form";
 import { JsonLd } from "@/components/json-ld";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,8 @@ import { format, localePath } from "@/lib/i18n/config";
 import { localisedOrNull, regionLabel } from "@/lib/i18n/content";
 import { checkedOn } from "@/lib/i18n/dates";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
+import { requireMemberAccess } from "@/lib/member-access";
+import { isStoreSponsored } from "@/lib/sponsorships";
 import { getStoreBySlug } from "@/lib/stores";
 
 export const dynamic = "force-dynamic";
@@ -27,7 +30,11 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/stores/[sl
 
   if (!store) return { title: t.meta.storeNotFound };
 
-  return { title: store.storeName, description: store.about ?? store.storeName };
+  return {
+    title: t.account.detailGateTitle,
+    description: t.account.detailGateBody,
+    robots: { index: false, follow: false },
+  };
 }
 
 export default async function StorePage({ params }: PageProps<"/[lang]/stores/[slug]">) {
@@ -39,6 +46,9 @@ export default async function StorePage({ params }: PageProps<"/[lang]/stores/[s
   ]);
 
   if (!store) notFound();
+  const returnPath = localePath(locale, `/stores/${store.slug}`);
+  const { customer } = await requireMemberAccess(locale, returnPath);
+  const sponsored = await isStoreSponsored(store.id);
 
   // A search, not a dropped pin: we hold no coordinates and guessing one would
   // send somebody to the wrong street with our name on it.
@@ -75,6 +85,7 @@ export default async function StorePage({ params }: PageProps<"/[lang]/stores/[s
 
       <header className="glass mt-6 animate-rise rounded-3xl p-6 sm:p-8">
         <div className="flex flex-wrap items-center gap-2">
+          {sponsored ? <Badge tone="marigold">{t.stores.sponsored}</Badge> : null}
           <Badge tone="leaf">
             <ShieldCheckIcon /> {t.stores.verified}
           </Badge>
@@ -182,6 +193,13 @@ export default async function StorePage({ params }: PageProps<"/[lang]/stores/[s
           </div>
         )}
       </header>
+
+      <FarmerEnquiryForm
+        recipientType="STORE"
+        recipientId={store.id}
+        recipientName={store.storeName}
+        canShareEmail={customer.emailVerifiedAt !== null}
+      />
     </div>
   );
 }

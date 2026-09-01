@@ -9,6 +9,7 @@ npm-debug.log*
 .env.*
 !.env.example
 conf/config.yaml
+conf/client_secret*.json
 README.md
 Dockerfile
 .dockerignore

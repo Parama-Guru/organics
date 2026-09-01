@@ -16,7 +16,13 @@ import { getRedis, redisKey } from "./redis";
  * conf/config.ts.
  */
 
-export type SessionRecord = { customerId: string; createdAt: number };
+export type SessionRecord = {
+  customerId: string;
+  createdAt: number;
+  // Customer sessions set this; farmer sessions intentionally do not use the
+  // customer credential-version boundary.
+  sessionVersion?: number;
+};
 
 const memory = new Map<string, { value: string; expiresAt: number }>();
 
@@ -84,6 +90,17 @@ export async function dropSession(sessionId: string): Promise<void> {
   memory.delete(key);
 }
 
+/** Explicit sign-out must know whether the shared revocation actually landed. */
+export async function dropSessionStrict(sessionId: string): Promise<void> {
+  const key = storageKey(sessionId);
+  const redis = getRedis();
+  if (redis) {
+    await redis.del(key);
+    return;
+  }
+  memory.delete(key);
+}
+
 /**
  * Fixed-window counter. Returns how many hits remain and when the window
  * resets. Shared across instances when Redis is present, which is the point:
@@ -99,15 +116,17 @@ export async function consumeRateLimit(
 
   if (redis) {
     try {
-      const count = await redis.incr(key);
-      if (count === 1) await redis.expire(key, windowSeconds);
+      const [count, ttl] = (await redis.eval(
+        "local c=redis.call('INCR',KEYS[1]); local ttl=redis.call('TTL',KEYS[1]); if c==1 or ttl<0 then redis.call('EXPIRE',KEYS[1],ARGV[1]); ttl=tonumber(ARGV[1]); end; return {c,ttl}",
+        1,
+        key,
+        windowSeconds,
+      )) as [number, number];
       if (count <= limit) return { allowed: true, retryAfterSeconds: 0 };
-      const ttl = await redis.ttl(key);
       return { allowed: false, retryAfterSeconds: ttl > 0 ? ttl : windowSeconds };
     } catch {
-      // A limiter that fails open is better than a login page that 500s, and
-      // the per-process limiter below still applies.
-      return { allowed: true, retryAfterSeconds: 0 };
+      // Fall through to the in-process bucket. It is weaker across replicas,
+      // but never silently removes authentication throttling during Redis loss.
     }
   }
 

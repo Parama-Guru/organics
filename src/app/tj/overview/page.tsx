@@ -57,6 +57,7 @@ export default async function AdminOverview() {
   if (!(await isSignedIn())) redirect("/tj/login");
 
   const sevenDaysAgo = await weekAgo();
+  const now = new Date();
 
   const [
     pendingFarms,
@@ -76,6 +77,9 @@ export default async function AdminOverview() {
     closedStores,
     unansweredMessages,
     newMessages,
+    unresolvedEnquiries,
+    failedEnquiries,
+    activePromotions,
     recentEdits,
   ] = await Promise.all([
     prisma.farmer.count({ where: { status: "PENDING" } }),
@@ -103,6 +107,11 @@ export default async function AdminOverview() {
     prisma.organicStore.count({ where: { status: { in: ["SUSPENDED", "REJECTED"] } } }),
     prisma.contactMessage.count({ where: { handledAt: null } }),
     prisma.contactMessage.count({ where: { createdAt: { gte: sevenDaysAgo } } }),
+    prisma.privateEnquiry.count({ where: { handledAt: null } }),
+    prisma.privateEnquiry.count({ where: { handledAt: null, deliveryStatus: "FAILED" } }),
+    prisma.sponsoredPlacement.count({
+      where: { status: "ACTIVE", startsAt: { lte: now }, endsAt: { gt: now } },
+    }),
     prisma.product.findMany({
       where: { updatedAt: { gte: sevenDaysAgo } },
       orderBy: { updatedAt: "desc" },
@@ -199,6 +208,20 @@ export default async function AdminOverview() {
             alarming
           />
           <Stat label="Arrived this week" value={newMessages} href="/tj/messages" />
+        </div>
+      </section>
+
+      <section className="mt-8">
+        <h2 className="font-display text-lg text-bark-900">Buyer enquiries and promotion</h2>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <Stat label="Unresolved enquiries" value={unresolvedEnquiries} href="/tj/enquiries" alarming />
+          <Stat
+            label="Failed email delivery"
+            value={failedEnquiries}
+            href="/tj/enquiries?show=failed"
+            alarming
+          />
+          <Stat label="Sponsored now" value={activePromotions} href="/tj/sponsored" />
         </div>
       </section>
 

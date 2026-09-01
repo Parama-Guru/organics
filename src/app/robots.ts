@@ -13,8 +13,8 @@ export const dynamic = "force-dynamic";
  *
  * The staff and farmer areas are deliberately not listed. Naming a private path
  * in robots.txt publishes it to anyone who reads the file, which is the
- * opposite of what an unguessable path is for. Both trees send noindex in their
- * own metadata and 404 without a session, so a crawler has nothing to index.
+ * opposite of keeping operational routes out of discovery. Both trees send
+ * noindex metadata and enforce their own authentication boundaries.
  */
 export default function robots(): MetadataRoute.Robots {
   const base = loadConfig().app.site_url.replace(/\/$/, "");

@@ -7,10 +7,15 @@ import { z } from "zod";
 
 import { isSignedIn } from "@/lib/admin-auth";
 import { farmerApplicationSchema } from "@/lib/farmer-application-schema";
+import { deliverPrivateEnquiry, safeDeliveryError } from "@/lib/enquiry-delivery";
 import { FARMER_PORTAL, cancelFarmerInvite, farmerPortalEnabled, issueFarmerInvite } from "@/lib/farmer-auth";
+import { mailConfigured } from "@/lib/mail";
 import { prisma } from "@/lib/prisma";
+import { deleteCustomerAccount } from "@/lib/customer-delete";
 import { regionIdForName } from "@/lib/regions";
 import { loadConfig } from "@conf/config";
+import { updateSponsoredPlacementStatus } from "@/lib/sponsorships";
+import { endOfIndiaDate, startOfIndiaDate } from "@/lib/india-date";
 
 const decisionSchema = z.object({
   farmerId: z.string().min(1).max(60),
@@ -50,6 +55,19 @@ export async function decideFarmer(
   });
   if (!parsed.success) return { ok: false, message: "That request was malformed." };
 
+  if (status === "VERIFIED") {
+    const certificate = await prisma.farmer.findUnique({
+      where: { id: parsed.data.farmerId },
+      select: { certifiedUntil: true },
+    });
+    if (!certificate?.certifiedUntil || certificate.certifiedUntil <= new Date()) {
+      return {
+        ok: false,
+        message: "Record a future certificate expiry before approving this farm.",
+      };
+    }
+  }
+
   await prisma.farmer.update({
     where: { id: parsed.data.farmerId },
     data: {
@@ -57,6 +75,9 @@ export async function decideFarmer(
       // Clearing verifiedAt on the way out matters: the public queries gate on
       // status, but the "verified" badge reads verifiedAt.
       verifiedAt: status === "VERIFIED" ? new Date() : null,
+      ...(status === "VERIFIED"
+        ? {}
+        : { portalSessionVersion: { increment: 1 } }),
       // Only written when a note was actually supplied, so a decision without
       // one does not wipe the note left by a previous reviewer.
       ...(parsed.data.note ? { reviewNote: parsed.data.note } : {}),
@@ -98,7 +119,7 @@ export async function createFarmer(formData: FormData): Promise<ActionResult> {
       // reading "Certificate —" on the very claim the site is built on.
       certifier: input.certifier,
       certificateNo: input.certificateNo,
-      certifiedUntil: input.certifiedUntil ? new Date(input.certifiedUntil) : null,
+      certifiedUntil: endOfIndiaDate(input.certifiedUntil)!,
       certificateUrl: input.certificateUrl || null,
       // Added by an admin who has already done the checking, so it goes live.
       status: "VERIFIED",
@@ -174,7 +195,11 @@ export async function cancelInvite(formData: FormData): Promise<ActionResult> {
   const parsed = idSchema.safeParse({ id: formData.get("farmerId") });
   if (!parsed.success) return { ok: false, message: "That request was malformed." };
 
-  await cancelFarmerInvite(parsed.data.id);
+  try {
+    await cancelFarmerInvite(parsed.data.id);
+  } catch {
+    return { ok: false, message: "The invite store is unavailable; nothing was changed." };
+  }
 
   // Only clear the "invited" stamp when there is no password behind it;
   // otherwise this would lock out a farm that is already signed up.
@@ -202,10 +227,18 @@ export async function revokePortalAccess(formData: FormData): Promise<ActionResu
   const parsed = idSchema.safeParse({ id: formData.get("farmerId") });
   if (!parsed.success) return { ok: false, message: "That request was malformed." };
 
-  await cancelFarmerInvite(parsed.data.id);
+  try {
+    await cancelFarmerInvite(parsed.data.id);
+  } catch {
+    return { ok: false, message: "The invite store is unavailable; access was not changed." };
+  }
   await prisma.farmer.update({
     where: { id: parsed.data.id },
-    data: { passwordHash: null, portalEnabledAt: null },
+    data: {
+      passwordHash: null,
+      portalEnabledAt: null,
+      portalSessionVersion: { increment: 1 },
+    },
   });
 
   revalidatePath("/tj");
@@ -259,9 +292,28 @@ export async function setCustomerStatus(
   const parsed = idSchema.safeParse({ id: formData.get("customerId") });
   if (!parsed.success) return { ok: false, message: "That request was malformed." };
 
+  if (status === "SUSPENDED") {
+    const recurring = await prisma.customerSubscription.findUnique({
+      where: { customerId: parsed.data.id },
+      select: { providerSubscriptionId: true, providerStatus: true },
+    });
+    if (
+      recurring?.providerSubscriptionId &&
+      !["cancelled", "completed", "expired"].includes(recurring.providerStatus ?? "")
+    ) {
+      return {
+        ok: false,
+        message: "Cancel the buyer's recurring payment before suspending account access.",
+      };
+    }
+  }
+
   const { count } = await prisma.customer.updateMany({
     where: { id: parsed.data.id },
-    data: { status },
+    data: {
+      status,
+      ...(status === "SUSPENDED" ? { sessionVersion: { increment: 1 } } : {}),
+    },
   });
   if (count === 0) return { ok: false, message: "That account no longer exists." };
 
@@ -282,7 +334,16 @@ export async function deleteCustomer(formData: FormData): Promise<ActionResult> 
   const parsed = idSchema.safeParse({ id: formData.get("customerId") });
   if (!parsed.success) return { ok: false, message: "That request was malformed." };
 
-  await prisma.customer.deleteMany({ where: { id: parsed.data.id } });
+  const deleted = await deleteCustomerAccount(parsed.data.id);
+  if (!deleted.ok) {
+    return {
+      ok: false,
+      message:
+        deleted.reason === "NOT_FOUND"
+          ? "That account no longer exists."
+          : "The payment subscription could not be stopped, so the account was not deleted.",
+    };
+  }
 
   revalidatePath("/tj/buyers");
   return { ok: true };
@@ -402,5 +463,169 @@ export async function setMessageHandled(
   if (count === 0) return { ok: false, message: "That message no longer exists." };
 
   revalidatePath("/tj/messages");
+  return { ok: true };
+}
+
+export async function setEnquiryHandled(
+  handled: boolean,
+  formData: FormData,
+): Promise<ActionResult> {
+  if (!(await isSignedIn())) return NOT_SIGNED_IN;
+
+  const parsed = idSchema.safeParse({ id: formData.get("enquiryId") });
+  if (!parsed.success) return { ok: false, message: "That request was malformed." };
+
+  const { count } = await prisma.privateEnquiry.updateMany({
+    where: { id: parsed.data.id },
+    data: { handledAt: handled ? new Date() : null },
+  });
+  if (count === 0) return { ok: false, message: "That enquiry no longer exists." };
+
+  revalidatePath("/tj/enquiries");
+  return { ok: true };
+}
+
+export async function retryEnquiryDelivery(formData: FormData): Promise<ActionResult> {
+  if (!(await isSignedIn())) return NOT_SIGNED_IN;
+  if (!mailConfigured()) return { ok: false, message: "SMTP is not configured." };
+
+  const parsed = idSchema.safeParse({ id: formData.get("enquiryId") });
+  if (!parsed.success) return { ok: false, message: "That request was malformed." };
+
+  const enquiry = await prisma.privateEnquiry.findUnique({
+    where: { id: parsed.data.id },
+    include: {
+      customer: { select: { name: true } },
+      farmer: { select: { status: true, certifiedUntil: true } },
+      store: { select: { status: true } },
+    },
+  });
+  if (!enquiry) return { ok: false, message: "That enquiry no longer exists." };
+  const recipientStillValid = enquiry.farmer
+    ? enquiry.farmer.status === "VERIFIED" &&
+      Boolean(enquiry.farmer.certifiedUntil && enquiry.farmer.certifiedUntil > new Date())
+    : enquiry.store?.status === "VERIFIED";
+  if (!recipientStillValid) {
+    return { ok: false, message: "The seller is no longer verified; delivery was not retried." };
+  }
+
+  try {
+    await deliverPrivateEnquiry(enquiry);
+    await prisma.privateEnquiry.update({
+      where: { id: enquiry.id },
+      data: {
+        deliveryStatus: "SENT",
+        deliveryAttempts: { increment: 1 },
+        lastDeliveryError: null,
+        sentAt: new Date(),
+      },
+    });
+  } catch (error) {
+    await prisma.privateEnquiry.update({
+      where: { id: enquiry.id },
+      data: {
+        deliveryStatus: "FAILED",
+        deliveryAttempts: { increment: 1 },
+        lastDeliveryError: safeDeliveryError(error),
+      },
+    });
+    revalidatePath("/tj/enquiries");
+    return { ok: false, message: "Delivery failed again; the enquiry remains in the queue." };
+  }
+
+  revalidatePath("/tj/enquiries");
+  return { ok: true };
+}
+
+const promotionSchema = z.object({
+  targetType: z.enum(["FARMER", "STORE"]),
+  targetId: z.string().min(1).max(60),
+  startsAt: z.string().transform((value, ctx) => {
+    const date = startOfIndiaDate(value);
+    if (!date) {
+      ctx.addIssue({ code: "custom", message: "invalid start date" });
+      return z.NEVER;
+    }
+    return date;
+  }),
+  endsAt: z.string().transform((value, ctx) => {
+    const date = endOfIndiaDate(value);
+    if (!date) {
+      ctx.addIssue({ code: "custom", message: "invalid end date" });
+      return z.NEVER;
+    }
+    return date;
+  }),
+  priority: z.coerce.number().int().min(0).max(100),
+  note: z.string().trim().max(500).optional(),
+}).refine((value) => value.endsAt > value.startsAt, { path: ["endsAt"] });
+
+export async function createSponsoredPlacement(formData: FormData): Promise<ActionResult> {
+  if (!(await isSignedIn())) return NOT_SIGNED_IN;
+
+  const parsed = promotionSchema.safeParse({
+    targetType: formData.get("targetType"),
+    targetId: formData.get("targetId"),
+    startsAt: formData.get("startsAt"),
+    endsAt: formData.get("endsAt"),
+    priority: formData.get("priority"),
+    note: formData.get("note") || undefined,
+  });
+  if (!parsed.success) return { ok: false, message: "Check the target, dates and priority." };
+
+  const input = parsed.data;
+  const exists = input.targetType === "FARMER"
+    ? await prisma.farmer.count({
+        where: {
+          id: input.targetId,
+          status: "VERIFIED",
+          certifiedUntil: { gte: new Date() },
+        },
+      })
+    : await prisma.organicStore.count({ where: { id: input.targetId, status: "VERIFIED" } });
+  if (!exists) return { ok: false, message: "Only a verified farmer or store can be sponsored." };
+
+  await prisma.sponsoredPlacement.create({
+    data: {
+      ...(input.targetType === "FARMER"
+        ? { farmerId: input.targetId }
+        : { storeId: input.targetId }),
+      startsAt: input.startsAt,
+      endsAt: input.endsAt,
+      priority: input.priority,
+      internalNote: input.note || null,
+    },
+  });
+  revalidatePath("/tj/sponsored");
+  revalidatePath("/ta/farmers");
+  revalidatePath("/ta/stores");
+  revalidatePath("/en/farmers");
+  revalidatePath("/en/stores");
+  return { ok: true };
+}
+
+export async function setSponsoredPlacementStatus(
+  status: "ACTIVE" | "PAUSED" | "ENDED",
+  formData: FormData,
+): Promise<ActionResult> {
+  if (!(await isSignedIn())) return NOT_SIGNED_IN;
+  const parsed = idSchema.safeParse({ id: formData.get("placementId") });
+  if (!parsed.success) return { ok: false, message: "That request was malformed." };
+
+  const result = await updateSponsoredPlacementStatus(parsed.data.id, status);
+  if (result !== "UPDATED") {
+    return {
+      ok: false,
+      message:
+        result === "EXPIRED"
+          ? "An ended or expired promotion cannot be resumed; create a new window instead."
+          : "That promotion no longer exists.",
+    };
+  }
+  revalidatePath("/tj/sponsored");
+  revalidatePath("/ta/farmers");
+  revalidatePath("/ta/stores");
+  revalidatePath("/en/farmers");
+  revalidatePath("/en/stores");
   return { ok: true };
 }

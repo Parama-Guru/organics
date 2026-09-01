@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { AcceptInviteForm } from "@/app/pannai/forms";
-import { FARMER_PORTAL, getFarmer, inviteIsOutstanding } from "@/lib/farmer-auth";
+import { FARMER_PORTAL, farmerInviteMatches, getFarmer } from "@/lib/farmer-auth";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -20,7 +20,7 @@ export default async function AcceptInvitePage({
   // Checked before the form is drawn rather than after a password is typed, so
   // nobody chooses a password only to be told the link was already dead.
   const farm =
-    token && farmId && (await inviteIsOutstanding(farmId))
+    token && farmId && (await farmerInviteMatches(farmId, token))
       ? await prisma.farmer.findFirst({
           where: { id: farmId, status: "VERIFIED" },
           select: { farmName: true, passwordHash: true },

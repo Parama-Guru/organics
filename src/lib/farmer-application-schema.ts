@@ -1,10 +1,12 @@
 import { z } from "zod";
 
+import { endOfIndiaDate } from "./india-date";
+
 // Shared by the form and the route so the two cannot drift.
 export const farmerApplicationSchema = z.object({
   farmName: z.string().trim().min(2).max(120),
   contactName: z.string().trim().min(2).max(120),
-  email: z.email().max(200),
+  email: z.email().max(200).toLowerCase(),
   phone: z
     .string()
     .trim()
@@ -22,10 +24,12 @@ export const farmerApplicationSchema = z.object({
   // listed farm, so it cannot accept a farm that has not supplied one.
   certifier: z.string().trim().min(3).max(160),
   certificateNo: z.string().trim().min(3).max(80),
-  // Optional, but if given it has to be a real date the UI can show.
-  certifiedUntil: z
-    .union([z.iso.date(), z.literal("")])
-    .optional(),
+  // Required because an undated or expired certificate cannot support a
+  // continuing verified-organic claim.
+  certifiedUntil: z.iso.date().refine((value) => {
+    const expiry = endOfIndiaDate(value);
+    return Boolean(expiry && expiry > new Date());
+  }, "certificate expiry must be in the future"),
   certificateUrl: z.union([z.url().max(500), z.literal("")]).optional(),
 });
 

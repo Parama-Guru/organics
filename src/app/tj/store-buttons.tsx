@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 
-import { decideStore, deleteStore, setMessageHandled, type ActionResult } from "@/app/tj/actions";
+import { decideStore, deleteStore, retryEnquiryDelivery, setEnquiryHandled, setMessageHandled, type ActionResult } from "@/app/tj/actions";
 import { Button } from "@/components/ui/button";
 
 type Status = "VERIFIED" | "REJECTED" | "SUSPENDED" | "PENDING";
@@ -153,6 +153,67 @@ export function MessageHandledButton({
           {error}
         </p>
       ) : null}
+    </div>
+  );
+}
+
+export function EnquiryHandledButton({
+  enquiryId,
+  handled,
+}: {
+  enquiryId: string;
+  handled: boolean;
+}) {
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+
+  function run() {
+    const form = new FormData();
+    form.set("enquiryId", enquiryId);
+    startTransition(async () => {
+      setError(null);
+      const result = await setEnquiryHandled(!handled, form);
+      if (!result.ok) setError(result.message);
+    });
+  }
+
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <Button
+        type="button"
+        size="sm"
+        variant={handled ? "ghost" : "primary"}
+        className={handled ? "border-bark-200" : ""}
+        disabled={pending}
+        onClick={run}
+      >
+        {handled ? "Reopen" : "Mark resolved"}
+      </Button>
+      {error ? <p className="text-sm text-red-700">{error}</p> : null}
+    </div>
+  );
+}
+
+export function RetryEnquiryButton({ enquiryId }: { enquiryId: string }) {
+  const [pending, startTransition] = useTransition();
+  const [message, setMessage] = useState<string | null>(null);
+
+  function run() {
+    const form = new FormData();
+    form.set("enquiryId", enquiryId);
+    startTransition(async () => {
+      setMessage(null);
+      const result = await retryEnquiryDelivery(form);
+      setMessage(result.ok ? "Delivery sent." : result.message);
+    });
+  }
+
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <Button type="button" size="sm" variant="secondary" disabled={pending} onClick={run}>
+        {pending ? "Retrying…" : "Retry delivery"}
+      </Button>
+      {message ? <p role="status" className="text-sm text-bark-600">{message}</p> : null}
     </div>
   );
 }
