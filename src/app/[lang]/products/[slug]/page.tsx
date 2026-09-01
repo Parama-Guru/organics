@@ -135,9 +135,13 @@ export default async function ProductPage({ params }: PageProps<"/[lang]/product
               customer ? (
                 <SaveButton kind="product" id={product.id} initialSaved={saved} size="lg" />
               ) : (
+                // Without the return path, signing in lands on the account page
+                // and the listing they meant to save is gone.
                 <Button
                   as={Link}
-                  href={localePath(locale, "/account/sign-in")}
+                  href={`${localePath(locale, "/account/sign-in")}?next=${encodeURIComponent(
+                    localePath(locale, `/products/${product.slug}`),
+                  )}`}
                   variant="ghost"
                   size="lg"
                 >

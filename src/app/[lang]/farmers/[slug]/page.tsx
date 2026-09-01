@@ -189,9 +189,13 @@ export default async function FarmerPage({ params }: PageProps<"/[lang]/farmers/
                 customer ? (
                   <SaveButton kind="farmer" id={farmer.id} initialSaved={saved} size="lg" />
                 ) : (
+                  // Without the return path, signing in lands on the account page
+                  // and the farm they meant to save is gone.
                   <Button
                     as={Link}
-                    href={localePath(locale, "/account/sign-in")}
+                    href={`${localePath(locale, "/account/sign-in")}?next=${encodeURIComponent(
+                      localePath(locale, `/farmers/${farmer.slug}`),
+                    )}`}
                     variant="ghost"
                     size="lg"
                   >
