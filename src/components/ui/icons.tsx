@@ -168,3 +168,30 @@ export function BasketIcon({ className = "" }: Props) {
     </svg>
   );
 }
+
+export function BookmarkIcon({ className = "" }: Props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden className={`${base} ${className}`}>
+      <path
+        d="M6.5 3.75h11a1 1 0 0 1 1 1v15.4a.5.5 0 0 1-.77.42L12 16.6l-5.73 3.97a.5.5 0 0 1-.77-.42V4.75a1 1 0 0 1 1-1Z"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function UserIcon({ className = "" }: Props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden className={`${base} ${className}`}>
+      <circle cx="12" cy="8" r="3.75" stroke="currentColor" strokeWidth="1.7" />
+      <path
+        d="M4.5 20c.9-3.6 3.8-5.6 7.5-5.6s6.6 2 7.5 5.6"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}

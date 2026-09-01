@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { PhoneIcon, WhatsAppIcon } from "@/components/ui/icons";
-import { dialNumber, whatsappNumber } from "@/components/farmer-contact";
+import { dialNumber, showFarmerPhone, whatsappNumber } from "@/components/farmer-contact";
 import { getDictionary } from "@/lib/i18n/server";
 
 /**
@@ -9,6 +9,9 @@ import { getDictionary } from "@/lib/i18n/server";
  */
 export async function StickyCallBar({ phone }: { phone: string }) {
   const t = await getDictionary();
+
+  // Nothing to pin to the bottom of the screen until the numbers are published.
+  if (!showFarmerPhone()) return null;
 
   return (
     <>

@@ -1,5 +1,6 @@
 import Image from "next/image";
 
+import { loadConfig } from "@conf/config";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MapPinIcon, PhoneIcon, ShieldCheckIcon, WhatsAppIcon } from "@/components/ui/icons";
@@ -13,7 +14,7 @@ type Farmer = {
   farmName: string;
   contactName: string;
   phone: string;
-  region: string;
+  region: { slug: string; name: string; nameTa: string | null };
   about: string | null;
   aboutTa: string | null;
   photoUrl: string | null;
@@ -31,6 +32,11 @@ export function whatsappNumber(phone: string): string {
 
 export function dialNumber(phone: string): string {
   return phone.replace(/[^\d+]/g, "");
+}
+
+/** Config-driven, so the numbers can be published without a code change. */
+export function showFarmerPhone(): boolean {
+  return loadConfig().app.show_farmer_phone;
 }
 
 export async function FarmerContact({ farmer }: { farmer: Farmer }) {
@@ -101,29 +107,38 @@ export async function FarmerContact({ farmer }: { farmer: Farmer }) {
             </p>
           ) : null}
 
-          <div className="mt-6 flex flex-wrap items-center gap-3">
-            {/* Labelled rather than repeating the digits: the number is already
-                the primary button at the top of the page and again in the sticky
-                bar, and three copies of one phone number reads as filler. */}
-            <Button as="a" href={`tel:${dialNumber(farmer.phone)}`} size="lg">
-              <PhoneIcon /> {t.contact.callNow}
-            </Button>
-            <Button
-              as="a"
-              href={`https://wa.me/${whatsappNumber(farmer.phone)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              variant="secondary"
-              size="lg"
-            >
-              <WhatsAppIcon /> {t.contact.whatsapp}
-            </Button>
-            <Badge tone="neutral">{t.contact.callWindow}</Badge>
-          </div>
+          {showFarmerPhone() ? (
+            <>
+              <div className="mt-6 flex flex-wrap items-center gap-3">
+                {/* Labelled rather than repeating the digits: the number is already
+                    the primary button at the top of the page and again in the sticky
+                    bar, and three copies of one phone number reads as filler. */}
+                <Button as="a" href={`tel:${dialNumber(farmer.phone)}`} size="lg">
+                  <PhoneIcon /> {t.contact.callNow}
+                </Button>
+                <Button
+                  as="a"
+                  href={`https://wa.me/${whatsappNumber(farmer.phone)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  variant="secondary"
+                  size="lg"
+                >
+                  <WhatsAppIcon /> {t.contact.whatsapp}
+                </Button>
+                <Badge tone="neutral">{t.contact.callWindow}</Badge>
+              </div>
 
-          <p className="mt-4 max-w-2xl leading-relaxed text-bark-600">
-            {format(t.contact.note, { seller: farmer.farmName })}
-          </p>
+              <p className="mt-4 max-w-2xl leading-relaxed text-bark-600">
+                {format(t.contact.note, { seller: farmer.farmName })}
+              </p>
+            </>
+          ) : (
+            <div className="mt-6 max-w-2xl rounded-2xl border border-bark-200 bg-bark-50/70 p-5">
+              <p className="font-semibold text-ink">{t.contact.phoneSoon}</p>
+              <p className="mt-1 leading-relaxed text-bark-600">{t.contact.phoneSoonNote}</p>
+            </div>
+          )}
         </div>
       </div>
     </section>

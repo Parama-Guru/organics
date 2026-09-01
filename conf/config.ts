@@ -20,6 +20,10 @@ const configSchema = z
         // hidden entirely, rather than shipping a placeholder address.
         contact_email: z.string().default(""),
         contact_place: z.string().default(""),
+        // Publishing the farm's number is the whole point of the directory, but
+        // it stays off until the farms have agreed to it. While false, every
+        // call and WhatsApp button becomes a "details coming soon" note.
+        show_farmer_phone: z.boolean().default(false),
       })
       .prefault({}),
     database: z
@@ -36,6 +40,36 @@ const configSchema = z
           .prefault({}),
       })
       .prefault({}),
+    redis: z
+      .object({
+        // Holds buyer sessions and the login rate limiter. Both need to be shared
+        // across instances, which process memory cannot do.
+        url: z.string().default(""),
+        // Prefixed so one Redis instance can serve several environments.
+        key_prefix: z.string().default("organics:"),
+      })
+      .prefault({}),
+    accounts: z
+      .object({
+        // Buyer accounts: saved produce and saved farms. Off by default, so a
+        // deployment does not start collecting personal data unasked.
+        enabled: z.boolean().default(false),
+        // Signs the session cookie. Rotating it signs everyone out.
+        session_secret: z.string().default(""),
+        session_ttl_days: z.number().int().min(1).max(90).default(30),
+      })
+      .prefault({}),
+    mail: z
+      .object({
+        // Password reset is the only thing that sends mail. With no host the
+        // reset link is not offered at all rather than half-working.
+        host: z.string().default(""),
+        port: z.number().int().min(1).max(65535).default(587),
+        user: z.string().default(""),
+        password: z.string().default(""),
+        from: z.string().default(""),
+      })
+      .prefault({}),
     admin: z
       .object({
         // scrypt hash of the admin passphrase, as `scrypt:<salt-hex>:<key-hex>`.
@@ -48,6 +82,43 @@ const configSchema = z
       .prefault({}),
   })
   .check((ctx) => {
+    // A signing secret with no store, or a store with no secret, is a
+    // half-configured login. Refuse both rather than start and fail per request.
+    if (ctx.value.accounts.enabled && ctx.value.accounts.session_secret.length < 32) {
+      ctx.issues.push({
+        code: "custom",
+        input: ctx.value.accounts.session_secret,
+        path: ["accounts", "session_secret"],
+        message: "must be at least 32 characters when accounts.enabled is true",
+      });
+    }
+
+    // In-process session storage works for one container and silently signs
+    // people out as soon as a second one starts. Allowed in dev, never in prod.
+    if (ctx.value.accounts.enabled && ctx.value.app.env === "prod" && !ctx.value.redis.url) {
+      ctx.issues.push({
+        code: "custom",
+        input: ctx.value.redis.url,
+        path: ["redis", "url"],
+        message: "required when accounts.enabled is true and app.env is prod",
+      });
+    }
+
+    // The trust page invites people to report a bad listing and the privacy
+    // page offers a copy of their data — both render the address from here, and
+    // both silently drop the offer when it is blank. A directory that asks the
+    // public to trust its verification, with no way to reach it, is worse than
+    // one that never made the claim. Required before going live.
+    if (ctx.value.app.env === "prod" && !ctx.value.app.contact_email) {
+      ctx.issues.push({
+        code: "custom",
+        input: ctx.value.app.contact_email,
+        path: ["app", "contact_email"],
+        message:
+          "required when app.env is prod — the trust and privacy pages promise a contact address",
+      });
+    }
+
     // A hash with no signing secret would mean unsigned session cookies, i.e.
     // anyone could forge one. Refuse to start half-configured.
     if (ctx.value.admin.password_hash && ctx.value.admin.session_secret.length < 32) {

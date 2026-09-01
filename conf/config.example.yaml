@@ -24,6 +24,10 @@ app:
   # line is hidden — better nothing than a placeholder address on a trust page.
   contact_email: "${CONTACT_EMAIL:-}"
   contact_place: "${CONTACT_PLACE:-}"
+  # Publishing each farm's phone number is the point of the directory, but it
+  # stays off until the farms have agreed. While false the call and WhatsApp
+  # buttons are replaced by a "contact details coming soon" note.
+  show_farmer_phone: ${SHOW_FARMER_PHONE:-false}
 
 database:
   # System of record, reached through Prisma. Everything the site reads lives
@@ -35,6 +39,33 @@ database:
     # Session-mode pooler (port 5432). Prisma Migrate needs a real session because
     # a transaction-mode pooler cannot hold advisory locks or run DDL reliably.
     direct_url: "${DIRECT_URL:-}"
+
+# Buyer accounts: a saved list of produce and farms to call later. Sessions live
+# in Redis, so signing out takes effect immediately on every instance.
+# Leave enabled false and the whole account area 404s.
+accounts:
+  enabled: ${ACCOUNTS_ENABLED:-false}
+  # 32+ characters. Generate with: openssl rand -base64 48
+  session_secret: "${ACCOUNTS_SESSION_SECRET:-}"
+  session_ttl_days: 30
+
+# Session store and the login rate limiter. Both have to be shared across
+# instances, which process memory cannot do. Required once app.env is prod and
+# accounts are enabled; in dev an in-process store stands in.
+redis:
+  url: "${REDIS_URL:-}"
+  key_prefix: "${REDIS_KEY_PREFIX:-organics:}"
+
+# Sends the password-reset link, and nothing else. Leave host empty and the
+# "forgot password" route is not offered, rather than sending nowhere.
+# In dev with no host, the link is written to the server log so the flow is
+# still testable; that never happens when app.env is prod.
+mail:
+  host: "${SMTP_HOST:-}"
+  port: ${SMTP_PORT:-587}
+  user: "${SMTP_USER:-}"
+  password: "${SMTP_PASSWORD:-}"
+  from: "${SMTP_FROM:-}"
 
 # Staff-only farm verification area at /admin. Not linked from the site and
 # disallowed in robots.txt. Leave password_hash empty and the whole tree 404s,

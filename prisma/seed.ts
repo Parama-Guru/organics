@@ -18,6 +18,17 @@ function artFor(slug: string): string {
   return `/products/${slug}.svg`;
 }
 
+// Districts, with their Tamil spelling. The UI reads these from the row, so an
+// admin adding a district gets it translated without a code change.
+const regions = [
+  { slug: "nilgiris", name: "Nilgiris", nameTa: "நீலகிரி" },
+  { slug: "thanjavur", name: "Thanjavur", nameTa: "தஞ்சாவூர்" },
+  { slug: "erode", name: "Erode", nameTa: "ஈரோடு" },
+  { slug: "coorg", name: "Coorg", nameTa: "குடகு" },
+  { slug: "ratnagiri", name: "Ratnagiri", nameTa: "ரத்னகிரி" },
+  { slug: "himachal", name: "Himachal", nameTa: "இமாசலம்" },
+];
+
 type SeedFarmer = {
   slug: string;
   contactName: string;
@@ -248,28 +259,8 @@ const catalog: Array<{
         region: "Thanjavur",
         stock: 70,
         farmerSlug: "kaveri-farms",
-      },      {
-        name: "Little Millet",
-        slug: "little-millet",
-        description: "Samai from a rainfed plot, hulled but unpolished. Cooks like a short-grain rice.",
-        priceCents: 21900,
-        unit: "2 kg",
-        emoji: "\u{1F33E}",
-        region: "Thanjavur",
-        stock: 44,
-        farmerSlug: "kaveri-farms",
       },
       {
-        name: "Black Urad Whole",
-        slug: "black-urad-whole",
-        description: "Skin-on urad for a properly dark, tempered dal. Sorted by hand, never polished.",
-        priceCents: 19900,
-        unit: "1 kg",
-        emoji: "\u{1FAD8}",
-        region: "Thanjavur",
-        stock: 58,
-        farmerSlug: "kaveri-farms",
-      },      {
         name: "Country Okra",
         slug: "country-okra",
         description: "Short, ridged native bhindi that stays firm in the pan instead of turning slimy.",
@@ -501,6 +492,28 @@ const catalog: Array<{
         emoji: "\u{1F33E}",
         region: "Thanjavur",
         stock: 50,
+        farmerSlug: "kaveri-farms",
+      },
+      {
+        name: "Little Millet",
+        slug: "little-millet",
+        description: "Samai from a rainfed plot, hulled but unpolished. Cooks like a short-grain rice.",
+        priceCents: 21900,
+        unit: "2 kg",
+        emoji: "\u{1F33E}",
+        region: "Thanjavur",
+        stock: 44,
+        farmerSlug: "kaveri-farms",
+      },
+      {
+        name: "Black Urad Whole",
+        slug: "black-urad-whole",
+        description: "Skin-on urad for a properly dark, tempered dal. Sorted by hand, never polished.",
+        priceCents: 19900,
+        unit: "1 kg",
+        emoji: "\u{1FAD8}",
+        region: "Thanjavur",
+        stock: 58,
         farmerSlug: "kaveri-farms",
       },
     ],
@@ -756,10 +769,27 @@ const productTa: Record<string, { name: string; description: string }> = {
 async function main() {
   const farmerIdBySlug = new Map<string, string>();
 
+  // Districts are their own table, so the Tamil spelling lives with the data
+  // rather than in a hard-coded map in the UI layer.
+  const regionIdByName = new Map<string, string>();
+  for (const region of regions) {
+    const saved = await prisma.region.upsert({
+      where: { slug: region.slug },
+      update: { name: region.name, nameTa: region.nameTa },
+      create: region,
+      select: { id: true, name: true },
+    });
+    regionIdByName.set(saved.name, saved.id);
+  }
+
   for (const farmer of farmers) {
-    const { status, certifiedUntil, checkedDaysAgo, ...rest } = farmer;
+    const { status, certifiedUntil, checkedDaysAgo, region, ...rest } = farmer;
+    const regionId = regionIdByName.get(region);
+    if (!regionId) throw new Error(`Unknown region "${region}" on ${farmer.slug}`);
+
     const data = {
       ...rest,
+      regionId,
       status,
       photoUrl: `/farms/${farmer.slug}.svg`,
       certifiedUntil: certifiedUntil ? new Date(certifiedUntil) : null,
@@ -798,8 +828,12 @@ async function main() {
 
       const art = artFor(product.slug);
       const productTamil = productTa[product.slug];
+      const { region: productRegion, ...restProduct } = productData;
       const data = {
-        ...productData,
+        ...restProduct,
+        // The listing's district is the farm's district; storing a second copy
+        // is how they drifted apart before.
+        regionId: productRegion ? (regionIdByName.get(productRegion) ?? null) : null,
         nameTa: productTamil?.name ?? null,
         descriptionTa: productTamil?.description ?? null,
         imageUrl: art,

@@ -1,6 +1,7 @@
 import type { Prisma } from "@prisma/client";
 import { unstable_cache } from "next/cache";
 
+import { DEFAULT_LOCALE, type Locale } from "./i18n/config";
 import type { ProductSort } from "./product-query-schema";
 import { prisma } from "./prisma";
 
@@ -23,10 +24,17 @@ export const productSummarySelect = {
   unit: true,
   emoji: true,
   imageUrl: true,
-  region: true,
+  region: { select: { slug: true, name: true, nameTa: true } },
   stock: true,
   category: { select: { name: true, nameTa: true, slug: true } },
-  farmer: { select: { slug: true, farmName: true, region: true, verifiedAt: true } },
+  farmer: {
+    select: {
+      slug: true,
+      farmName: true,
+      verifiedAt: true,
+      region: { select: { slug: true, name: true, nameTa: true } },
+    },
+  },
 } satisfies Prisma.ProductSelect;
 
 const productDetailSelect = {
@@ -41,7 +49,7 @@ const productDetailSelect = {
       farmName: true,
       contactName: true,
       phone: true,
-      region: true,
+      region: { select: { slug: true, name: true, nameTa: true } },
       about: true,
       aboutTa: true,
       photoUrl: true,
@@ -90,13 +98,22 @@ function likePattern(term: string): string {
 // single query with `OR farmer.farmName ILIKE ...` degrades to a sequential scan
 // (measured: 87ms at 20k rows vs 0.4ms for this form). A UNION lets the planner
 // pick the trigram index for each branch independently.
+//
+// Every branch searches the Tamil column as well as the English one. Omitting
+// them meant a Tamil-only site could not find its own produce: "தக்காளி"
+// returned nothing while நாட்டுத் தக்காளி sat on the page behind the search box.
 async function searchProductIds(term: string): Promise<string[]> {
   const pattern = likePattern(term);
 
   const rows = await prisma.$queryRaw<{ id: string }[]>`
     SELECT id FROM "Product"
       WHERE "isActive"
-        AND (name ILIKE ${pattern} OR description ILIKE ${pattern} OR region ILIKE ${pattern})
+        AND (name ILIKE ${pattern} OR description ILIKE ${pattern}
+          OR "nameTa" ILIKE ${pattern} OR "descriptionTa" ILIKE ${pattern})
+    UNION
+    SELECT p.id FROM "Product" p
+      JOIN "Region" r ON r.id = p."regionId"
+      WHERE p."isActive" AND (r.name ILIKE ${pattern} OR r."nameTa" ILIKE ${pattern})
     UNION
     SELECT p.id FROM "Product" p
       JOIN "Farmer" f ON f.id = p."farmerId"
@@ -104,7 +121,7 @@ async function searchProductIds(term: string): Promise<string[]> {
     UNION
     SELECT p.id FROM "Product" p
       JOIN "Category" c ON c.id = p."categoryId"
-      WHERE p."isActive" AND c.name ILIKE ${pattern}
+      WHERE p."isActive" AND (c.name ILIKE ${pattern} OR c."nameTa" ILIKE ${pattern})
     -- Bounded so a term matching most of the catalogue cannot build a huge IN list.
     -- Past this size the answer is pagination, not a longer list.
     LIMIT 5000
@@ -119,29 +136,38 @@ export async function getProducts(options: {
   search?: string;
   sort?: ProductSort;
   limit?: number;
+  locale?: Locale;
 }) {
-  const { categorySlug, region, search, sort = "name", limit = 60 } = options;
+  const { categorySlug, region, search, sort = "name", limit = 60, locale = DEFAULT_LOCALE } = options;
 
   const searchIds = search?.trim() ? await searchProductIds(search.trim()) : null;
 
   // An empty result short-circuits instead of sending `IN ()` to Postgres.
   if (searchIds !== null && searchIds.length === 0) return [];
 
+  // The chip says "அகரவரிசை" — Tamil alphabetical order. Sorting by the English
+  // `name` delivered A2, Bilona, Farm butter… which to a Tamil reader is random
+  // noise, because the key being sorted is not the text on screen. Sort by the
+  // column actually being displayed. `nameTa` is nullable, so fall back to the
+  // English name for any listing that has not been translated yet.
+  const nameOrder: Prisma.ProductOrderByWithRelationInput[] =
+    locale === "ta" ? [{ nameTa: { sort: "asc", nulls: "last" } }, { name: "asc" }] : [{ name: "asc" }];
+
   // Grouping by category put every dairy line first, and one farm supplies all
   // of them — the grid opened with five identical farm names. Sorting by product
   // name interleaves farms and categories instead.
   const orderBy: Prisma.ProductOrderByWithRelationInput[] =
     sort === "price-asc"
-      ? [{ priceCents: "asc" }, { name: "asc" }]
+      ? [{ priceCents: "asc" }, ...nameOrder]
       : sort === "price-desc"
-        ? [{ priceCents: "desc" }, { name: "asc" }]
-        : [{ name: "asc" }];
+        ? [{ priceCents: "desc" }, ...nameOrder]
+        : nameOrder;
 
   return prisma.product.findMany({
     where: {
       ...publicProductWhere,
       ...(categorySlug ? { category: { slug: categorySlug } } : {}),
-      ...(region ? { region: { equals: region, mode: "insensitive" } } : {}),
+      ...(region ? { region: { slug: region } } : {}),
       ...(searchIds ? { id: { in: searchIds } } : {}),
     },
     select: productSummarySelect,
@@ -150,20 +176,19 @@ export async function getProducts(options: {
   });
 }
 
-// Facets are read on every shop request but only change when the catalogue does,
-// and the distinct-region query scans the whole table. Cached so clicking a
-// filter does not pay for them again.
+// Facets are read on every shop request but only change when the catalogue does.
+// Cached so clicking a filter does not pay for them again.
 export const getRegions = unstable_cache(
-  async (): Promise<string[]> => {
-    const rows = await prisma.product.findMany({
-      where: { ...publicProductWhere, region: { not: null } },
-      select: { region: true },
-      distinct: ["region"],
-      orderBy: { region: "asc" },
-    });
-
-    return rows.flatMap((row) => (row.region ? [row.region] : []));
-  },
+  async () =>
+    prisma.region.findMany({
+      // Only districts that actually have something listed.
+      where: { products: { some: publicProductWhere } },
+      select: { slug: true, name: true, nameTa: true },
+      // Ordered by the Tamil name, because that is what the chips display. By
+      // English name the row read குடகு, ஈரோடு, இமாசலம், நீலகிரி — sorted by a
+      // key the reader cannot see.
+      orderBy: [{ nameTa: { sort: "asc", nulls: "last" } }, { name: "asc" }],
+    }),
   ["shop-regions"],
   { revalidate: 300, tags: ["catalog"] },
 );

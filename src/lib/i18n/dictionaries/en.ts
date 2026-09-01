@@ -22,6 +22,94 @@ export const en = {
     sell: "Sell with us",
     language: "Language",
     switchTo: "Switch to {language}",
+    account: "My list",
+    signIn: "Sign in",
+  },
+
+  account: {
+    signInTitle: "Sign in",
+    signInIntro: "Keep a list of the produce and farms you mean to ring.",
+    signUpTitle: "Create an account",
+    signUpIntro:
+      "Only to save a shortlist. We take no payment, so we never ask for an address or a card.",
+    name: "Your name",
+    email: "Email",
+    password: "Password",
+    passwordHint: "at least 10 characters",
+    phone: "Phone",
+    phoneHint: "optional — helps you recover the account. Never sent to farms.",
+    region: "District",
+    regionHint: "optional",
+    language: "Language",
+    submitSignIn: "Sign in",
+    submitSignUp: "Create account",
+    working: "One moment…",
+    noAccount: "No account yet?",
+    createOne: "Create one",
+    haveAccount: "Already have an account?",
+    signInInstead: "Sign in",
+    signOut: "Sign out",
+    title: "My list",
+    greeting: "Hello, {name}",
+    memberSince: "With us since {date}",
+    savedProduce: "Saved produce",
+    savedFarms: "Saved farms",
+    noSavedProduce: "Nothing saved yet. Tap Save on any listing.",
+    noSavedFarms: "No farms saved yet.",
+    browseProduce: "Browse produce",
+    browseFarms: "Browse farms",
+    profile: "Your details",
+    profileIntro: "Only you see this. We never publish a buyer's details.",
+    save: "Save changes",
+    saveItem: "Save",
+    savedItem: "Saved",
+    removeItem: "Remove",
+    signInToSave: "Sign in to save",
+    privacyNote:
+      "We store your email, name and — if you give them — your phone and district. Nothing else, and nothing reaches a farm unless you ring them.",
+    errorInvalid: "Check the highlighted fields.",
+    fieldName: "Enter at least 2 characters.",
+    fieldEmail: "Enter a valid email address.",
+    fieldPassword: "Use at least 10 characters, and not your email address.",
+    fieldPhone: "Enter a reachable phone number, or leave it blank.",
+    savedChanges: "Saved.",
+    security: "Password",
+    currentPassword: "Current password",
+    newPassword: "New password",
+    changePassword: "Change password",
+    changePasswordNote:
+      "Changing it signs you out on every device, including this one, so sign back in with the new password.",
+    errorCurrentPassword: "That current password is wrong.",
+    dangerTitle: "Delete this account",
+    dangerBody:
+      "This removes your account, your saved produce and your saved farms. It is immediate and cannot be undone. The farms are not told.",
+    dangerConfirmLabel: "Type DELETE to confirm",
+    dangerConfirm: "DELETE",
+    dangerButton: "Delete my account",
+    dangerNotConfirmed: "Type DELETE in the box to confirm.",
+    dangerWrongPassword: "That password is wrong. Nothing was deleted.",
+    dangerPasswordLabel: "Your password",
+    deleted: "Your account and your saved list have been deleted.",
+    forgot: "Forgotten your password?",
+    forgotTitle: "Reset your password",
+    forgotIntro:
+      "Give us the address you signed up with and we will email a link. The link works once and lasts 30 minutes.",
+    forgotSubmit: "Email me a link",
+    forgotSent:
+      "If that address has an account, the link is on its way. Check your spam folder too.",
+    resetTitle: "Choose a new password",
+    resetSubmit: "Save new password",
+    resetExpired: "That link has expired or has already been used. Ask for a new one.",
+    resetDone: "Password changed. Sign in with the new one.",
+    changedDone: "Password changed, so every device has been signed out. Sign in with the new one.",
+    resetEmailSubject: "Reset your Organics password",
+    resetEmailBody:
+      "Someone asked to reset the password for this address on Organics. Open the link below within 30 minutes to choose a new one. If it was not you, ignore this email — nothing has changed.",
+    errorCredentials: "That email and password do not match.",
+    errorRateLimited:
+      "Too many attempts. Wait about 15 minutes, or reset your password using the link below.",
+    errorSignUp: "We could not create that account. Try a different email.",
+    errorUnavailable: "Accounts are not available right now.",
   },
 
   home: {
@@ -70,7 +158,7 @@ export const en = {
     sortPriceDesc: "Price ↓",
     all: "All",
     noMatch: "Nothing matches those filters",
-    noMatchHint: "Try a different region, or clear the filters to see everything.",
+    noMatchHint: "Try a different word, or clear the filters to see everything.",
     resultCount: "{count} item",
     resultCountPlural: "{count} items",
     clearFilters: "Clear filters",
@@ -87,6 +175,7 @@ export const en = {
     backToShop: "Back to shop",
     grownIn: "grown in {region}",
     inStock: "Listed as available — ask the farm for quantity",
+    inStockSoon: "Listed as available",
     unavailable: "Currently unavailable",
     aboutFarm: "About {farm}",
     soldBy: "Listed and sold by {farm}. You pay the farm directly.",
@@ -102,6 +191,9 @@ export const en = {
     callNow: "Call the farm",
     callShort: "Call",
     whatsapp: "WhatsApp",
+    phoneSoon: "Contact details coming soon",
+    phoneSoonNote:
+      "We are still confirming with each farm before we publish their number. The listings and the checks are real; the phone line is not open yet.",
     certifier: "Certified under",
     certificateNo: "Certificate number",
     certifiedUntil: "Valid until",
@@ -120,6 +212,8 @@ export const en = {
     title: "Our farmers",
     intro:
       "We check a farm's details before any of its listings go live. Call them directly from any product page.",
+    introSoon:
+      "We check a farm's details before any of its listings go live. Certificates are on show now; phone numbers open shortly.",
     none: "No farms listed yet",
     applyToList: "List your farm",
     listingCount: "{count} listing",
@@ -140,12 +234,16 @@ export const en = {
     titleTail: ".",
     intro:
       "We list organic farms only. Buyers see your farm name, your region and your phone number, and call you directly. We never handle the money.",
+    introSoon:
+      "We list organic farms only. Your farm name and region go live now. Your phone number goes live only with your say-so, shortly. We never handle the money.",
     step1Title: "Apply",
     step1Body: "Tell us about the farm, what you grow and how it is certified.",
     step2Title: "We check",
     step2Body: "We go through your details and call you. Nothing goes live until that is done.",
     step3Title: "Buyers call you",
     step3Body: "Your produce appears in the shop with your number on it. You take it from there.",
+    step3BodySoon:
+      "Your produce appears in the shop. We ring you to confirm before your number goes live, and buyers contact you directly after that.",
     applyHeading: "Apply to list",
   },
 
@@ -170,6 +268,7 @@ export const en = {
     aboutHint: "at least 20 characters",
     aboutPlaceholder: "What you grow, how long you have farmed it, and how it is certified.",
     aadhaarNote: "We only ask for the last four digits. Never share the full number.",
+    privacyLink: "What we do with these details",
     submit: "Send application",
     submitting: "Sending…",
     doneTitle: "Application received",
@@ -182,6 +281,8 @@ export const en = {
     copyright: "© {year} Organics. A directory of checked organic farms.",
     blurb:
       "We check organic farms and publish their number. Buyers call the farm directly — we never handle the order or the money.",
+    blurbSoon:
+      "We check organic farms and list them. Buyers will call the farm directly — numbers open shortly, and we never handle the order or the money.",
     browseHeading: "Browse",
     trustHeading: "Trust",
     howWeCheck: "How we check farms",
@@ -213,25 +314,29 @@ export const en = {
 
   notFound: {
     heading: "That page has gone",
-    body: "The listing may have been taken down, or the farm may no longer be listed. Everything currently checked is in the shop.",
+    body: "The address may be wrong, or the page may have been taken down. Everything currently checked is in the shop.",
     browse: "Browse produce",
   },
 
   privacy: {
     heading: "Privacy",
     intro: "What we collect, why, and how long we keep it.",
-    s1Title: "Buyers",
+    s1Title: "Buyers without an account",
     s1Body:
-      "Browsing this site needs no account and we ask you for nothing. We store one cookie, NEXT_LOCALE, to remember whether you chose Tamil or English. There is no advertising or analytics tracking on this site.",
+      "Browsing needs no account and we ask you for nothing. We store one cookie, NEXT_LOCALE, to remember the site language. There is no advertising or analytics tracking on this site.",
+    s1bTitle: "Buyers with an account",
+    s1bBody:
+      "An account exists only to keep a shortlist of produce and farms. We store your email, your name, a hashed password, and the phone number and district if you choose to give them — we never see the password itself. Your details are never published and never sent to the farms; a farm only learns who you are if you ring them. Signing in sets a second cookie holding a session identifier, which is deleted when you sign out.",
     s2Title: "Farmers who apply",
     s2Body:
-      "We collect the farm name, contact name, phone number, email, district, a description and an optional certificate link, for the sole purpose of checking the farm and publishing the listing. Farm name, district, description and phone number are published; your email is not.",
+      "We collect the farm name, contact name, phone number, email, district, a description and the organic certification details, for the sole purpose of checking the farm and publishing the listing. We also ask for the last four digits of an Aadhaar number if you choose to give them — we never ask for or store the full number, and those four digits are never published. Farm name, district, description, phone number and certification are published; your email is not.",
     s3Title: "How long we keep it",
     s3Body:
-      "Applications we reject are deleted within 90 days. A listing is removed when you ask us to remove it, and we confirm within a week.",
+      "Applications we reject are deleted within 90 days. A listing is removed when you ask us to remove it, and we confirm within a week. A buyer account and its shortlist are deleted immediately when you delete the account.",
     s4Title: "Your rights",
     s4Body:
-      "You can ask for a copy of what we hold about you, ask us to correct it, or ask us to delete it, using the contact address in the footer.",
+      "You can delete your account and everything attached to it yourself, from your account page — it is permanent and takes effect at once.",
+    s4Contact: "To ask for a copy of what we hold, or to have something corrected, write to us:",
   },
 
   // Keyed by the `code` the API returns, so wording is never sent over the wire.

@@ -21,21 +21,14 @@ export function localisedOrNull(
   return locale === "ta" && tamil ? tamil : base;
 }
 
-// Regions are free text on the product, and the English spelling is the value
-// carried in the ?region= query string. Only the label is translated, so a filter
-// link keeps working and stays shareable across languages.
-const REGION_TA: Record<string, string> = {
-  Nilgiris: "நீலகிரி",
-  Thanjavur: "தஞ்சாவூர்",
-  Erode: "ஈரோடு",
-  Coorg: "குடகு",
-  Ratnagiri: "ரத்னகிரி",
-  Himachal: "இமாசலம்",
-};
+// A district row. Tamil falls back to the English name only when nobody has
+// filled it in, which an admin can fix without a code change — the previous
+// hard-coded map could not.
+export type RegionRef = { slug: string; name: string; nameTa: string | null };
 
-export function regionLabel(locale: Locale, region: string): string {
-  if (locale === DEFAULT_LOCALE) return REGION_TA[region] ?? region;
-  return region;
+export function regionLabel(locale: Locale, region: RegionRef | null | undefined): string {
+  if (!region) return "";
+  return locale === DEFAULT_LOCALE ? (region.nameTa ?? region.name) : region.name;
 }
 
 // Units are free text on the product and mostly "<number> <noun>". Only the noun

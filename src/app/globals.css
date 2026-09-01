@@ -195,20 +195,35 @@ html:lang(ta) h3 {
   mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 2.5rem), transparent 100%);
 }
 
-@utility glass {
-  background-color: rgb(255 255 255 / 0.62);
-  backdrop-filter: blur(16px) saturate(150%);
-  -webkit-backdrop-filter: blur(16px) saturate(150%);
-  border: 1px solid rgb(255 255 255 / 0.65);
-  box-shadow: var(--shadow-glass);
-}
+/* Declared as plain rules in the components layer so a `bg-*` utility can still
+   override the tint.
+   Only the unprefixed property is written: hand-adding `-webkit-backdrop-filter`
+   made Lightning CSS emit the prefixed form *alone*, which Chrome ignores, so
+   every panel was tinted but never blurred. It adds whatever prefix the
+   browser targets need. */
+@layer components {
+  .glass {
+    background-color: rgb(255 255 255 / 0.62);
+    backdrop-filter: blur(16px) saturate(150%);
+    border: 1px solid rgb(255 255 255 / 0.65);
+    box-shadow: var(--shadow-glass);
+  }
 
-/* For glass sitting on the dark navy hero. */
-@utility glass-dark {
-  background-color: rgb(255 255 255 / 0.10);
-  backdrop-filter: blur(14px) saturate(140%);
-  -webkit-backdrop-filter: blur(14px) saturate(140%);
-  border: 1px solid rgb(255 255 255 / 0.22);
+  /* Grid surface. Deliberately a lighter blur than `glass`: backdrop-filter is
+     the expensive part, and a shop page paints 31 of these at once. */
+  .glass-card {
+    background-color: rgb(255 255 255 / 0.74);
+    backdrop-filter: blur(7px) saturate(140%);
+    border: 1px solid rgb(255 255 255 / 0.7);
+    box-shadow: var(--shadow-soft);
+  }
+
+  /* For glass sitting on the dark navy hero. */
+  .glass-dark {
+    background-color: rgb(255 255 255 / 0.1);
+    backdrop-filter: blur(14px) saturate(140%);
+    border: 1px solid rgb(255 255 255 / 0.22);
+  }
 }
 
 /* Browsers without backdrop-filter get an opaque panel instead of unreadable text. */
@@ -216,8 +231,89 @@ html:lang(ta) h3 {
   .glass {
     background-color: rgb(255 255 255 / 0.96);
   }
+  .glass-card {
+    background-color: rgb(255 255 255 / 0.97);
+  }
   .glass-dark {
     background-color: rgb(0 0 128 / 0.86);
+  }
+}
+
+/* A sheen that follows the pointer across a glass panel.
+   --mx/--my are set by components/glass-panel.tsx from pointermove; nothing else
+   is written, so the handler never reads layout and cannot cause a reflow. The
+   sheen is a child pseudo-element rather than a background on the panel itself,
+   so it composites on its own layer and does not repaint the content.
+   Defaults put the highlight off-panel, so a panel that is never pointed at
+   looks exactly like plain glass. */
+.glass-interactive {
+  position: relative;
+  isolation: isolate;
+  --mx: -20%;
+  --my: -20%;
+}
+
+.glass-interactive::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  background: radial-gradient(
+    18rem circle at var(--mx) var(--my),
+    rgb(255 255 255 / 0.85),
+    rgb(236 147 70 / 0.16) 38%,
+    transparent 68%
+  );
+}
+
+/* Only where there is a real pointer. On a touch screen the sheen would stick
+   wherever the last tap landed. */
+@media (hover: hover) and (pointer: fine) {
+  .glass-interactive:hover::before {
+    opacity: 1;
+  }
+}
+
+/* Focus is deliberately outside that media query: a keyboard user needs the
+   panel to light up whatever the device reports about its pointer. */
+.glass-interactive:focus-within::before {
+  opacity: 1;
+}
+
+/* A hairline that lifts on the same interaction, so the panel edge reads as
+   glass catching light rather than a flat border. */
+.glass-interactive::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.75) inset,
+    0 0 0 1px rgb(255 255 255 / 0.5) inset;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .glass-interactive:hover::after {
+    opacity: 1;
+  }
+}
+
+.glass-interactive:focus-within::after {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glass-interactive::before,
+  .glass-interactive::after {
+    transition: none;
   }
 }
 

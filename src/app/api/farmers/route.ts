@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { farmerApplicationSchema } from "@/lib/farmer-application-schema";
 import { prisma } from "@/lib/prisma";
+import { regionIdForName } from "@/lib/regions";
 import { clientKeyFromHeaders, rateLimit } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
@@ -96,7 +97,7 @@ export async function POST(request: NextRequest) {
         contactName: input.contactName,
         email: input.email,
         phone: input.phone,
-        region: input.region,
+        regionId: await regionIdForName(input.region),
         about: input.about,
         govtIdLast4: input.govtIdLast4,
         certifier: input.certifier,

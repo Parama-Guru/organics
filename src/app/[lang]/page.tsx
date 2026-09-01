@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { ProductCard } from "@/components/product-card";
+import { PhoneSoonNotice } from "@/components/phone-soon-notice";
 import { Button } from "@/components/ui/button";
 import { ArrowRightIcon, MapPinIcon, PhoneIcon, ShieldCheckIcon } from "@/components/ui/icons";
 import { getVerifiedFarmers } from "@/lib/farmers";
@@ -13,13 +14,14 @@ import { getCategories, getFeaturedProducts } from "@/lib/products";
 // The catalog lives in Postgres, which is not reachable while the Docker image builds.
 export const dynamic = "force-dynamic";
 
-export default async function HomePage() {
-  const [featured, categories, farmers, locale, t] = await Promise.all([
+export default async function HomePage({ searchParams }: PageProps<"/[lang]">) {
+  const [featured, categories, farmers, locale, t, params] = await Promise.all([
     getFeaturedProducts(8),
     getCategories(),
     getVerifiedFarmers(),
     getLocale(),
     getDictionary(),
+    searchParams,
   ]);
 
   const steps = [
@@ -30,6 +32,22 @@ export default async function HomePage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6">
+      {/* Deleting an account is irreversible; landing silently on the home page
+          reads as though it may not have worked. */}
+      {params.deleted === "1" ? (
+        <p
+          role="status"
+          className="mt-6 rounded-2xl bg-leaf-50 p-4 leading-relaxed text-leaf-800 ring-1 ring-inset ring-leaf-200"
+        >
+          {t.account.deleted}
+        </p>
+      ) : null}
+
+      {/* The rest of the copy describes a directory whose numbers are live. While
+          they are withheld, say so once, at the top, rather than letting every
+          page imply a call the visitor cannot make. */}
+      <PhoneSoonNotice className="mt-6" />
+
       <section className="relative mt-6 animate-rise overflow-hidden rounded-[1.75rem] bg-bark-900 text-white sm:mt-10 sm:rounded-[2rem]">
         <div className="grid items-stretch gap-0 md:grid-cols-[minmax(0,1fr)_44%]">
           {/* Food first on phones: a dark box tells nobody what this site sells.
@@ -112,7 +130,7 @@ export default async function HomePage() {
             {t.home.emptyAfter}
           </p>
         ) : (
-          <div className="mt-5 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
+          <div className="mt-5 grid grid-cols-1 gap-3 min-[400px]:grid-cols-2 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
             {featured.map((product, index) => (
               <div
                 key={product.id}

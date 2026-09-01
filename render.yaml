@@ -27,34 +27,54 @@ services:
       # because schema.prisma declares directUrl.
       - key: DIRECT_URL
         sync: false
-      - key: NEXT_PUBLIC_SUPABASE_URL
+
+      # ---- buyer accounts. Sessions and the login rate limiter live in Redis,
+      # so conf/config.ts refuses to boot with accounts on and no REDIS_URL when
+      # APP_ENV is prod: process memory would sign everyone out on every deploy.
+      - key: ACCOUNTS_ENABLED
+        value: "true"
+      # 32+ characters. Rotating it signs every buyer out.
+      - key: ACCOUNTS_SESSION_SECRET
         sync: false
-      - key: NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-        sync: false
-      # Bypasses Row Level Security. Server-only.
-      - key: SUPABASE_SECRET_KEY
-        sync: false
-      - key: SUPABASE_JWKS_URL
+      - key: REDIS_URL
         sync: false
 
-      # ---- staff-only /admin. Leave ADMIN_PASSWORD_HASH unset and the whole
-      # tree 404s, so the area is never live before you mean it to be.
+      # ---- password reset. With SMTP_HOST unset the reset route is not offered
+      # at all, rather than sending mail nowhere.
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_FROM
+        sync: false
+
+      # ---- staff-only admin tree. Leave ADMIN_PASSWORD_HASH unset and it 404s,
+      # so the area is never live before you mean it to be.
       # Generate both with `npm run admin:hash`.
       - key: ADMIN_PASSWORD_HASH
         sync: false
       - key: ADMIN_SESSION_SECRET
         sync: false
 
-      # ---- derived, so the URL does not have to be known before the first deploy
+      # ---- the public origin. Set to the custom domain, not Render's own
+      # hostname: password-reset links and every canonical/OG URL are built from
+      # this, so deriving it from RENDER_EXTERNAL_URL would email people a
+      # *.onrender.com link and tell Google the real site is the subdomain.
       - key: NEXT_PUBLIC_SITE_URL
-        fromService:
-          name: organics
-          type: web
-          envVarKey: RENDER_EXTERNAL_URL
+        value: https://ossil.in
 
       # ---- plain settings
       - key: APP_ENV
         value: prod
+      # Published on the privacy page as the address for a data request, and
+      # required when APP_ENV is prod.
+      - key: CONTACT_EMAIL
+        sync: false
+      # Farmer numbers stay hidden until this is flipped to true.
+      - key: SHOW_FARMER_PHONE
+        value: "false"
       - key: NEXT_PUBLIC_CURRENCY
         value: INR
       - key: NEXT_PUBLIC_LOCALE

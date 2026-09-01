@@ -1,15 +1,16 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Field, TextareaField } from "@/components/ui/field";
 import { useI18n } from "@/lib/i18n/client";
 import { apiErrorMessage } from "@/lib/i18n/api-error";
-import { format } from "@/lib/i18n/config";
+import { format, localePath } from "@/lib/i18n/config";
 
 export function FarmerApplicationForm() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -158,6 +159,18 @@ export function FarmerApplicationForm() {
       ) : null}
 
       <p className="text-sm text-bark-600 sm:col-span-2">{t.application.aadhaarNote}</p>
+
+      {/* This form asks a farmer for a phone number and four Aadhaar digits. The
+          page that says what we do with them should be one tap away from the
+          submit button, not buried in the footer. */}
+      <p className="text-sm text-bark-600 sm:col-span-2">
+        <Link
+          href={localePath(locale, "/privacy")}
+          className="rounded underline decoration-bark-300 underline-offset-4 hover:decoration-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold-400"
+        >
+          {t.application.privacyLink}
+        </Link>
+      </p>
 
       <Button type="submit" size="lg" disabled={submitting} className="sm:col-span-2">
         {submitting ? t.application.submitting : t.application.submit}

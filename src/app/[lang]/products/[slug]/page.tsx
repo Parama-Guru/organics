@@ -2,16 +2,19 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ProductCard } from "@/components/product-card";
-import { FarmerContact, dialNumber } from "@/components/farmer-contact";
+import { FarmerContact, dialNumber, showFarmerPhone } from "@/components/farmer-contact";
 import { ProductGallery } from "@/components/product-gallery";
+import { SaveButton } from "@/components/save-button";
 import { StickyCallBar } from "@/components/sticky-call-bar";
 import { Button } from "@/components/ui/button";
-import { ArrowLeftIcon, LeafMark, MapPinIcon, PhoneIcon, ShieldCheckIcon } from "@/components/ui/icons";
+import { ArrowLeftIcon, BookmarkIcon, LeafMark, MapPinIcon, PhoneIcon, ShieldCheckIcon } from "@/components/ui/icons";
+import { accountsEnabled, getCustomer } from "@/lib/customer-auth";
 import { format, localePath } from "@/lib/i18n/config";
 import { localised, regionLabel, unitLabel } from "@/lib/i18n/content";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
 import { formatMoney } from "@/lib/money";
 import { getMoreFromFarm, getProductBySlug } from "@/lib/products";
+import { isProductSaved } from "@/lib/saved";
 
 export const dynamic = "force-dynamic";
 
@@ -43,7 +46,13 @@ export default async function ProductPage({ params }: PageProps<"/[lang]/product
 
   const inStock = product.stock > 0;
   const name = localised(locale, product.name, product.nameTa);
-  const more = await getMoreFromFarm(product.farmer.slug, product.slug, 4);
+  const accountsOn = accountsEnabled();
+  const customer = accountsOn ? await getCustomer() : null;
+  const phoneShown = showFarmerPhone();
+  const [more, saved] = await Promise.all([
+    getMoreFromFarm(product.farmer.slug, product.slug, 4),
+    customer ? isProductSaved(customer.id, product.id) : Promise.resolve(false),
+  ]);
 
   return (
     <div className="mx-auto max-w-5xl px-4 pb-24 pt-8 sm:px-6 sm:pb-10">
@@ -103,18 +112,39 @@ export default async function ProductPage({ params }: PageProps<"/[lang]/product
               inStock ? "bg-leaf-100 text-leaf-800" : "bg-bark-100 text-bark-600"
             }`}
           >
-            {inStock ? t.product.inStock : t.product.unavailable}
+            {inStock ? (phoneShown ? t.product.inStock : t.product.inStockSoon) : t.product.unavailable}
           </p>
 
           {/* The point of the site is the call, so the number is the button rather
               than an anchor that scrolls to one. */}
           <div className="mt-7 flex flex-wrap gap-3">
-            <Button as="a" href={`tel:${dialNumber(product.farmer.phone)}`} size="lg">
-              <PhoneIcon /> {product.farmer.phone}
-            </Button>
-            <Button as="a" href="#contact" variant="secondary" size="lg">
+            {showFarmerPhone() ? (
+              <Button as="a" href={`tel:${dialNumber(product.farmer.phone)}`} size="lg">
+                <PhoneIcon /> {product.farmer.phone}
+              </Button>
+            ) : null}
+            <Button
+              as="a"
+              href="#contact"
+              variant={showFarmerPhone() ? "secondary" : "primary"}
+              size="lg"
+            >
               {format(t.product.aboutFarm, { farm: product.farmer.farmName })}
             </Button>
+            {accountsOn ? (
+              customer ? (
+                <SaveButton kind="product" id={product.id} initialSaved={saved} size="lg" />
+              ) : (
+                <Button
+                  as={Link}
+                  href={localePath(locale, "/account/sign-in")}
+                  variant="ghost"
+                  size="lg"
+                >
+                  <BookmarkIcon /> {t.account.signInToSave}
+                </Button>
+              )
+            ) : null}
           </div>
 
           {product.farmer.verifiedAt ? (

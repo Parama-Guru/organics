@@ -5,6 +5,18 @@ export type Locale = (typeof LOCALES)[number];
 /** Tamil is the default: this is a Tamil Nadu farm directory first. */
 export const DEFAULT_LOCALE: Locale = "ta";
 
+/**
+ * The locales the site actually serves. English is written and kept in the
+ * repo but not offered: a request for /en is redirected to Tamil and the
+ * language toggle does not render. Add "en" back here to turn it on again —
+ * nothing else needs to change.
+ */
+export const ENABLED_LOCALES: readonly Locale[] = ["ta"];
+
+export function isEnabledLocale(value: unknown): value is Locale {
+  return isLocale(value) && ENABLED_LOCALES.includes(value);
+}
+
 /** Read by the proxy to keep an explicit choice sticky across visits. */
 export const LOCALE_COOKIE = "NEXT_LOCALE";
 export const LOCALE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
@@ -33,6 +45,15 @@ export function isLocale(value: unknown): value is Locale {
 /** Prefix an app-relative path with a locale: ("ta", "/products") -> "/ta/products". */
 export function localePath(locale: Locale, path: string): string {
   return path === "/" ? `/${locale}` : `/${locale}${path}`;
+}
+
+/**
+ * Only same-site absolute paths are accepted back, so `?next=` cannot be used
+ * to bounce someone to another host after they sign in.
+ */
+export function safeNext(value: string | undefined, locale: Locale): string | null {
+  if (!value || !value.startsWith("/") || value.startsWith("//")) return null;
+  return value.startsWith(`/${locale}/`) || value === `/${locale}` ? value : null;
 }
 
 /** Swap the locale segment of a full pathname, keeping the rest of the route. */

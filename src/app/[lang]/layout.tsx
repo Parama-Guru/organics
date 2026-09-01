@@ -4,8 +4,9 @@ import { Fraunces, Manrope, Noto_Sans_Tamil, Noto_Serif_Tamil } from "next/font/
 import { loadConfig } from "@conf/config";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { accountsEnabled, getCustomer } from "@/lib/customer-auth";
 import { I18nProvider } from "@/lib/i18n/client";
-import { HTML_LANG, LOCALES } from "@/lib/i18n/config";
+import { HTML_LANG, ENABLED_LOCALES } from "@/lib/i18n/config";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
 
 import "../globals.css";
@@ -39,7 +40,7 @@ const bodyTamil = Noto_Sans_Tamil({
 });
 
 export function generateStaticParams() {
-  return LOCALES.map((lang) => ({ lang }));
+  return ENABLED_LOCALES.map((lang) => ({ lang }));
 }
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -56,7 +57,7 @@ export async function generateMetadata(): Promise<Metadata> {
     description: t.meta.description,
     alternates: {
       canonical: `/${locale}`,
-      languages: Object.fromEntries(LOCALES.map((code) => [HTML_LANG[code], `/${code}`])),
+      languages: Object.fromEntries(ENABLED_LOCALES.map((code) => [HTML_LANG[code], `/${code}`])),
     },
     openGraph: {
       title: `${app.name} — ${t.meta.title}`,
@@ -73,6 +74,9 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function RootLayout({ children }: LayoutProps<"/[lang]">) {
   const locale = await getLocale();
   const t = await getDictionary();
+  const accountsOn = accountsEnabled();
+  // Only a boolean crosses into the client bundle; the session itself never does.
+  const signedIn = accountsOn ? (await getCustomer()) !== null : false;
 
   return (
     <html
@@ -87,7 +91,7 @@ export default async function RootLayout({ children }: LayoutProps<"/[lang]">) {
           >
             {t.nav.skipToContent}
           </a>
-          <SiteHeader />
+          <SiteHeader accountsOn={accountsOn} signedIn={signedIn} />
           <main id="main" className="flex-1">
             {children}
           </main>

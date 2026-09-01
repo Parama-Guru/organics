@@ -26,7 +26,7 @@ function FarmerRow({
     contactName: string;
     email: string;
     phone: string;
-    region: string;
+    region: { name: string };
     about: string | null;
     govtIdLast4: string | null;
     certificateUrl: string | null;
@@ -42,7 +42,7 @@ function FarmerRow({
         <div className="min-w-0">
           <h3 className="font-display text-lg text-bark-900">{farmer.farmName}</h3>
           <p className="text-sm text-bark-600">
-            {farmer.contactName} · {farmer.region}
+            {farmer.contactName} · {farmer.region.name}
           </p>
         </div>
         <Badge tone={TONE[farmer.status]}>{farmer.status}</Badge>
@@ -115,7 +115,7 @@ export default async function AdminHome() {
     contactName: true,
     email: true,
     phone: true,
-    region: true,
+    region: { select: { name: true } },
     about: true,
     govtIdLast4: true,
     certificateUrl: true,

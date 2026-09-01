@@ -1,4 +1,6 @@
 import { FarmerApplicationForm } from "@/components/farmer-application-form";
+import { showFarmerPhone } from "@/components/farmer-contact";
+import { PhoneSoonNotice } from "@/components/phone-soon-notice";
 import { Badge } from "@/components/ui/badge";
 import { getDictionary } from "@/lib/i18n/server";
 
@@ -9,11 +11,15 @@ export async function generateMetadata() {
 
 export default async function SellPage() {
   const t = await getDictionary();
+  // This page recruits farmers on the promise that buyers will ring them. While
+  // numbers are withheld that promise has a caveat, and the farmer is the person
+  // who most deserves to hear it before applying.
+  const phoneShown = showFarmerPhone();
 
   const steps = [
     { title: t.sell.step1Title, body: t.sell.step1Body },
     { title: t.sell.step2Title, body: t.sell.step2Body },
-    { title: t.sell.step3Title, body: t.sell.step3Body },
+    { title: t.sell.step3Title, body: phoneShown ? t.sell.step3Body : t.sell.step3BodySoon },
   ];
 
   return (
@@ -24,7 +30,11 @@ export default async function SellPage() {
         <span className="text-marigold-600">{t.sell.titleAccent}</span>
         {t.sell.titleTail}
       </h1>
-      <p className="mt-4 max-w-2xl text-lg text-bark-600">{t.sell.intro}</p>
+      <p className="mt-4 max-w-2xl text-lg text-bark-600">
+        {phoneShown ? t.sell.intro : t.sell.introSoon}
+      </p>
+
+      <PhoneSoonNotice className="mt-4 max-w-2xl" />
 
       <ol className="mt-10 grid gap-4 sm:grid-cols-3">
         {steps.map((step, index) => (

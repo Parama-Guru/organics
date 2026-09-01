@@ -2,13 +2,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { dialNumber, whatsappNumber } from "@/components/farmer-contact";
+import { dialNumber, showFarmerPhone, whatsappNumber } from "@/components/farmer-contact";
+import { SaveButton } from "@/components/save-button";
 import { ProductCard } from "@/components/product-card";
 import { StickyCallBar } from "@/components/sticky-call-bar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowLeftIcon, ArrowRightIcon, MapPinIcon, PhoneIcon, ShieldCheckIcon, WhatsAppIcon } from "@/components/ui/icons";
 import { getFarmerBySlug } from "@/lib/farmers";
+import { accountsEnabled, getCustomer } from "@/lib/customer-auth";
+import { isFarmerSaved } from "@/lib/saved";
 import { format, localePath } from "@/lib/i18n/config";
 import { checkedOn } from "@/lib/i18n/dates";
 import { localisedOrNull, regionLabel } from "@/lib/i18n/content";
@@ -39,6 +42,9 @@ export default async function FarmerPage({ params }: PageProps<"/[lang]/farmers/
   if (!result) notFound();
 
   const { farmer, products } = result;
+  const accountsOn = accountsEnabled();
+  const customer = accountsOn ? await getCustomer() : null;
+  const saved = customer ? await isFarmerSaved(customer.id, farmer.id) : false;
 
   return (
     <div className="mx-auto max-w-6xl px-4 pb-24 pt-8 sm:px-6 sm:pb-10">
@@ -141,21 +147,46 @@ export default async function FarmerPage({ params }: PageProps<"/[lang]/farmers/
             ) : null}
 
             <div className="mt-6 flex flex-wrap items-center gap-3">
-              <Button as="a" href={`tel:${dialNumber(farmer.phone)}`} size="lg">
-                <PhoneIcon /> {farmer.phone}
-              </Button>
-              <Button
-                as="a"
-                href={`https://wa.me/${whatsappNumber(farmer.phone)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                variant="secondary"
-                size="lg"
-              >
-                <WhatsAppIcon /> {t.contact.whatsapp}
-              </Button>
-              <Badge tone="neutral">{t.contact.callWindow}</Badge>
+              {showFarmerPhone() ? (
+                <>
+                  <Button as="a" href={`tel:${dialNumber(farmer.phone)}`} size="lg">
+                    <PhoneIcon /> {farmer.phone}
+                  </Button>
+                  <Button
+                    as="a"
+                    href={`https://wa.me/${whatsappNumber(farmer.phone)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    variant="secondary"
+                    size="lg"
+                  >
+                    <WhatsAppIcon /> {t.contact.whatsapp}
+                  </Button>
+                  <Badge tone="neutral">{t.contact.callWindow}</Badge>
+                </>
+              ) : null}
+              {accountsOn ? (
+                customer ? (
+                  <SaveButton kind="farmer" id={farmer.id} initialSaved={saved} size="lg" />
+                ) : (
+                  <Button
+                    as={Link}
+                    href={localePath(locale, "/account/sign-in")}
+                    variant="ghost"
+                    size="lg"
+                  >
+                    {t.account.signInToSave}
+                  </Button>
+                )
+              ) : null}
             </div>
+
+            {showFarmerPhone() ? null : (
+              <div className="mt-5 max-w-2xl rounded-2xl border border-bark-200 bg-bark-50/70 p-5">
+                <p className="font-semibold text-ink">{t.contact.phoneSoon}</p>
+                <p className="mt-1 leading-relaxed text-bark-600">{t.contact.phoneSoonNote}</p>
+              </div>
+            )}
         </div>
       </header>
 
@@ -169,7 +200,7 @@ export default async function FarmerPage({ params }: PageProps<"/[lang]/farmers/
           {t.farmers.nothingListed}
         </p>
       ) : (
-        <div className="mt-5 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
+        <div className="mt-5 grid grid-cols-1 gap-3 min-[400px]:grid-cols-2 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
           {products.map((product, index) => (
             <div
               key={product.id}

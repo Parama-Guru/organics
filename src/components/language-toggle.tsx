@@ -5,7 +5,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 
 import { useI18n } from "@/lib/i18n/client";
 import {
-  LOCALES,
+  ENABLED_LOCALES,
   LOCALE_COOKIE,
   LOCALE_COOKIE_MAX_AGE,
   LOCALE_NAMES,
@@ -27,13 +27,16 @@ export function LanguageToggle() {
   const pathname = usePathname();
   const query = useSearchParams().toString();
 
+  // Nothing to choose between while only Tamil is served.
+  if (ENABLED_LOCALES.length < 2) return null;
+
   return (
     <div
       role="group"
       aria-label={t.nav.language}
       className="flex shrink-0 items-center rounded-full border border-bark-200 bg-white/70 p-0.5 backdrop-blur"
     >
-      {LOCALES.map((target) => {
+      {ENABLED_LOCALES.map((target) => {
         const active = target === locale;
         return (
           <Link
@@ -47,7 +50,7 @@ export function LanguageToggle() {
                 : format(t.nav.switchTo, { language: LOCALE_NAMES[target] })
             }
             onClick={() => remember(target)}
-            className={`flex min-h-9 items-center rounded-full px-2.5 text-xs font-semibold transition-colors ${
+            className={`flex min-h-11 min-w-11 items-center justifyw-11 items-center justify-center rounded-full px-2.5 text-xs font-semibold transition-colors ${
               active
                 ? "bg-bark-900 text-bark-50"
                 : "text-bark-600 hover:bg-bark-900/5 hover:text-bark-900"

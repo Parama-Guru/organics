@@ -8,6 +8,7 @@ import { z } from "zod";
 import { isSignedIn } from "@/lib/admin-auth";
 import { farmerApplicationSchema } from "@/lib/farmer-application-schema";
 import { prisma } from "@/lib/prisma";
+import { regionIdForName } from "@/lib/regions";
 
 const decisionSchema = z.object({
   farmerId: z.string().min(1).max(60),
@@ -84,7 +85,7 @@ export async function createFarmer(formData: FormData): Promise<ActionResult> {
       contactName: input.contactName,
       email: input.email,
       phone: input.phone,
-      region: input.region,
+      regionId: await regionIdForName(input.region),
       about: input.about,
       govtIdLast4: input.govtIdLast4,
       certificateUrl: input.certificateUrl || null,

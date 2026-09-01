@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { FilterChip } from "@/components/filter-chip";
+import { PhoneSoonNotice } from "@/components/phone-soon-notice";
 import { ProductCard } from "@/components/product-card";
 import { Button } from "@/components/ui/button";
 import { BasketIcon, SearchIcon } from "@/components/ui/icons";
@@ -8,6 +9,8 @@ import { format, localePath } from "@/lib/i18n/config";
 import { localised, localisedOrNull, regionLabel } from "@/lib/i18n/content";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
 import { getCategories, getProducts, getRegions } from "@/lib/products";
+import { accountsEnabled, getCustomer } from "@/lib/customer-auth";
+import { savedProductIds } from "@/lib/saved";
 import { PRODUCT_SORTS, type ProductSort } from "@/lib/product-query-schema";
 
 export const dynamic = "force-dynamic";
@@ -56,6 +59,7 @@ export default async function ProductsPage({ searchParams }: PageProps<"/[lang]/
       region: filters.region,
       search: filters.search,
       sort,
+      locale: await getLocale(),
     }),
     getCategories(),
     getRegions(),
@@ -64,11 +68,14 @@ export default async function ProductsPage({ searchParams }: PageProps<"/[lang]/
   ]);
 
   const base = localePath(locale, "/products");
+  const accountsOn = accountsEnabled();
+  const customer = accountsOn ? await getCustomer() : null;
+  // One query for the whole grid rather than one per card.
+  const saved = customer
+    ? await savedProductIds(customer.id, products.map((p) => p.id))
+    : new Set<string>();
   const activeCategory = categories.find((category) => category.slug === filters.category);
-  // ?region=himachal must not render as "from himachal" in an h1.
-  const activeRegion = regions.find(
-    (region) => region.toLowerCase() === filters.region?.toLowerCase(),
-  );
+  const activeRegion = regions.find((region) => region.slug === filters.region);
   const isFiltered = Boolean(filters.category || filters.region || filters.search);
 
   return (
@@ -89,6 +96,8 @@ export default async function ProductsPage({ searchParams }: PageProps<"/[lang]/
           ? localisedOrNull(locale, activeCategory.description, activeCategory.descriptionTa)
           : null) ?? t.products.everythingNow}
       </p>
+
+      <PhoneSoonNotice className="mt-4" />
 
       <form method="get" className="relative mt-6 flex max-w-md gap-2" role="search">
         {filters.category ? (
@@ -113,9 +122,14 @@ export default async function ProductsPage({ searchParams }: PageProps<"/[lang]/
         </Button>
       </form>
 
+      {/* These used to be a horizontal scroll rail on phones. At 390px the
+          category rail was 972px wide, so four of the six categories sat off
+          screen with nothing to say they existed, and the last visible one was
+          sliced mid-word. Filters are primary navigation: they wrap now, and
+          cost a second line instead of hiding most of themselves. */}
       <nav
         aria-label={t.products.category}
-        className="no-scrollbar rail-fade -mx-4 mt-6 flex items-center gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0"
+        className="mt-6 flex flex-wrap items-center gap-2"
       >
         <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-bark-600">
           {t.products.category}
@@ -140,7 +154,7 @@ export default async function ProductsPage({ searchParams }: PageProps<"/[lang]/
       {regions.length > 0 ? (
         <nav
           aria-label={t.products.region}
-          className="no-scrollbar rail-fade -mx-4 mt-3 flex items-center gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0"
+          className="mt-3 flex flex-wrap items-center gap-2"
         >
           <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-bark-600">
             {t.products.region}
@@ -153,9 +167,9 @@ export default async function ProductsPage({ searchParams }: PageProps<"/[lang]/
           </FilterChip>
           {regions.map((region) => (
             <FilterChip
-              key={region}
-              href={hrefWith(base, filters, { region })}
-              active={region === activeRegion}
+              key={region.slug}
+              href={hrefWith(base, filters, { region: region.slug })}
+              active={region.slug === activeRegion?.slug}
             >
               {regionLabel(locale, region)}
             </FilterChip>
@@ -192,6 +206,10 @@ export default async function ProductsPage({ searchParams }: PageProps<"/[lang]/
         </nav>
       </div>
 
+      {/* One card per row below 400px. At two-up a card is ~166px wide, which
+          is narrower than a single Tamil word: "கருவேப்பிலைக்" broke across two
+          lines mid-word. Tamil takes no hyphen, so a mid-word break just reads
+          as a mistake. */}
       {products.length === 0 ? (
         <div className="glass mt-4 animate-rise rounded-3xl p-12 text-center">
           <BasketIcon className="mx-auto text-5xl text-bark-200" />
@@ -204,14 +222,25 @@ export default async function ProductsPage({ searchParams }: PageProps<"/[lang]/
           ) : null}
         </div>
       ) : (
-        <div className="mt-4 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
+        <div className="mt-4 grid grid-cols-1 gap-3 min-[400px]:grid-cols-2 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
           {products.map((product, index) => (
             <div
               key={product.id}
               style={{ animationDelay: `${Math.min(index, 11) * 45}ms` }}
               className="animate-rise"
             >
-              <ProductCard product={product} />
+              <ProductCard
+                product={product}
+                saveState={
+                  !accountsOn
+                    ? "hidden"
+                    : !customer
+                      ? "signedOut"
+                      : saved.has(product.id)
+                        ? "saved"
+                        : "unsaved"
+                }
+              />
             </div>
           ))}
         </div>

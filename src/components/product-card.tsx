@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { GlassPanel } from "@/components/glass-panel";
+import { SaveButton } from "@/components/save-button";
 import { Button } from "@/components/ui/button";
 import { CheckIcon, LeafMark, MapPinIcon } from "@/components/ui/icons";
 import { checkedOn } from "@/lib/i18n/dates";
@@ -13,15 +15,23 @@ import type { ProductSummary } from "@/lib/products";
 export async function ProductCard({
   product,
   priority = false,
+  saveState = "hidden",
 }: {
   product: ProductSummary;
   priority?: boolean;
+  // "signedOut" renders a link to sign in, so the shortlist is discoverable by
+  // the people who do not have an account yet.
+  saveState?: "hidden" | "saved" | "unsaved" | "signedOut";
 }) {
   const [locale, t] = await Promise.all([getLocale(), getDictionary()]);
   const href = localePath(locale, `/products/${product.slug}`);
 
   return (
-    <article className="card-lift group flex h-full flex-col overflow-hidden rounded-3xl border border-white/70 bg-white shadow-soft">
+    <GlassPanel
+      as="article"
+      surface="card"
+      className="card-lift group flex h-full flex-col overflow-hidden rounded-3xl"
+    >
       {/* Decorative duplicate of the title link, so it is kept out of the a11y tree. */}
       <Link
         href={href}
@@ -43,18 +53,6 @@ export async function ProductCard({
             {product.emoji ?? "\u{1F331}"}
           </span>
         )}
-
-        {product.farmer?.verifiedAt ? (
-          <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/90 px-2 py-1 text-[0.72rem] font-semibold text-leaf-800 shadow-soft backdrop-blur">
-            <CheckIcon /> {format(t.products.checkedOn, { date: checkedOn(product.farmer.verifiedAt, locale) })}
-          </span>
-        ) : null}
-
-        {product.region ? (
-          <span className="absolute bottom-3 right-3 inline-flex items-center gap-1 rounded-full bg-bark-900/80 px-2 py-1 text-[0.72rem] font-medium text-bark-50 backdrop-blur">
-            <MapPinIcon /> {regionLabel(locale, product.region)}
-          </span>
-        ) : null}
       </Link>
 
       <div className="flex flex-1 flex-col gap-1.5 p-4">
@@ -95,6 +93,28 @@ export async function ProductCard({
           </p>
         ) : null}
 
+        {/* The check date and district used to sit on top of the picture. Small
+            type over an illustration is the first thing to become unreadable,
+            and it covered the food. They sit under the farm instead of above the
+            title, because as a grey preamble they pushed the product name down
+            the card and read as though the date mattered more than the produce.
+            Two lines are reserved because the pair wraps on the narrower cards. */}
+        <p className="flex min-h-[2.4rem] flex-wrap content-start items-center gap-x-3 gap-y-0.5 text-[0.72rem]">
+          {product.farmer?.verifiedAt ? (
+            <span className="inline-flex items-center gap-1 font-semibold text-leaf-700">
+              <CheckIcon />
+              {format(t.products.checkedOn, {
+                date: checkedOn(product.farmer.verifiedAt, locale),
+              })}
+            </span>
+          ) : null}
+          {product.region ? (
+            <span className="inline-flex items-center gap-1 text-bark-600">
+              <MapPinIcon /> {regionLabel(locale, product.region)}
+            </span>
+          ) : null}
+        </p>
+
         {/* Price and unit stack rather than share a line. Clamped to one line the
             Tamil unit lost half its text — "6 எண் பெட்டி" became "6 எண்…" — and
             the quantity is half of what a price means. */}
@@ -117,8 +137,30 @@ export async function ProductCard({
           >
             {t.products.viewAndCall}
           </Button>
+
+          {saveState === "signedOut" ? (
+            <Button
+              as={Link}
+              href={`${localePath(locale, "/account/sign-in")}?next=${encodeURIComponent(href)}`}
+              size="sm"
+              variant="ghost"
+              className="mt-2 w-full border-bark-200 px-2 text-xs sm:px-4 sm:text-[0.8125rem]"
+            >
+              {t.account.signInToSave}
+            </Button>
+          ) : saveState !== "hidden" ? (
+            <div className="mt-2">
+              <SaveButton
+                kind="product"
+                id={product.id}
+                initialSaved={saveState === "saved"}
+                size="sm"
+                full
+              />
+            </div>
+          ) : null}
         </div>
       </div>
-    </article>
+    </GlassPanel>
   );
 }

@@ -30,6 +30,23 @@ model Category {
   @@index([slug])
 }
 
+// A district. Was a free-text column repeated on Farmer and Product, with the
+// Tamil spelling hard-coded in a TypeScript map — so a typo produced a silent
+// second "region" in the filters and Tamil silently fell back to English.
+model Region {
+  id        String    @id @default(cuid())
+  slug      String    @unique
+  name      String    @unique
+  nameTa    String?
+  farmers   Farmer[]
+  products  Product[]
+  customers Customer[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([slug])
+}
+
 // A farmer only becomes visible to shoppers at VERIFIED; everything else hides
 // their listings. Mirrors Amazon's "seller account is approved before listings
 // go live" rule.
@@ -47,7 +64,8 @@ model Farmer {
   farmName       String
   phone          String
   email          String       @unique
-  region         String
+  regionId       String
+  region         Region       @relation(fields: [regionId], references: [id], onDelete: Restrict)
   about          String?
   aboutTa        String?
   photoUrl       String?
@@ -63,11 +81,12 @@ model Farmer {
   verifiedAt     DateTime?
   reviewNote     String?
   products       Product[]
+  savedBy        SavedFarmer[]
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
   @@index([status])
-  @@index([region])
+  @@index([regionId])
   @@index([farmName(ops: raw("gin_trgm_ops"))], map: "Farmer_farmName_trgm_idx", type: Gin)
 }
 
@@ -94,7 +113,8 @@ model Product {
   unit          String
   imageUrl      String?
   emoji         String?
-  region        String?
+  regionId      String?
+  region        Region?        @relation(fields: [regionId], references: [id], onDelete: SetNull)
   stock         Int            @default(0)
   isActive      Boolean        @default(true)
   isFeatured    Boolean        @default(false)
@@ -105,17 +125,78 @@ model Product {
   categoryId    String
   category      Category       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   images        ProductImage[]
+  savedBy       SavedProduct[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
   @@index([categoryId])
   @@index([slug])
   @@index([isActive, isFeatured])
-  @@index([region])
+  @@index([regionId])
   @@index([farmerId])
   // Trigram indexes: search uses ILIKE '%term%', which no b-tree can serve. Without
   // these a term that matches little or nothing scans the whole table.
   @@index([name(ops: raw("gin_trgm_ops"))], map: "Product_name_trgm_idx", type: Gin)
   @@index([description(ops: raw("gin_trgm_ops"))], map: "Product_description_trgm_idx", type: Gin)
-  @@index([region(ops: raw("gin_trgm_ops"))], map: "Product_region_trgm_idx", type: Gin)
+}
+
+// A buyer account. The site takes no payment, so an account exists only to keep
+// a shortlist of produce and farms to ring later — which is why it stores no
+// address and no card.
+model Customer {
+  id            String         @id @default(cuid())
+  // Stored lower-cased; the unique index is what stops duplicate signups.
+  email         String         @unique
+  // scrypt:<salt-hex>:<key-hex>. Never a plaintext or reversible value.
+  passwordHash  String
+  name          String
+  phone         String?
+  // Their own district, used to sort nearby farms first. Same table the farms
+  // and listings use, so "Erode" is one row rather than three spellings.
+  regionId      String?
+  region        Region?        @relation(fields: [regionId], references: [id], onDelete: SetNull)
+  // Which language to serve after sign-in, so the choice survives a new device.
+  locale        String         @default("ta")
+  status        CustomerStatus @default(ACTIVE)
+  savedProducts SavedProduct[]
+  savedFarmers  SavedFarmer[]
+  // Set when the password last changed, so a support question about "why was I
+  // signed out" has an answer.
+  passwordSetAt DateTime?
+  lastSeenAt    DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([email])
+  @@index([regionId])
+  @@index([status])
+}
+
+// Suspending rather than deleting keeps the shortlist intact if an account is
+// locked for abuse and later cleared.
+enum CustomerStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+model SavedProduct {
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@id([customerId, productId])
+  @@index([customerId, createdAt])
+}
+
+model SavedFarmer {
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  farmerId   String
+  farmer     Farmer   @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@id([customerId, farmerId])
+  @@index([customerId, createdAt])
 }

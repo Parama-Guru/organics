@@ -6,11 +6,17 @@ import { Suspense } from "react";
 
 import { LanguageToggle } from "@/components/language-toggle";
 import { Button } from "@/components/ui/button";
-import { LeafMark } from "@/components/ui/icons";
+import { LeafMark, UserIcon } from "@/components/ui/icons";
 import { useI18n } from "@/lib/i18n/client";
 import { localePath } from "@/lib/i18n/config";
 
-export function SiteHeader() {
+export function SiteHeader({
+  accountsOn = false,
+  signedIn = false,
+}: {
+  accountsOn?: boolean;
+  signedIn?: boolean;
+}) {
   const { locale, t } = useI18n();
   const pathname = usePathname();
 
@@ -53,7 +59,7 @@ export function SiteHeader() {
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-2 px-4 sm:gap-4 sm:px-6">
         <Link
           href={localePath(locale, "/")}
-          className="group flex shrink-0 items-center gap-2 font-semibold tracking-tight"
+          className="group flex min-h-11 shrink-0 items-center gap-2 font-semibold tracking-tight"
         >
           <span
             aria-hidden
@@ -76,6 +82,22 @@ export function SiteHeader() {
           <Suspense fallback={<div className="h-11 w-24" />}>
             <LanguageToggle />
           </Suspense>
+
+          {accountsOn ? (
+            <Link
+              href={localePath(locale, signedIn ? "/account" : "/account/sign-in")}
+              // The label is hidden below `sm`: with the language toggle and the
+              // sell button beside it, the Tamil wording pushed the row 23px past
+              // the viewport. aria-label keeps the icon-only link named.
+              aria-label={signedIn ? t.nav.account : t.nav.signIn}
+              className="flex h-11 min-h-11 min-w-11 shrink-0 items-center justifyk-0 items-center justify-center gap-1.5 rounded-lg px-2.5 text-sm font-medium text-bark-600 transition-colors hover:text-bark-900"
+            >
+              <UserIcon />
+              <span className="hidden sm:inline">
+                {signedIn ? t.nav.account : t.nav.signIn}
+              </span>
+            </Link>
+          ) : null}
 
           {/* Farmers browse on phones, so the acquisition CTA has to survive
               there — but it is a secondary button. When the loudest thing in the

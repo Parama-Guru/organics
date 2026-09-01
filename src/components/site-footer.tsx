@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { loadConfig } from "@conf/config";
+import { showFarmerPhone } from "@/components/farmer-contact";
 import { LeafMark, MapPinIcon } from "@/components/ui/icons";
 import { format, localePath } from "@/lib/i18n/config";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
@@ -25,7 +26,9 @@ export async function SiteFooter() {
           <p className="flex items-center gap-2 font-display text-lg">
             <LeafMark className="text-2xl text-leaf-600" /> Organics
           </p>
-          <p className="mt-3 max-w-xs leading-relaxed text-bark-600">{t.footer.blurb}</p>
+        <p className="mt-3 max-w-sm leading-relaxed text-bark-600">
+          {showFarmerPhone() ? t.footer.blurb : t.footer.blurbSoon}
+        </p>
           {app.contact_place ? (
             <p className="mt-4 inline-flex items-center gap-1.5 text-sm text-bark-600">
               <MapPinIcon /> {app.contact_place}
