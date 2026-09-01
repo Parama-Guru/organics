@@ -16,12 +16,7 @@ who does not exist is a small lie on a page about trust.
 - **Consent in writing before publishing anyone's face.** Ask when you do the
   verification call, and record it in the farm's review note.
 - **No stock photography of foreign farms.** Tamil Nadu, or nothing.
-- **Landscape 1.6:1** for cards (`public/farms/`, `public/products/`), **4:5
-  portrait** for the people on the home page.
-- **The 4:5 is exact, not approximate.** The home page slot measures 355x444 at
-  desktop and 311x389 on a 360px phone — 0.800 either way — so a 4:5 file is
-  shown whole and anything else gets cropped from the bottom, which is where
-  the produce is. Export **1200x1500**.
+- **Landscape 1.6:1** for cards (`public/farms/`, `public/products/`).
 - **Export WebP** at roughly 1600px on the long edge, quality 78. The card slots
   are at most 400px wide, so anything larger is bytes on a phone connection for
   no visible gain.
@@ -32,60 +27,17 @@ who does not exist is a small lie on a page about trust.
 
 ---
 
-## 1. `public/community/farmer.svg` → farmer portrait
+## 1. `public/farms/<slug>.svg` → one photograph per farm
 
-Shown at the foot of the home page next to the count of registered farmers.
+**This is the highest-value image on the site.** There are seven, one per farm in
+the seed, and each is currently a generated landscape. **These should not be
+generated at all** — take the photograph on the verification visit. A farm page
+carrying a real picture of that farm is the entire product.
 
-**Shot list.** A farmer who is actually listed on the site, standing in their own
-field, holding a crate or bundle of what they grow. Waist-up, camera at chest
-height, farmer looking at the lens. Morning or late-afternoon light. The crop
-must be identifiable — this is the evidence, not the background.
-
-**Prompt.**
-
-> Documentary portrait photograph of a South Indian farmer in their forties
-> standing in a small organic vegetable field in Tamil Nadu, holding a wooden
-> crate of freshly picked tomatoes and greens. Waist-up framing, 4:5 portrait,
-> shot on a 50mm lens at f/2.8, soft early-morning daylight, natural skin tones,
-> no filter. Working clothes, a cotton shirt and a towel over the shoulder.
-> Rows of crops and a coconut palm softly out of focus behind. Calm, direct,
-> unposed expression, looking at the camera. Photojournalism, not advertising.
-
-**Negative prompt.** `stock photo smile, studio lighting, white background,
-plastic packaging, supermarket, western farm, tractor, wheat field, text,
-watermark, oversaturated, HDR`
-
----
-
-## 2. `public/community/buyer.svg` → buyer portrait
-
-Shown beside the count of registered buyers.
-
-**Shot list.** A customer at the point the site is about: carrying produce they
-bought direct. A street or doorway, not a supermarket aisle — we are not a shop.
-
-**Prompt.**
-
-> Documentary portrait photograph of a South Indian woman in her thirties on a
-> Tamil Nadu street, carrying a cloth bag of unpackaged vegetables over one
-> shoulder, greens and a bunch of bananas visible at the top of the bag.
-> Waist-up framing, 4:5 portrait, 50mm lens at f/2.8, soft daylight, natural
-> skin tones. Everyday cotton kurta. A painted wall and a doorway softly out of
-> focus behind. Relaxed, unposed, half-smiling, looking at the camera.
-> Photojournalism, not advertising.
-
-**Negative prompt.** `supermarket, trolley, plastic bags, branded packaging,
-studio lighting, white background, stock photo smile, text, watermark,
-oversaturated`
-
----
-
-## 3. `public/farms/<slug>.svg` → one photograph per farm
-
-There are seven of these, one per farm in the seed. Each is currently a
-generated landscape. **These should not be generated at all** — take the
-photograph on the verification visit. A farm page carrying a real picture of
-that farm is the entire product.
+The banner is **1.6:1 landscape**, not a portrait. A 4:5 portrait dropped in here
+is cropped to its middle band, losing both the sky and the crop at the farmer's
+feet. If you want a farmer in the shot, frame it as a landscape with a person in
+it, not as a portrait.
 
 **Shot list.** Wide establishing shot of the land, 1.6:1, taken from standing
 height. Include whatever makes the place specific: the terracing at Coonoor, the
@@ -96,7 +48,7 @@ phone. A slightly crooked real photo beats a perfect fake one.
 
 ---
 
-## 4. `public/products/<slug>.svg` → produce photographs
+## 2. `public/products/<slug>.svg` → produce photographs
 
 Forty-odd of these. Lower priority than the farm and people shots: a competent
 illustration of turmeric is honest, because nobody thinks it is a photograph of
@@ -117,7 +69,7 @@ label, glossy, artificial, text, watermark, hands`
 
 ---
 
-## 5. `public/hero.svg` → home page hero
+## 3. `public/hero.svg` → home page hero
 
 The one image where an illustration is defensible, because it is decorative
 rather than evidential. Replace it only if you have a genuinely good wide shot
@@ -129,8 +81,6 @@ of a Tamil Nadu farm at first light — otherwise leave it.
 
 | File | Used by |
 | --- | --- |
-| `public/community/farmer.svg` | home page community band |
-| `public/community/buyer.svg` | home page community band |
 | `public/farms/<slug>.svg` | `Farmer.photoUrl`, set in `prisma/seed.ts` |
 | `public/products/<slug>.svg` | `Product.imageUrl` and `ProductImage.url` |
 | `public/hero.svg` | home page hero |

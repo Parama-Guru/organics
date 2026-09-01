@@ -159,8 +159,6 @@ export const en = {
     communityFarmersOne: "farmer registered",
     communityCustomersOne: "buyer registered",
     communityStoresOne: "organic store registered",
-    communityFarmerCaption: "A farmer listed on Organics",
-    communityCustomerCaption: "A buyer who found their farm here",
     communityJoinFarmer: "List your farm",
     communityJoinStore: "Register your store",
     communityJoinCustomer: "Create your list",

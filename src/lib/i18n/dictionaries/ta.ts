@@ -162,8 +162,7 @@ export const ta = {
     communityFarmersOne: "விவசாயி பதிவு",
     communityCustomersOne: "வாங்குபவர் பதிவு",
     communityStoresOne: "இயற்கைக் கடை பதிவு",
-    communityFarmerCaption: "Organics-இல் பட்டியலிடப்பட்ட ஒரு விவசாயி",
-    communityCustomerCaption: "இங்கே தன் பண்ணையைக் கண்டுபிடித்த ஒரு வாங்குபவர்",
+
     communityJoinFarmer: "உங்கள் பண்ணையைப் பட்டியலிட",
     communityJoinStore: "உங்கள் கடையைப் பதிவு செய்ய",
     communityJoinCustomer: "உங்கள் பட்டியலை உருவாக்க",

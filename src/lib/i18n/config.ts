@@ -6,12 +6,12 @@ export type Locale = (typeof LOCALES)[number];
 export const DEFAULT_LOCALE: Locale = "ta";
 
 /**
- * The locales the site actually serves. English is written and kept in the
- * repo but not offered: a request for /en is redirected to Tamil and the
- * language toggle does not render. Add "en" back here to turn it on again —
- * nothing else needs to change.
+ * The locales the site actually serves. Tamil is the DEFAULT — a visitor with
+ * no stored choice lands on /ta — but English stays reachable through the
+ * header toggle. Removing "en" here disables it everywhere and hides the
+ * toggle; nothing else needs to change either way.
  */
-export const ENABLED_LOCALES: readonly Locale[] = ["ta"];
+export const ENABLED_LOCALES: readonly Locale[] = ["ta", "en"];
 
 export function isEnabledLocale(value: unknown): value is Locale {
   return isLocale(value) && ENABLED_LOCALES.includes(value);
