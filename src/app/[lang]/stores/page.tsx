@@ -91,7 +91,14 @@ export default async function StoresPage({ searchParams }: PageProps<"/[lang]/st
                 </span>
               </p>
 
-              <h2 className="mt-2 font-display text-xl break-words">{store.storeName}</h2>
+              <h2 className="mt-2 font-display text-xl break-words">
+                <Link
+                  href={localePath(locale, `/stores/${store.slug}`)}
+                  className="decoration-marigold-500 decoration-2 underline-offset-4 hover:underline"
+                >
+                  {store.storeName}
+                </Link>
+              </h2>
               <p className="text-sm text-bark-600">{store.contactName}</p>
               <p className="mt-2 text-sm leading-relaxed text-bark-600">{store.addressLine}</p>
 
@@ -119,13 +126,22 @@ export default async function StoresPage({ searchParams }: PageProps<"/[lang]/st
                 ) : null}
               </dl>
 
-              {phoneShown ? (
-                <div className="mt-auto flex flex-wrap gap-2 border-t border-bark-200/60 pt-4">
+              <div className="mt-auto flex flex-wrap gap-2 border-t border-bark-200/60 pt-4">
+                {phoneShown ? (
                   <Button as="a" href={`tel:${dialNumber(store.phone)}`} size="sm">
                     <PhoneIcon /> {store.phone}
                   </Button>
-                </div>
-              ) : null}
+                ) : null}
+                <Button
+                  as={Link}
+                  href={localePath(locale, `/stores/${store.slug}`)}
+                  size="sm"
+                  variant="secondary"
+                >
+                  {t.stores.viewStore}
+                  <ArrowRightIcon />
+                </Button>
+              </div>
             </GlassPanel>
           ))}
         </div>

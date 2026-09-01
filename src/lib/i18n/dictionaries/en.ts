@@ -327,6 +327,10 @@ export const en = {
     clear: "Clear",
     fssai: "FSSAI licence",
     certifiedBy: "Certified by",
+    viewStore: "View shop",
+    backToAll: "All shops",
+    addressHeading: "Where to find them",
+    openInMaps: "Open in Maps",
     registerCta: "Run an organic shop?",
     registerCtaBody:
       "List it here, free. Buyers looking for organic produce in your district will find you.",

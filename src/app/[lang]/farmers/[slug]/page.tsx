@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { dialNumber, showFarmerPhone, whatsappNumber } from "@/components/farmer-contact";
+import { JsonLd } from "@/components/json-ld";
 import { SaveButton } from "@/components/save-button";
 import { ProductCard } from "@/components/product-card";
 import { StickyCallBar } from "@/components/sticky-call-bar";
@@ -48,6 +49,25 @@ export default async function FarmerPage({ params }: PageProps<"/[lang]/farmers/
 
   return (
     <div className="mx-auto max-w-6xl px-4 pb-24 pt-8 sm:px-6 sm:pb-10">
+      {/* Says what this page is to a crawler: a real farm in a named district,
+          not an article about one. The phone is included only once it is
+          public, so the markup never carries what the page itself withholds. */}
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Farm",
+          name: farmer.farmName,
+          description: farmer.about ?? undefined,
+          address: {
+            "@type": "PostalAddress",
+            addressLocality: farmer.region.name,
+            addressRegion: "Tamil Nadu",
+            addressCountry: "IN",
+          },
+          ...(showFarmerPhone() ? { telephone: farmer.phone } : {}),
+        }}
+      />
+
       <Link
         href={localePath(locale, "/farmers")}
         className="-ml-2 inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-sm font-medium text-bark-600 transition-colors hover:text-bark-900"
