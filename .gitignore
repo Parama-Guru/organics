@@ -52,3 +52,8 @@ next-env.d.ts
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+# Working notes kept on the machine, not in the repository: the running
+# checklist and the latest test run.
+/pending.md
+/test_result.md
