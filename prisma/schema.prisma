@@ -39,6 +39,10 @@ model Region {
   slug      String    @unique
   name      String    @unique
   nameTa    String?
+  // District centre, used to order farms and shops by rough distance. A
+  // visitor's own coordinates are never sent here or stored anywhere.
+  latitude  Float?
+  longitude Float?
   farmers   Farmer[]
   products  Product[]
   customers Customer[]

@@ -3,10 +3,10 @@
 Updated as work lands. `[x]` = done and verified, `[ ]` = not done, `[~]` = done
 but blocked on something outside the code.
 
-**Score: 182 done · 10 blocked · 15 open**
+**Score: 198 done · 10 blocked · 15 open**
 
-Last updated: 2026-09-02 · Home page 28% shorter, crop-index and cursor motion,
-seller type chooser on /sell
+Last updated: 2026-09-02 · Find what is near me — farms and shops ordered by
+distance, with the visitor's coordinates never leaving their browser
 
 ---
 
@@ -282,6 +282,60 @@ a buyer would act on is not.
 - [x] Verified signed out: zero `₹` on home, shop and detail in both locales, no
       `priceCents` anywhere in the HTML, no `tel:` link, and the API omits the
       field. Verified signed in: price, price sorting and contact all return.
+
+---
+## Find what is near me
+
+Sorts farms and organic stores by how close they are, without turning a
+directory into a tracker.
+
+### The privacy shape of it
+- [x] The visitor's coordinates never leave the browser. It compares its own
+      position against a published list of district centres, picks the nearest,
+      and only that district's slug goes into the URL — the same value the
+      region filter has always put there.
+- [x] Nothing is stored: no coordinates in the database, none in localStorage,
+      none in a cookie, and none kept in component state after the district is
+      chosen.
+- [x] Say so where it is asked for, not only in the policy: the button carries
+      "Worked out in your browser. Your position is never sent to us or saved."
+- [x] Add a privacy section covering location, in both languages.
+
+### Data
+- [x] `Region.latitude` / `Region.longitude`, migration
+      `20260902140000_add_region_coordinates`. Real district centres, written in
+      the migration as well as the seed so an existing database gains them
+      without a reseed.
+- [x] Coordinates are district-level and the copy says so: "Ordered by the
+      distance between district centres, so treat it as a guide rather than a
+      road distance." We do not hold farm coordinates and must not imply we do.
+
+### Behaviour
+- [x] `src/lib/geo.ts`: haversine distance, nearest district, ordering and
+      rounding. Pure functions, no browser or database, so they are testable.
+- [x] Distances round to 5km under 100km and 10km above it, because a district
+      centroid cannot support "41.8 km".
+- [x] Order by distance first and apply sponsorship second, so paid placement
+      still leads while everything inside each group is nearest-first.
+- [x] A district with no coordinates keeps its place at the end of the list
+      rather than disappearing: an unplaced district is a missing measurement,
+      not a missing farm.
+- [x] Handle every failure the browser can produce — permission denied, position
+      unavailable, no geolocation API at all, and no district placed yet — each
+      with its own message pointing at the district filter.
+- [x] `?near=` is validated against the known districts, so a hand-edited value
+      falls through to the normal listing rather than reaching a query.
+
+### Verification
+- [x] Distances checked against reality: Coimbatore to Nilgiris 50km, to Erode
+      90km, to Thanjavur 240km, to Shimla 2230km.
+- [x] Five unit tests covering distance, symmetry, nearest-district selection,
+      ordering with unplaced districts, and rounding. 37 tests pass.
+- [x] Denied, unavailable and `near=../../etc/passwd` all verified in the
+      browser; the last returns 200 with the full unsorted listing.
+- [x] 270 page loads and 108 axe runs across 27 paths including the new `?near=`
+      URLs, five widths, both themes and both languages: zero WCAG 2 A/AA
+      violations, zero overflow, zero console errors.
 
 ---
 ## Density, motion and the seller chooser

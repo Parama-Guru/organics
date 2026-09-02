@@ -201,6 +201,21 @@ export const getRegions = unstable_cache(
 );
 
 /**
+ * Every district with a centre on the map. Public reference data, so it is safe
+ * to hand to the browser, which is where the distance comparison happens.
+ */
+export const getLocatedRegions = unstable_cache(
+  async () =>
+    prisma.region.findMany({
+      where: { latitude: { not: null }, longitude: { not: null } },
+      select: { slug: true, name: true, nameTa: true, latitude: true, longitude: true },
+      orderBy: { name: "asc" },
+    }),
+  ["located-regions"],
+  { revalidate: 300, tags: ["catalog"] },
+);
+
+/**
  * Route params arrive percent-encoded, unlike search params. An ASCII slug is
  * unchanged by encoding, so this went unnoticed until a Tamil slug existed:
  * the page looked up "%E0%AE%9A%E0%AF%8B..." and 404ed on its own link.

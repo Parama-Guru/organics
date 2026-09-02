@@ -12,6 +12,9 @@ import { Button } from "@/components/ui/button";
 import { ArrowRightIcon, CheckIcon, MapPinIcon, PhoneIcon } from "@/components/ui/icons";
 import { getCustomerAccess } from "@/lib/customer-access";
 import { accountsEnabled, getCustomer } from "@/lib/customer-auth";
+import { NearMeButton } from "@/components/near-me-button";
+import { byDistanceFrom, roundedKm } from "@/lib/geo";
+import { getLocatedRegions } from "@/lib/products";
 import { format, localePath } from "@/lib/i18n/config";
 import { localisedOrNull, regionLabel } from "@/lib/i18n/content";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
@@ -29,11 +32,32 @@ export default async function StoresPage({ searchParams }: PageProps<"/[lang]/st
   const [params, locale, t] = await Promise.all([searchParams, getLocale(), getDictionary()]);
   const query = (Array.isArray(params.q) ? params.q[0] : params.q)?.trim() ?? "";
 
-  const [baseStores, sponsorships] = await Promise.all([
+  const [baseStores, sponsorships, locatedRegions] = await Promise.all([
     getVerifiedStores(query),
     activeSponsoredIds(),
+    getLocatedRegions(),
   ]);
-  const stores = sponsoredFirst(baseStores, sponsorships.store);
+
+  // A district slug, never coordinates.
+  const nearSlug = Array.isArray(params.near) ? params.near[0] : params.near;
+  const origin = locatedRegions.find((region) => region.slug === nearSlug) ?? null;
+
+  // Distance first, then sponsorship: sponsoredFirst keeps the order it is
+  // given inside each group, so paid placement still leads.
+  const distances = new Map<string, number | null>();
+  const orderedByDistance =
+    origin && origin.latitude !== null && origin.longitude !== null
+      ? byDistanceFrom(
+          { latitude: origin.latitude, longitude: origin.longitude },
+          baseStores,
+          (store) => store.region,
+        ).map(({ row, km }) => {
+          distances.set(row.id, km);
+          return row;
+        })
+      : baseStores;
+
+  const stores = sponsoredFirst(orderedByDistance, sponsorships.store);
   const phoneShown = showFarmerPhone();
   const customer = accountsEnabled() ? await getCustomer() : null;
   const access = customer ? await getCustomerAccess(customer.id) : null;
@@ -74,6 +98,35 @@ export default async function StoresPage({ searchParams }: PageProps<"/[lang]/st
           </Button>
         ) : null}
       </form>
+
+      <div className="mt-5 flex flex-wrap items-start justify-between gap-4">
+        <NearMeButton
+          regions={locatedRegions}
+          labels={{
+            action: t.near.action,
+            asking: t.near.asking,
+            denied: t.near.denied,
+            unavailable: t.near.unavailable,
+            nowhere: t.near.nowhere,
+            privacy: t.near.privacy,
+          }}
+        />
+
+        {origin ? (
+          <div className="min-w-0">
+            <p className="font-display text-xl text-bark-900">
+              {format(t.near.headingStores, { region: regionLabel(locale, origin) })}
+            </p>
+            <p className="mt-1 max-w-md text-xs leading-relaxed text-bark-600">{t.near.note}</p>
+            <Link
+              href={localePath(locale, "/stores")}
+              className="mt-1.5 inline-flex min-h-11 items-center text-sm font-semibold text-bark-900 underline-offset-4 hover:underline"
+            >
+              {t.near.clear}
+            </Link>
+          </div>
+        ) : null}
+      </div>
 
       <p className="mt-4 text-sm text-bark-600">
         {stores.length === 1
@@ -124,6 +177,13 @@ export default async function StoresPage({ searchParams }: PageProps<"/[lang]/st
                     <span className="inline-flex items-center gap-1 text-bark-600">
                       <MapPinIcon /> {regionLabel(locale, store.region)}
                     </span>
+                    {distances.get(store.id) !== undefined && distances.get(store.id) !== null ? (
+                      <span className="rule-label inline-flex items-center rounded-full bg-leaf-50 px-2.5 py-1 text-leaf-800">
+                        {roundedKm(distances.get(store.id)!) === 0
+                          ? t.near.here
+                          : format(t.near.away, { km: roundedKm(distances.get(store.id)!) })}
+                      </span>
+                    ) : null}
                   </p>
 
                   <h2 className="mt-4 font-display text-3xl font-medium leading-none break-words">

@@ -24,6 +24,7 @@ export default async function PrivacyPage() {
     { title: t.privacy.s3Title, body: t.privacy.s3Body },
     { title: t.privacy.s4Title, body: t.privacy.s4Body },
     { title: t.privacy.s5Title, body: t.privacy.s5Body },
+    { title: t.privacy.s6Title, body: t.privacy.s6Body },
   ];
 
   return (

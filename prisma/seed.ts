@@ -21,17 +21,19 @@ function artFor(slug: string): string {
 }
 
 // Districts, with their Tamil spelling. The UI reads these from the row, so an
-// admin adding a district gets it translated without a code change.
+// admin adding a district gets it translated without a code change. The
+// coordinates are the district centre and are only accurate to that: they order
+// results by rough distance, they do not locate a farm.
 const regions = [
-  { slug: "nilgiris", name: "Nilgiris", nameTa: "நீலகிரி" },
-  { slug: "thanjavur", name: "Thanjavur", nameTa: "தஞ்சாவூர்" },
-  { slug: "erode", name: "Erode", nameTa: "ஈரோடு" },
-  { slug: "coorg", name: "Coorg", nameTa: "குடகு" },
-  { slug: "ratnagiri", name: "Ratnagiri", nameTa: "ரத்னகிரி" },
-  { slug: "himachal", name: "Himachal", nameTa: "இமாசலம்" },
-  { slug: "coimbatore", name: "Coimbatore", nameTa: "கோயம்புத்தூர்" },
-  { slug: "madurai", name: "Madurai", nameTa: "மதுரை" },
-  { slug: "chennai", name: "Chennai", nameTa: "சென்னை" },
+  { slug: "nilgiris", name: "Nilgiris", nameTa: "நீலகிரி", latitude: 11.4064, longitude: 76.7028 },
+  { slug: "thanjavur", name: "Thanjavur", nameTa: "தஞ்சாவூர்", latitude: 10.787, longitude: 79.1378 },
+  { slug: "erode", name: "Erode", nameTa: "ஈரோடு", latitude: 11.341, longitude: 77.7172 },
+  { slug: "coorg", name: "Coorg", nameTa: "குடகு", latitude: 12.4244, longitude: 75.7382 },
+  { slug: "ratnagiri", name: "Ratnagiri", nameTa: "ரத்னகிரி", latitude: 16.9902, longitude: 73.312 },
+  { slug: "himachal", name: "Himachal", nameTa: "இமாசலம்", latitude: 31.1048, longitude: 77.1734 },
+  { slug: "coimbatore", name: "Coimbatore", nameTa: "கோயம்புத்தூர்", latitude: 11.0168, longitude: 76.9558 },
+  { slug: "madurai", name: "Madurai", nameTa: "மதுரை", latitude: 9.9252, longitude: 78.1198 },
+  { slug: "chennai", name: "Chennai", nameTa: "சென்னை", latitude: 13.0827, longitude: 80.2707 },
 ];
 
 type SeedStore = {
@@ -896,7 +898,12 @@ async function main() {
   for (const region of regions) {
     const saved = await prisma.region.upsert({
       where: { slug: region.slug },
-      update: { name: region.name, nameTa: region.nameTa },
+      update: {
+        name: region.name,
+        nameTa: region.nameTa,
+        latitude: region.latitude,
+        longitude: region.longitude,
+      },
       create: region,
       select: { id: true, name: true },
     });

@@ -381,6 +381,24 @@ export const en = {
     emptySearch: "No farm matches that search.",
   },
 
+  // Location is handled entirely in the browser. The wording has to say so
+  // plainly, because asking for a position is the one thing on this site that
+  // looks like tracking.
+  near: {
+    action: "Find what is near me",
+    asking: "Checking your location…",
+    denied: "Location is switched off for this site. Turn it on in your browser, or pick a district above.",
+    unavailable: "Your browser could not give us a location. Pick a district above instead.",
+    nowhere: "No district has been placed on the map yet, so we cannot sort by distance.",
+    privacy: "Worked out in your browser. Your position is never sent to us or saved.",
+    headingFarms: "Farms nearest {region}",
+    headingStores: "Shops nearest {region}",
+    note: "Ordered by the distance between district centres, so treat it as a guide rather than a road distance.",
+    away: "≈ {km} km",
+    here: "In your district",
+    clear: "Show all",
+  },
+
   sell: {
     badge: "For farmers",
     titleLead: "Sell what you grow, ",
@@ -682,6 +700,9 @@ export const en = {
     s5Title: "Sponsored placement measurement",
     s5Body:
       "Sponsored cards are labelled. We count only daily totals for card views and clicks. We do not store a visitor ID, customer ID, IP address or user-agent with those totals, and no third-party advertising script is used. Short-lived rate limits reduce artificial traffic and are not retained as advertising profiles.",
+    s6Title: "Finding what is near you",
+    s6Body:
+      "If you ask the farmers or stores page to find what is near you, your browser asks for your position and compares it against a published list of district centres. That comparison happens on your device. Your coordinates are never sent to OSSIL, never written to our database and never stored in your browser. The only thing that leaves your device is the name of the nearest district, which appears in the page address exactly as it does when you pick a district by hand. You can refuse the request and use the district filter instead; nothing else on the site changes.",
   },
 
   legal: {
