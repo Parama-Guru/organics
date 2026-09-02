@@ -76,14 +76,21 @@ export type ProductDetail = Prisma.ProductGetPayload<{
   select: typeof productDetailSelect;
 }>;
 
-export function getFeaturedProducts(limit = 4) {
-  return prisma.product.findMany({
-    where: { ...publicProductWhere(), isFeatured: true },
-    select: productSummarySelect,
-    orderBy: { name: "asc" },
-    take: limit,
-  });
-}
+/**
+ * Cached: the same rows for every visitor, and each uncached read costs a full
+ * round trip to a database that is not in the same region as the app.
+ */
+export const getFeaturedProducts = unstable_cache(
+  async (limit = 4) =>
+    prisma.product.findMany({
+      where: { ...publicProductWhere(), isFeatured: true },
+      select: productSummarySelect,
+      orderBy: { name: "asc" },
+      take: limit,
+    }),
+  ["featured-products"],
+  { revalidate: 120, tags: ["catalog"] },
+);
 
 /** Other listings from the same farm, so a product page is not a dead end. */
 export function getMoreFromFarm(farmerSlug: string, excludeSlug: string, limit = 4) {

@@ -22,7 +22,10 @@
     "db:studio": "prisma studio",
     "admin:hash": "tsx scripts/hash-admin-passphrase.mts",
     "verify:boundary": "tsx --conditions=react-server scripts/verify-boundary.mts",
-    "verify:secrets": "node scripts/secret-scan.mjs"
+    "verify:secrets": "node scripts/secret-scan.mjs",
+    "data:inventory": "tsx scripts/data-inventory.mts",
+    "data:purge": "tsx scripts/data-purge.mts",
+    "test:api": "tsx scripts/api-test.mts"
   },
   "overrides": {
     "deepmerge-ts": "^8.0.2"

@@ -33,6 +33,10 @@ const publicFarmerWhere = (now = new Date()): Prisma.FarmerWhereInput => ({
 // Only VERIFIED farms with a current certificate are ever listed. Search is
 // deliberately limited to public fields; private email and phone data never
 // become a discovery API while contact details are gated.
+//
+// Deliberately uncached: tests/database-boundaries.test.ts calls this directly
+// to prove the boundary, and unstable_cache needs a request context it does not
+// have. Caching here would mean testing a wrapper instead of the query.
 export function getVerifiedFarmers(query = "") {
   const term = query.trim();
   return prisma.farmer.findMany({

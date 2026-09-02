@@ -919,6 +919,7 @@ async function main() {
       ...rest,
       regionId,
       status,
+      isSample: true,
       photoUrl: `/farms/${farmer.slug}.svg`,
       certifiedUntil: certifiedUntil ? endOfIndiaDate(certifiedUntil) : null,
       verifiedAt:
@@ -943,6 +944,7 @@ async function main() {
       ...rest,
       regionId,
       status,
+      isSample: true,
       certifiedUntil: certifiedUntil ? endOfIndiaDate(certifiedUntil) : null,
       verifiedAt:
         status === "VERIFIED" ? new Date(Date.now() - (checkedDaysAgo ?? 0) * 86_400_000) : null,
@@ -985,6 +987,7 @@ async function main() {
         nameTa: productTamil?.name ?? null,
         descriptionTa: productTamil?.description ?? null,
         imageUrl: art,
+        isSample: true,
         categoryId: savedCategory.id,
         farmerId,
       };

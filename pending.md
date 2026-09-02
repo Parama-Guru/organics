@@ -3,10 +3,10 @@
 Updated as work lands. `[x]` = done and verified, `[ ]` = not done, `[~]` = done
 but blocked on something outside the code.
 
-**Score: 198 done · 10 blocked · 15 open**
+**Score: 208 done · 10 blocked · 25 open**
 
-Last updated: 2026-09-02 · Find what is near me — farms and shops ordered by
-distance, with the visitor's coordinates never leaving their browser
+Last updated: 2026-09-02 · Sample-data flags, buyer data cleared, Redis
+confirmed, and the cause of slow pages measured. Results in `test_result.md`.
 
 ---
 
@@ -284,7 +284,79 @@ a buyer would act on is not.
       field. Verified signed in: price, price sorting and contact all return.
 
 ---
-## Find what is near me
+## Data hygiene, Redis and performance
+
+Test evidence for everything below is in `test_result.md`.
+
+### Seeing the data
+- [x] `npm run data:inventory` prints a row count for every table. There is no
+      local database — everything lives in the Supabase project, so the Table
+      Editor and the SQL editor there are the other way in.
+- [x] Current state: 5 categories, 10 districts, 8 farms, 33 listings, 5 shops,
+      0 buyers, and nothing in messages, enquiries, sponsorships or payments.
+
+### Telling sample data from real
+- [x] `isSample` on `Farmer`, `Product` and `OrganicStore`, migration
+      `20260902160000_add_sample_data_flag`. Everything present when it ran came
+      from the seed, so it was marked true; anything arriving through the public
+      application form takes the false default.
+- [x] The seed sets the flag on every row it writes, so reseeding cannot quietly
+      create rows that look real.
+- [x] `npm run data:purge -- --samples` removes them and their images, saves,
+      enquiries, sponsorships and review history in one transaction.
+      `--dry-run` prints what would go first.
+- [x] Deleted the one buyer account and its related rows on request:
+      `npm run data:purge -- --customers`.
+
+### Redis
+- [x] Confirmed integrated and healthy: `/api/health` reports `redis: ok`, and
+      it backs customer sessions, farmer and store portal sessions, OAuth state,
+      password reset and email verification tokens.
+- [ ] **Move rate limiting from memory to Redis.** `src/lib/rate-limit.ts` keeps
+      its buckets in a per-process `Map`. It works and is verified (52 allowed,
+      28 refused out of 80), but a second replica doubles every limit and a
+      restart clears them. This is the one thing standing between the current
+      limiter and a production-grade one.
+
+### Performance
+- [x] Measured the cause rather than guessing: `SELECT 1` against the database
+      takes **644ms median**. The project is in `ap-northeast-1` (Tokyo). Every
+      query on every page pays that round trip, which is why a page doing three
+      or four of them cannot beat about two seconds.
+- [x] Cached the home page's public catalogue reads. `/en` p50 2732ms → 949ms,
+      p99 4476ms → 1215ms, throughput 3.3 → 9.2 req/s.
+- [x] Fixed the bug that caching introduced: `unstable_cache` round-trips
+      through JSON, so `Date` fields came back as strings and every cached
+      listing threw `RangeError: Invalid time value`. `checkedOn` now accepts
+      both forms.
+- [ ] **Move the database to `ap-south-1` (Mumbai).** Worth more than every
+      other optimisation combined: 644ms per query would become roughly 30–50ms
+      and every page would benefit, not just the cached ones. A Supabase
+      project's region is fixed at creation, so this means creating a new
+      project and migrating. Needs your decision because it changes connection
+      strings and involves downtime.
+- [ ] Cache the shop and directory listings the way the home page now is.
+      `/en/products` is still 1985ms p50 and `/en/products/a2-whole-milk` 3663ms.
+      Both are `force-dynamic` and uncached.
+- [ ] Add `loading.tsx` skeletons. Even at 949ms the next page shows nothing at
+      all until the server replies, which is what makes navigation feel slow.
+- [ ] Add `error.tsx` boundaries. When Supabase dropped a connection during
+      testing the page returned a raw 500; there is no friendly retry anywhere.
+
+### Suggestions for you to weigh in on
+- [ ] **Region move** — the single biggest win, but it is your call.
+- [ ] **Seed data at launch** — run `npm run data:purge -- --samples` once real
+      farms are approved. Decide whether the sample farms should disappear on
+      the day of launch or stay until the first real listings are live, so the
+      directory is never empty.
+- [ ] **Keep or drop the 8 sample farms in the meantime.** They make the site
+      look populated for demos, and they are clearly flagged in the database,
+      but they are fictional and a visitor cannot tell.
+- [ ] **Rate limits are per-process.** Fine on one container, wrong on two.
+- [ ] Consider an index on `Product.isFeatured` if the catalogue grows; at 33
+      rows it would not pay for itself yet.
+
+---
 
 Sorts farms and organic stores by how close they are, without turning a
 directory into a tracker.

@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { unstable_cache } from "next/cache";
 
 import { prisma } from "./prisma";
 import { decodeSlug } from "./products";
@@ -109,14 +110,18 @@ export async function getStoreBySlug(rawSlug: string) {
  * VERIFIED, a buyer once the account is ACTIVE. Suspended entries are excluded,
  * so the figure never claims more than the site will actually show you.
  */
-export async function getRegisteredCounts() {
-  const [farmers, customers, stores] = await Promise.all([
-    prisma.farmer.count({
-      where: { status: "VERIFIED", certifiedUntil: { gte: new Date() } },
-    }),
-    prisma.customer.count({ where: { status: "ACTIVE" } }),
-    prisma.organicStore.count({ where: publicStoreWhere() }),
-  ]);
+export const getRegisteredCounts = unstable_cache(
+  async () => {
+    const [farmers, customers, stores] = await Promise.all([
+      prisma.farmer.count({
+        where: { status: "VERIFIED", certifiedUntil: { gte: new Date() } },
+      }),
+      prisma.customer.count({ where: { status: "ACTIVE" } }),
+      prisma.organicStore.count({ where: publicStoreWhere() }),
+    ]);
 
-  return { farmers, customers, stores };
-}
+    return { farmers, customers, stores };
+  },
+  ["registered-counts"],
+  { revalidate: 120, tags: ["catalog"] },
+);

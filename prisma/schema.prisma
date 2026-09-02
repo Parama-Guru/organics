@@ -76,8 +76,10 @@ model Farmer {
   about          String?
   aboutTa        String?
   photoUrl       String?
-  status         FarmerStatus @default(PENDING)
-  // Evidence captured at signup and checked by an admin before VERIFIED.
+  // Seeded demonstration data. Real applications default to false, so the
+  // launch cleanup is `where: { isSample: true }` rather than a list of slugs.
+  isSample       Boolean      @default(false)
+  status         FarmerStatus @default(PENDING)  // Evidence captured at signup and checked by an admin before VERIFIED.
   // "Certified organic" is a regulated claim in India, so the scheme, the
   // certificate number and its expiry are recorded and shown, not just asserted.
   govtIdLast4    String?
@@ -140,6 +142,7 @@ model Product {
   stock         Int            @default(0)
   isActive      Boolean        @default(true)
   isFeatured    Boolean        @default(false)
+  isSample      Boolean        @default(false)
   // Required: nothing is listed without a named farm behind it, and the listing
   // inherits that farm's verification state.
   farmerId      String
@@ -191,6 +194,7 @@ model OrganicStore {
   about          String?
   aboutTa        String?
   photoUrl       String?
+  isSample       Boolean     @default(false)
   status         StoreStatus @default(PENDING)
   // Evidence gathered before listing. A retail outlet needs an FSSAI licence to
   // sell food at all, which is the shop-side equivalent of a farm's NPOP scheme.
