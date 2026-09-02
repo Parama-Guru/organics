@@ -34,14 +34,14 @@ export function PromotionForm({
   }
 
   return (
-    <form action={submit} className="mt-5 grid gap-3 rounded-2xl border border-bark-200 bg-white p-5 sm:grid-cols-2">
+    <form action={submit} className="mt-5 grid gap-3 rounded-2xl border border-bark-200 bg-paper p-5 sm:grid-cols-2">
       <label className="grid gap-1 text-sm font-medium">
         Type
         <select
           name="targetType"
           value={targetType}
           onChange={(event) => setTargetType(event.target.value as "FARMER" | "STORE")}
-          className="min-h-11 rounded-xl border border-bark-200 bg-white px-3"
+          className="min-h-11 rounded-xl border border-bark-200 bg-paper px-3"
         >
           <option value="FARMER">Farmer</option>
           <option value="STORE">Organic store</option>
@@ -49,7 +49,7 @@ export function PromotionForm({
       </label>
       <label className="grid gap-1 text-sm font-medium">
         Verified target
-        <select name="targetId" required className="min-h-11 rounded-xl border border-bark-200 bg-white px-3">
+        <select name="targetId" required className="min-h-11 rounded-xl border border-bark-200 bg-paper px-3">
           <option value="">Choose…</option>
           {options.map((option) => <option key={option.id} value={option.id}>{option.name}</option>)}
         </select>

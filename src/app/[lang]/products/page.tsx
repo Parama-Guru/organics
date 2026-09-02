@@ -103,6 +103,43 @@ export default async function ProductsPage({ searchParams }: PageProps<"/[lang]/
 
       <PhoneSoonNotice className="mt-4" />
 
+      {/* A live reading of what the current filters actually return. It counts
+          the rows on screen rather than the whole table, so a filtered view
+          tells you how wide that slice really is. */}
+      {products.length > 0 ? (
+        <dl className="mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-[1.5rem] border border-bark-200 bg-bark-200 sm:grid-cols-4">
+          {(
+            [
+              [products.length, t.products.stripListings],
+              [new Set(products.map((product) => product.farmer.id)).size, t.products.stripFarms],
+              [
+                new Set(
+                  products
+                    .map((product) => product.region?.slug ?? product.farmer.region?.slug)
+                    .filter(Boolean),
+                ).size,
+                t.products.stripDistricts,
+              ],
+              [
+                new Set(products.map((product) => product.category.slug)).size,
+                t.products.stripCategories,
+              ],
+            ] as const
+          ).map(([value, label], cell) => (
+            <div
+              key={label}
+              style={{ animationDelay: `${cell * 70}ms` }}
+              className="animate-lift bg-paper px-5 py-6"
+            >
+              <dt className="rule-label text-bark-600">{label}</dt>
+              <dd className="tabular mt-2 font-display text-3xl leading-none text-bark-900 sm:text-4xl">
+                {value}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      ) : null}
+
       <section aria-label={t.products.searchLabel} className="editorial-panel mt-8 rounded-[2rem] p-4 sm:p-7">
       <form method="get" className="relative flex max-w-2xl gap-2" role="search">
         {filters.category ? (
@@ -116,7 +153,7 @@ export default async function ProductsPage({ searchParams }: PageProps<"/[lang]/
           maxLength={100}
           placeholder={t.products.searchPlaceholder}
           aria-label={t.products.searchLabel}
-          className="min-h-12 w-full rounded-full border border-bark-200 bg-bark-50 py-3 pl-12 pr-5 transition-[border-color,box-shadow,background-color] placeholder:text-bark-600/55 focus:border-leaf-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-leaf-400/20"
+          className="min-h-12 w-full rounded-full border border-bark-200 bg-canvas-2 py-3 pl-12 pr-5 transition-[border-color,box-shadow,background-color] placeholder:text-bark-600/55 focus:border-leaf-500 focus:bg-paper focus:outline-none focus:ring-4 focus:ring-leaf-400/20"
         />
         <SearchIcon
           aria-hidden
@@ -233,10 +270,12 @@ export default async function ProductsPage({ searchParams }: PageProps<"/[lang]/
             <div
               key={product.id}
               style={{ animationDelay: `${Math.min(index, 11) * 45}ms` }}
-              className="animate-rise"
+              className="animate-lift h-full min-w-0"
             >
               <ProductCard
                 product={product}
+                index={index}
+                priority={index < 2}
                 saveState={
                   !accountsOn
                     ? "hidden"

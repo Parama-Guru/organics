@@ -85,8 +85,8 @@ export default async function AdminMessagesPage({ searchParams }: PageProps<"/tj
               aria-current={active ? "page" : undefined}
               className={`inline-flex min-h-11 items-center rounded-xl border px-4 text-sm ${
                 active
-                  ? "border-bark-900 bg-bark-900 text-white"
-                  : "border-bark-200 bg-white text-bark-600"
+                  ? "border-bark-900 bg-inverse text-white"
+                  : "border-bark-200 bg-paper text-bark-600"
               }`}
             >
               {filter.label}
@@ -103,7 +103,7 @@ export default async function AdminMessagesPage({ searchParams }: PageProps<"/tj
       />
 
       {messages.length === 0 ? (
-        <p className="mt-6 rounded-2xl border border-dashed border-bark-200 bg-white p-8 text-center text-sm text-bark-600">
+        <p className="mt-6 rounded-2xl border border-dashed border-bark-200 bg-paper p-8 text-center text-sm text-bark-600">
           {query || role ? "No message matches that." : "Nobody has written in yet."}
         </p>
       ) : (
@@ -112,7 +112,7 @@ export default async function AdminMessagesPage({ searchParams }: PageProps<"/tj
             <li
               key={message.id}
               className={`rounded-2xl border p-4 ${
-                message.handledAt ? "border-bark-200 bg-white" : "border-marigold-200 bg-white"
+                message.handledAt ? "border-bark-200 bg-paper" : "border-marigold-200 bg-paper"
               }`}
             >
               <div className="flex flex-wrap items-start justify-between gap-3">

@@ -34,7 +34,7 @@ export function LanguageToggle() {
     <div
       role="group"
       aria-label={t.nav.language}
-      className="flex shrink-0 items-center rounded-full border border-bark-200 bg-white/70 p-0.5 backdrop-blur"
+      className="flex shrink-0 items-center rounded-full border border-bark-200 bg-paper/70 p-0.5 backdrop-blur"
     >
       {ENABLED_LOCALES.map((target) => {
         const active = target === locale;
@@ -58,7 +58,7 @@ export function LanguageToggle() {
             onClick={() => remember(target)}
             className={`flex min-h-11 min-w-11 items-center justify-center rounded-full px-2.5 text-xs font-semibold transition-colors ${
               active
-                ? "bg-bark-900 text-bark-50"
+                ? "bg-inverse text-bark-50"
                 : "text-bark-600 hover:bg-bark-900/5 hover:text-bark-900"
             }`}
           >

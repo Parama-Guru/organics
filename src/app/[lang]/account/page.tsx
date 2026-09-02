@@ -74,13 +74,13 @@ export default async function AccountPage({ searchParams }: PageProps<"/[lang]/a
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-20">
-      <section className="overflow-hidden rounded-[2rem] bg-bark-900 p-6 text-white shadow-lift sm:rounded-[3rem] sm:p-10 lg:p-12">
-        <p className="section-kicker !text-marigold-400 before:!bg-marigold-400">Personal field notebook</p>
+      <section className="overflow-hidden rounded-[2rem] bg-inverse p-6 text-white shadow-lift sm:rounded-[3rem] sm:p-10 lg:p-12">
+        <p className="section-kicker section-kicker--dark">Personal field notebook</p>
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="mt-6 flex min-w-0 items-center gap-4">
             <span
               aria-hidden
-              className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-marigold-500 text-3xl text-bark-900"
+              className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-marigold-500 text-3xl text-on-action"
             >
               <UserIcon />
             </span>
@@ -203,7 +203,7 @@ export default async function AccountPage({ searchParams }: PageProps<"/[lang]/a
         <p className="section-kicker">Notebook settings</p>
         <h2 className="mt-5 font-display text-4xl font-medium sm:text-5xl">{t.account.profile}</h2>
         <p className="mt-2 text-ink">{t.account.profileIntro}</p>
-        <div className="mt-5 rounded-2xl border border-bark-200 bg-white/70 p-4">
+        <div className="mt-5 rounded-2xl border border-bark-200 bg-paper/70 p-4">
           <p className={customer.emailVerifiedAt ? "font-medium text-leaf-700" : "font-medium text-bark-900"}>
             {customer.emailVerifiedAt ? t.account.emailVerified : t.account.emailUnverified}
           </p>

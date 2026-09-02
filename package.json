@@ -21,7 +21,8 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
     "admin:hash": "tsx scripts/hash-admin-passphrase.mts",
-    "verify:boundary": "tsx --conditions=react-server scripts/verify-boundary.mts"
+    "verify:boundary": "tsx --conditions=react-server scripts/verify-boundary.mts",
+    "verify:secrets": "node scripts/secret-scan.mjs"
   },
   "overrides": {
     "deepmerge-ts": "^8.0.2"

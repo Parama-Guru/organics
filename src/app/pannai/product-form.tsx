@@ -214,7 +214,7 @@ export function ProductForm({
         />
       </Field>
 
-      <label className="flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border border-bark-200 bg-white px-3.5 py-3 sm:col-span-2">
+      <label className="flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border border-bark-200 bg-paper px-3.5 py-3 sm:col-span-2">
         <input
           type="checkbox"
           name="isActive"
@@ -237,7 +237,7 @@ export function ProductForm({
       <button
         type="submit"
         disabled={pending}
-        className="min-h-12 justify-self-start rounded-full bg-marigold-500 px-6 font-medium text-bark-900 disabled:opacity-55 sm:col-span-2"
+        className="min-h-12 justify-self-start rounded-full bg-marigold-500 px-6 font-medium text-on-action disabled:opacity-55 sm:col-span-2"
       >
         {pending ? "சேமிக்கிறோம்…" : existing ? "மாற்றங்களைச் சேமிக்க" : "பொருளைச் சேர்க்க"}
       </button>

@@ -37,6 +37,9 @@ export const en = {
     contact: "Contact",
     language: "Language",
     switchTo: "Switch to {language}",
+    theme: "Appearance",
+    themeToDark: "Switch to dark mode",
+    themeToLight: "Switch to light mode",
     account: "My list",
     signIn: "Sign in",
   },
@@ -69,13 +72,13 @@ export const en = {
     orPassword: "or use email and password",
     oauthInvalid: "Google sign-in could not be verified. Start again from this page.",
     oauthUnverified: "That Google account does not have a verified email address.",
-    oauthLinkedElsewhere: "That Google account is already linked to another Organics account.",
-    oauthEmailInUse: "That Google email belongs to another Organics account.",
-    oauthWrongGoogle: "Use the Google account already linked to this Organics account.",
+    oauthLinkedElsewhere: "That Google account is already linked to another OSSIL account.",
+    oauthEmailInUse: "That Google email belongs to another OSSIL account.",
+    oauthWrongGoogle: "Use the Google account already linked to this OSSIL account.",
     oauthUnavailable: "Google sign-in is not configured yet. Use email and password.",
     onboardingTitle: "Finish your account",
     onboardingIntro:
-      "Google confirmed your email. Add the normal details Organics uses; no profile photo is collected.",
+      "Google confirmed your email. Add the normal details OSSIL uses; no profile photo is collected.",
     working: "One moment…",
     noAccount: "No account yet?",
     createOne: "Create one",
@@ -155,6 +158,25 @@ export const en = {
     fieldEmail: "Enter a valid email address.",
     fieldPassword: "Use at least 10 characters, and not your email address.",
     fieldPhone: "Enter a reachable phone number, or leave it blank.",
+    fieldUsername: "Use 3 to 20 letters, numbers or underscores.",
+    username: "Username",
+    usernameHint: "public handle — 3 to 20 letters, numbers or _",
+    usernameChecking: "Checking that handle…",
+    usernameAvailable: "That handle is free.",
+    usernameTaken: "That handle is taken. Try another.",
+    usernameInvalid: "Use 3 to 20 letters, numbers or underscores.",
+    passwordStrength: "Password strength",
+    strength0: "Too weak",
+    strength1: "Weak",
+    strength2: "Fair",
+    strength3: "Good",
+    strength4: "Strong",
+    strengthLength: "Make it longer — length beats symbols.",
+    strengthVariety: "Mix in another kind of character.",
+    strengthCommon: "That is a commonly guessed password.",
+    strengthPersonal: "Do not reuse your email or handle.",
+    strengthRepeat: "Avoid runs like 1234 or aaaa.",
+    strengthOk: "Strong enough. Nothing else to fix.",
     savedChanges: "Saved.",
     security: "Password",
     currentPassword: "Current password",
@@ -196,9 +218,9 @@ export const en = {
     resetExpired: "That link has expired or has already been used. Ask for a new one.",
     resetDone: "Password changed. Sign in with the new one.",
     changedDone: "Password changed, so every device has been signed out. Sign in with the new one.",
-    resetEmailSubject: "Reset your Organics password",
+    resetEmailSubject: "Reset your OSSIL password",
     resetEmailBody:
-      "Someone asked to reset the password for this address on Organics. Open the link below within 30 minutes to choose a new one. If it was not you, ignore this email — nothing has changed.",
+      "Someone asked to reset the password for this address on OSSIL. Open the link below within 30 minutes to choose a new one. If it was not you, ignore this email — nothing has changed.",
     errorCredentials: "That email and password do not match.",
     errorRateLimited:
       "Too many attempts. Wait about 15 minutes, or reset your password using the link below.",
@@ -225,11 +247,18 @@ export const en = {
     statCommission: "commission taken",
     statCall: "phone call to the farm",
     farmsHeading: "The farms behind it",
+    indexEyebrow: "The OSSIL index",
+    tickerLabel: "Live index",
+    searchLabel: "Search the index",
+    searchPlaceholder: "millets, cold-pressed oil, native rice",
+    searchAction: "Search",
+    boardVerified: "Checked",
+    boardDistrict: "Tamil Nadu",
 
     // The registered counts, at the foot of the page. Shown as they are, with no
     // rounding up and no "+", because the whole pitch is that these are checked
     // rather than numerous.
-    communityHeading: "Who is on Organics",
+    communityHeading: "Who is on OSSIL",
     communityIntro:
       "Everyone counted here has been through the same check. The numbers are exactly what is on the site today.",
     communityFarmers: "farmers registered",
@@ -279,6 +308,11 @@ export const en = {
     view: "View",
     perUnit: "per {unit}",
     perUnitShort: "/ {unit}",
+    noPhotograph: "Photograph to come",
+    stripListings: "listings",
+    stripFarms: "farms",
+    stripDistricts: "districts",
+    stripCategories: "categories",
   },
 
   product: {
@@ -296,7 +330,7 @@ export const en = {
   contact: {
     eyebrow: "Talk to the farm directly",
     verified: "Checked farm",
-    checkedOn: "Checked by Organics on {date}",
+    checkedOn: "Checked by OSSIL on {date}",
     callWindow: "Best 7am–10am",
     callNow: "Call the farm",
     callShort: "Call",
@@ -541,20 +575,20 @@ export const en = {
   enquiry: {
     heading: "Write to {seller}",
     intro:
-      "Organics stores this message first, then sends it to the checked email on the seller record. Their email is never exposed here.",
+      "OSSIL stores this message first, then sends it to the checked email on the seller record. Their email is never exposed here.",
     subject: "Subject",
     subjectPlaceholder: "Availability, quantity or collection",
     message: "Message",
     messagePlaceholder: "Say what you need, the quantity, and when you can collect it.",
     shareEmail: "Let the seller reply directly to my account email",
     shareEmailHint:
-      "Off by default. When off, your email stays private and the seller replies through Organics support.",
+      "Off by default. When off, your email stays private and the seller replies through OSSIL support.",
     shareEmailUnverified: "Verify your account email before sharing it as a reply address.",
     submit: "Send enquiry",
     sending: "Sending…",
-    sent: "Sent to the seller. A copy remains in Organics.",
+    sent: "Sent to the seller. A copy remains in OSSIL.",
     stored:
-      "Saved safely. Email delivery is not configured or failed, so an admin can follow it up from Organics.",
+      "Saved safely. Email delivery is not configured or failed, so an admin can follow it up from OSSIL.",
     invalid: "Check the subject and message.",
     rateLimited: "Too many enquiries. Try again later.",
     duplicate: "That exact enquiry was already saved during the last hour.",
@@ -563,7 +597,7 @@ export const en = {
   },
 
   footer: {
-    copyright: "© {year} Organics. A directory of checked organic farms.",
+    copyright: "© {year} OSSIL. A directory of checked organic farms.",
     blurb:
       "We check organic farms and publish their number. Buyers call the farm directly — we never handle the order or the money.",
     blurbSoon:
@@ -631,7 +665,7 @@ export const en = {
       "Applications and contact messages are kept while review or support work requires them; you can ask us to correct or delete them. A seller listing is removed on a verified request. Deleting a buyer account removes its profile, sign-in identities, shortlist, enquiries and subscription record. If payments are enabled, limited provider event IDs, amounts, currency and processing results may remain without the customer relation for fraud, accounting and webhook audit; no card details are stored.",
     s4Title: "Your rights",
     s4Body:
-      "You can delete your account from its security page after password or linked-Google confirmation. Deletion is permanent. If a recurring payment exists, Organics first stops future charges; the account is kept and an error is shown if that cannot be confirmed.",
+      "You can delete your account from its security page after password or linked-Google confirmation. Deletion is permanent. If a recurring payment exists, OSSIL first stops future charges; the account is kept and an error is shown if that cannot be confirmed.",
     s4Contact: "To ask for a copy of what we hold, or to have something corrected, write to us:",
     s5Title: "Sponsored placement measurement",
     s5Body:
@@ -641,17 +675,17 @@ export const en = {
   legal: {
     termsHeading: "Terms of use",
     termsIntro:
-      "These terms explain what Organics provides, what it does not provide, and the rules for using the directory.",
+      "These terms explain what OSSIL provides, what it does not provide, and the rules for using the directory.",
     effective: "Effective 2 September 2026.",
     termsDirectoryTitle: "A directory, not the seller",
     termsDirectoryBody:
-      "Organics helps buyers discover checked farms and organic stores. We do not own stock, set seller prices, accept produce orders, arrange delivery or hold money for a buyer-to-seller purchase. Any produce purchase is agreed directly with that seller.",
+      "OSSIL helps buyers discover checked farms and organic stores. We do not own stock, set seller prices, accept produce orders, arrange delivery or hold money for a buyer-to-seller purchase. Any produce purchase is agreed directly with that seller.",
     termsAccountTitle: "Accounts and access",
     termsAccountBody:
       "Give accurate details, keep sign-in methods private, and tell us promptly if an account may be compromised. Do not share paid access, scrape protected seller details, probe another account or use the service unlawfully. We may suspend access needed to protect people, sellers or the service.",
     termsSellerTitle: "Farmer and store responsibilities",
     termsSellerBody:
-      "A seller must provide truthful contact, licence, certification, address and listing information; have authority to publish it; and report material changes or expiry promptly. Organics may request evidence, flag a record for review, hide listings, suspend an entry or remove claims that cannot be supported.",
+      "A seller must provide truthful contact, licence, certification, address and listing information; have authority to publish it; and report material changes or expiry promptly. OSSIL may request evidence, flag a record for review, hide listings, suspend an entry or remove claims that cannot be supported.",
     termsEnquiryTitle: "Enquiries and acceptable use",
     termsEnquiryBody:
       "Use private enquiries for genuine produce or store questions. Do not send spam, threats, discriminatory content, illegal requests or personal data that is not needed. A buyer's email may be used as Reply-To only when that verified buyer explicitly chooses to share it.",
@@ -660,7 +694,7 @@ export const en = {
       "A paid placement is always labelled Sponsored / விளம்பரம். Sponsorship changes ordering only; it does not replace verification, guarantee quality or prevent suspension. Measurement is aggregate and first-party as described in the privacy notice.",
     termsBillingTitle: "Trials, subscriptions and renewal",
     termsBillingBody:
-      "When billing is enabled, one 14-day trial is available per eligible account. Monthly and annual prices, the exact access end or renewal date, and cancellation state are shown before payment. Authorization is hosted by Razorpay; Organics stores no card details. A subscription renews until cancelled. Cancellation stops a future renewal and access continues through the paid-through date. The cancellation and refund policy forms part of these terms.",
+      "When billing is enabled, one 14-day trial is available per eligible account. Monthly and annual prices, the exact access end or renewal date, and cancellation state are shown before payment. Authorization is hosted by Razorpay; OSSIL stores no card details. A subscription renews until cancelled. Cancellation stops a future renewal and access continues through the paid-through date. The cancellation and refund policy forms part of these terms.",
     termsBillingDisabled:
       "Billing is currently disabled. Signed-in access is free and no trial or recurring charge is started.",
     termsLimitsTitle: "Verification and service limits",
@@ -668,25 +702,25 @@ export const en = {
       "Verification checks records at a point in time; it is not a guarantee of every harvest, item, statement, availability or transaction. Buyers should confirm current certification, price, quantity, collection and quality with the seller. Nothing here removes rights or responsibilities that cannot lawfully be excluded.",
     termsChangesTitle: "Changes and contact",
     termsChangesBody:
-      "We may update these terms when the service changes and will publish the effective date here. Material changes to paid access apply prospectively. Contact Organics through the contact page for questions, corrections or complaints.",
+      "We may update these terms when the service changes and will publish the effective date here. Material changes to paid access apply prospectively. Contact OSSIL through the contact page for questions, corrections or complaints.",
     refundsHeading: "Cancellation and refunds",
     refundsIntro:
-      "This policy separates purchases made directly from sellers from payments for Organics directory access.",
+      "This policy separates purchases made directly from sellers from payments for OSSIL directory access.",
     refundsSellerTitle: "Produce and store purchases",
     refundsSellerBody:
-      "Organics does not take payment for produce, reserve stock or fulfil an order. Cancellation, replacement and refund requests for a purchase made with a farmer or store must be taken to that seller. Organics can review or suspend a misleading directory entry, but cannot reverse money it never received.",
-    refundsAccessTitle: "Organics access charges",
+      "OSSIL does not take payment for produce, reserve stock or fulfil an order. Cancellation, replacement and refund requests for a purchase made with a farmer or store must be taken to that seller. OSSIL can review or suspend a misleading directory entry, but cannot reverse money it never received.",
+    refundsAccessTitle: "OSSIL access charges",
     refundsAccessBody:
-      "Billing is currently disabled, so Organics is not charging for access. When enabled, checkout remains provider-hosted and a captured, verified charge is required before paid access is granted.",
+      "Billing is currently disabled, so OSSIL is not charging for access. When enabled, checkout remains provider-hosted and a captured, verified charge is required before paid access is granted.",
     refundsCancelTitle: "Stop renewal",
     refundsCancelBody:
       "Cancel renewal from the access page before the next renewal date. Cancellation does not remove the period already paid for: access continues through the displayed paid-through date and no later renewal is requested.",
     refundsEligibleTitle: "When an access refund is available",
     refundsEligibleBody:
-      "Contact us for a duplicate, incorrect or unrecognized charge as soon as possible. A first paid Organics access charge may be refunded when requested within 7 calendar days; a renewal may be refunded when requested within 3 calendar days. We also refund where applicable law requires it. Abuse, chargeback fraud and periods already refunded are excluded.",
+      "Contact us for a duplicate, incorrect or unrecognized charge as soon as possible. A first paid OSSIL access charge may be refunded when requested within 7 calendar days; a renewal may be refunded when requested within 3 calendar days. We also refund where applicable law requires it. Abuse, chargeback fraud and periods already refunded are excluded.",
     refundsProcessTitle: "How to request and receive it",
     refundsProcessBody:
-      "Use the account email and include the payment reference; never send card or bank credentials. We may verify account control and usage needed to investigate the request. Approved refunds go back through the original provider. Bank or card processing time is outside Organics and commonly takes 5–10 working days.",
+      "Use the account email and include the payment reference; never send card or bank credentials. We may verify account control and usage needed to investigate the request. Approved refunds go back through the original provider. Bank or card processing time is outside OSSIL and commonly takes 5–10 working days.",
     signupAgreement: "By creating an account, you agree to the terms of use.",
     billingAgreement: "By continuing to payment, you agree to the terms and cancellation/refund policy.",
   },

@@ -305,7 +305,7 @@ export default async function AdminOverview() {
       <section className="mt-10">
         <h2 className="font-display text-lg text-bark-900">Changed this week</h2>
         {recentEdits.length === 0 ? (
-          <p className="mt-3 rounded-2xl border border-dashed border-bark-200 bg-white p-8 text-center text-sm text-bark-600">
+          <p className="mt-3 rounded-2xl border border-dashed border-bark-200 bg-paper p-8 text-center text-sm text-bark-600">
             No listing has been touched in the last seven days.
           </p>
         ) : (
@@ -313,7 +313,7 @@ export default async function AdminOverview() {
             {recentEdits.map((product) => (
               <li
                 key={product.id}
-                className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 rounded-xl border border-bark-200 bg-white px-4 py-3 text-sm"
+                className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 rounded-xl border border-bark-200 bg-paper px-4 py-3 text-sm"
               >
                 <span className="min-w-0 break-words text-bark-900">
                   {product.nameTa ?? product.name}

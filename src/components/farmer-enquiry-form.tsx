@@ -107,7 +107,7 @@ export function FarmerEnquiryForm({
           placeholder={t.enquiry.messagePlaceholder}
           className={badFields.includes("message") ? "text-red-700" : ""}
         />
-        <label className={`flex items-start gap-3 rounded-2xl border p-4 ${canShareEmail ? "border-bark-200 bg-white/70" : "border-bark-200 bg-bark-50/70"}`}>
+        <label className={`flex items-start gap-3 rounded-2xl border p-4 ${canShareEmail ? "border-bark-200 bg-paper/70" : "border-bark-200 bg-canvas-2/70"}`}>
           <input
             type="checkbox"
             name="shareEmail"

@@ -11,8 +11,8 @@ function ChipBody({ active, children }: { active: boolean; children: string }) {
     <span
       className={`relative inline-flex min-h-11 items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium ring-1 transition-all duration-200 ${
         active || pending
-          ? "bg-bark-900 text-bark-50 shadow-soft ring-bark-900"
-          : "bg-white text-bark-600 ring-bark-200 hover:text-bark-900 hover:ring-marigold-400"
+          ? "bg-inverse text-bark-50 shadow-soft ring-bark-900"
+          : "bg-paper text-bark-600 ring-bark-200 hover:text-bark-900 hover:ring-marigold-400"
       }`}
     >
       {children}

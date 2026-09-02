@@ -134,7 +134,7 @@ export async function FarmerContact({ farmer }: { farmer: Farmer }) {
               </p>
             </>
           ) : (
-            <div className="mt-6 max-w-2xl rounded-2xl border border-bark-200 bg-bark-50/70 p-5">
+            <div className="mt-6 max-w-2xl rounded-2xl border border-bark-200 bg-canvas-2/70 p-5">
               <p className="font-semibold text-ink">{t.contact.phoneSoon}</p>
               <p className="mt-1 leading-relaxed text-bark-600">{t.contact.phoneSoonNote}</p>
             </div>

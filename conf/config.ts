@@ -34,7 +34,7 @@ const configSchema = z
   .object({
     app: z
       .object({
-        name: z.string().min(1).default("Organics"),
+        name: z.string().min(1).default("OSSIL"),
         env: z.enum(["dev", "prod"]).default("dev"),
         site_url: z.url().default("http://localhost:3000"),
         currency: z

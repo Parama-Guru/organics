@@ -1,11 +1,11 @@
-# Organics — running checklist
+# OSSIL — running checklist
 
 Updated as work lands. `[x]` = done and verified, `[ ]` = not done, `[~]` = done
 but blocked on something outside the code.
 
-**Score: 145 done · 10 blocked · 15 open**
+**Score: 163 done · 10 blocked · 15 open**
 
-Last updated: 2026-09-02 · Living Farm Atlas rebuild and full operational release verified
+Last updated: 2026-09-02 · OSSIL rebrand, Rich Heritage palette and light/dark themes verified
 
 ---
 
@@ -40,13 +40,13 @@ dashboard.
       application** and place `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in
       local config / Render Environment. Never paste the secret into chat or
       commit it. Redirect paths are listed below.
-- [ ] **The supplied Google Web credential does not register an Organics
+- [ ] **The supplied Google Web credential does not register an OSSIL
       callback.** Its redirects are for `127.0.0.1:5000` and two other Render
       services. Add `http://localhost:3000/api/auth/google/callback` and the real
-      Organics Render/domain callbacks before Google can complete sign-in.
+      OSSIL Render/domain callbacks before Google can complete sign-in.
 - [ ] **Rotate the pasted AMCS `jwt_secret` if that other application still
       uses it.** It was posted in chat and is compromised. It will not be copied
-      into Organics; this app keeps its existing Redis-backed customer session.
+      into OSSIL; this app keeps its existing Redis-backed customer session.
 - [ ] **Transactional email provider and verified sender domain.** Recommend
       Resend SMTP for the first launch. Verify `ossil.in`, then set
       `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` and `SMTP_FROM` in
@@ -207,6 +207,63 @@ clear proof, and different information density for buyers, sellers and staff.
 
 ---
 
+## OSSIL rebrand and second visual rebuild
+
+The Living Farm Atlas above shipped. This pass renames the product to OSSIL and
+replaces the surface again, this time from tokens measured on live reference
+pages rather than invented, and adds a real theme system.
+
+### Extraction and licensing
+- [x] Extract type scale, spacing rhythm, radii, easing curves and colour values
+      with a headless browser from lassie.ai and saaspo.com; report them before
+      writing any CSS.
+- [x] Check the licence of every candidate face. ABC Marist is a paid Dinamo
+      licence, so substitute Instrument Serif (SIL OFL) for display.
+- [x] Add no new runtime dependency: no icon package, no animation library, no
+      remote font or script.
+
+### Brand
+- [x] Rename OSSIL to OSSIL across copy, metadata, wordmarks, portals and the
+      contact address, leaving lowercase infrastructure identifiers untouched.
+- [x] Verify the Tamil dictionary survived the rename with no mangled glyphs.
+
+### Palette and themes
+- [x] Adopt the Rich Heritage palette (ivory cream canvas, midnight sapphire
+      structure, marigold orange action, deep emerald verification) on the
+      60-30-10 rule.
+- [x] Express every colour as a `@theme` custom property so a single
+      `[data-theme="dark"]` block retunes the whole application.
+- [x] Add the `OSSIL_THEME` cookie, a server read for correct first paint, an
+      inline OS-preference fallback and a header toggle with no hydration
+      mismatch and no flash.
+- [x] Migrate hard-coded light-only utilities (`bg-bark-900`, `bg-bark-50`,
+      `bg-white`, `text-bark-900` on marigold) to theme-aware tokens so dark mode
+      has no inverted pairing.
+- [x] Verify both themes at 375 and 1280 across 20 paths in Tamil and English:
+      zero WCAG 2 A/AA violations, zero horizontal overflow.
+
+### Interface
+- [x] Rebuild the header as a full-width bar with a scroll-lift state, serif
+      wordmark, underline-slide navigation, language toggle and theme toggle.
+- [x] Rebuild the home page around a live index board, an ink ticker of real
+      districts and categories, a proof ledger, featured stories and a crop index.
+- [x] Rebuild product cards as numbered catalogue entries with a single framed
+      image treatment shared by farm and store artwork.
+- [x] Add a live index strip to the shop that counts the listings, farms,
+      districts and categories actually returned by the current filters.
+- [x] Put the language toggle on all three portal sign-in screens without nesting
+      a form inside the sign-in form.
+
+### Security added in this pass
+- [x] Shared client/server password strength scoring with a minimum score,
+      personal-information and repetition checks on sign-up and both password
+      change paths.
+- [x] Live username availability with normalisation, pattern and reserved-word
+      checks before any database lookup, and rate limiting on the endpoint.
+- [x] `Customer.username` unique migration, deliberately not a sign-in credential.
+
+---
+
 ## Customer phase — access, Google sign-in and profile
 
 ### Access and entitlement
@@ -236,7 +293,7 @@ clear proof, and different information density for buyers, sellers and staff.
 - [x] Validate Google's issuer, audience, signature, expiry, nonce and
       `email_verified` before linking an account.
 - [x] Request only `openid email`; profile photo is not requested or stored.
-- [x] After first Google sign-in, collect the normal profile fields in Organics:
+- [x] After first Google sign-in, collect the normal profile fields in OSSIL:
       name, optional phone and district.
 - [x] Add link/unlink Google controls to account security. Refuse to unlink the
       last sign-in method.
@@ -284,7 +341,7 @@ clear proof, and different information density for buyers, sellers and staff.
 ## Email phase — transactional mail and private contact relay
 
 - [x] Extract one mail service from the password-reset-only implementation.
-- [x] Send from the configured Organics sender; never forge a buyer's address in
+- [x] Send from the configured OSSIL sender; never forge a buyer's address in
       `From` because SPF/DMARC will reject it.
 - [x] Keep password reset, then add local-account email verification.
 - [x] Send application acknowledgements to farmers and organic stores.
@@ -331,7 +388,7 @@ clear proof, and different information density for buyers, sellers and staff.
       `https://ossil.in` after DNS works.
 - [ ] Authorized redirect URIs: the same three origins followed by
       `/api/auth/google/callback`.
-- [ ] Configure consent screen: Organics, support email, privacy URL, terms URL,
+- [ ] Configure consent screen: OSSIL, support email, privacy URL, terms URL,
       verified domain; scopes only `openid` and `email`.
 - [ ] Set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in `conf/config.yaml`
       locally and Render Environment. Send neither secret through chat.
@@ -340,7 +397,7 @@ clear proof, and different information density for buyers, sellers and staff.
 - [ ] Verify `ossil.in` in Resend and add its SPF/DKIM DNS records.
 - [ ] Render values: `SMTP_HOST=smtp.resend.com`, `SMTP_PORT=587`,
       `SMTP_USER=resend`, `SMTP_PASSWORD=<Resend API key>`,
-      `SMTP_FROM=Organics <no-reply@ossil.in>`.
+      `SMTP_FROM=OSSIL <no-reply@ossil.in>`.
 - [ ] Keep `CONTACT_EMAIL` as the monitored support inbox, which may differ from
       the no-reply sender.
 

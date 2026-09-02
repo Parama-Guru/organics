@@ -1,6 +1,6 @@
-# Organics
+# OSSIL
 
-Organics is a bilingual directory for verified organic farms, produce, and
+OSSIL is a bilingual directory for verified organic farms, produce, and
 organic stores in Tamil Nadu. Tamil is the default language and English remains
 available from the site-wide language switcher.
 
@@ -27,8 +27,9 @@ and private enquiries to sellers.
 - Time-bounded, explicitly labelled sponsored farmer and store placements with
   first-party daily aggregate impression and click totals.
 - Tamil and English privacy, terms, cancellation, and refund pages.
-- An original Living Farm Atlas interface with editorial discovery pages,
-  layered farm artwork, responsive seller workspaces, and a staff command centre.
+- An original OSSIL editorial catalogue interface with a live index board,
+  numbered specimen cards, responsive seller workspaces, and a staff command
+  centre, in matched light and dark themes.
 - A dormant Razorpay subscription path for a 14-day trial, ₹49 monthly plan,
   and ₹499 annual plan. Access remains free until billing and every required
   Razorpay setting are deliberately enabled.
@@ -47,19 +48,30 @@ Node.js 22 or newer is required.
 
 ## Visual direction
 
-The interface is an original, bilingual field atlas rather than a generic
-storefront template. Warm paper surfaces and image-led stories carry public
-discovery; deep-indigo rails and ledger-like panels give seller and staff tools
-their own operational density. The home hero is a lightweight layered CSS/SVG
-farm world with pointer parallax—there is no WebGL, tracking script, or
-third-party animation runtime.
+The interface is an original, bilingual field catalogue rather than a generic
+storefront template. The palette is the Rich Heritage scheme, drawn from the
+Indian flag and applied on the 60-30-10 rule: an ivory-cream canvas carries the
+page, midnight-sapphire panels and rails carry structure, marigold orange is
+reserved for action, and deep emerald marks anything that has been checked. The
+home hero is a lightweight layered CSS/SVG index board with pointer
+parallax—there is no WebGL, tracking script, or third-party animation runtime.
 
-Newsreader and DM Sans provide the Latin display/body pairing, DM Mono is used
-for evidence and operational labels, and dedicated Noto Tamil faces preserve
-Tamil shaping and reading rhythm. Motion is decorative only, has reduced-motion
-and coarse-pointer fallbacks, and revealed content remains visible without
+Light and dark are first-class. Every colour is a CSS custom property declared
+in `@theme`, and a single `[data-theme="dark"]` block redeclares the same names,
+so the whole application—public pages, account, and all three portals—flips
+without per-component variants. The choice is stored in the `OSSIL_THEME`
+cookie, read on the server so the first paint is already correct, and a small
+inline script falls back to the operating-system preference when no cookie is
+set. The header toggle writes both.
+
+Instrument Serif and DM Sans provide the Latin display/body pairing, DM Mono is
+used for evidence and operational labels, and dedicated Noto Tamil faces
+preserve Tamil shaping and reading rhythm. Every face is an SIL Open Font
+Licence release, self-hosted through `next/font`; no font, icon, or animation
+library is fetched at runtime. Motion is decorative only, has reduced-motion and
+coarse-pointer fallbacks, and revealed content remains visible without
 JavaScript. The responsive and WCAG 2 A/AA browser matrix covers public,
-account, farmer, store, and staff page families.
+account, farmer, store, and staff page families in both themes.
 
 ## Local setup
 

@@ -53,7 +53,7 @@ export default async function SponsoredAdminPage() {
       />
 
       {placements.length === 0 ? (
-        <p className="mt-6 rounded-2xl border border-dashed border-bark-200 bg-white p-8 text-center text-sm text-bark-600">
+        <p className="mt-6 rounded-2xl border border-dashed border-bark-200 bg-paper p-8 text-center text-sm text-bark-600">
           No promotion has been created.
         </p>
       ) : (
@@ -79,7 +79,7 @@ export default async function SponsoredAdminPage() {
               ? `${((totals.clicks / totals.impressions) * 100).toFixed(1)}%`
               : "—";
             return (
-              <li key={placement.id} className="flex flex-wrap items-start justify-between gap-4 rounded-2xl border border-bark-200 bg-white p-4">
+              <li key={placement.id} className="flex flex-wrap items-start justify-between gap-4 rounded-2xl border border-bark-200 bg-paper p-4">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
                     <h2 className="font-medium text-bark-900">{target}</h2>

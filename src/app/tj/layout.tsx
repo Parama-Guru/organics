@@ -1,22 +1,24 @@
 import type { Metadata } from "next";
-import { DM_Mono, DM_Sans, Newsreader } from "next/font/google";
+import { DM_Mono, DM_Sans, Instrument_Serif } from "next/font/google";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { SignOutButton } from "@/app/tj/sign-out-button";
 import { isAdminEnabled, isSignedIn } from "@/lib/admin-auth";
+import { THEME_SCRIPT } from "@/lib/theme";
+import { getStoredTheme } from "@/lib/theme-cookie";
 
 import "../globals.css";
 
 const body = DM_Sans({ subsets: ["latin"], display: "swap", variable: "--font-body-family" });
-const display = Newsreader({ subsets: ["latin"], display: "swap", variable: "--font-display-family" });
+const display = Instrument_Serif({ subsets: ["latin"], weight: "400", display: "swap", variable: "--font-display-family" });
 const mono = DM_Mono({ subsets: ["latin"], weight: ["400", "500"], display: "swap", variable: "--font-mono-family" });
 
 // Staff-only: keep it out of search results and out of any share preview. The
 // title is deliberately bland — "Admin" in a shared browser's history advertises
 // exactly what the unguessable path was meant to hide.
 export const metadata: Metadata = {
-  title: "Organics",
+  title: "OSSIL",
   robots: { index: false, follow: false, nocache: true },
 };
 
@@ -27,6 +29,7 @@ export default async function AdminLayout({ children }: LayoutProps<"/tj">) {
   if (!isAdminEnabled()) notFound();
 
   const signedIn = await isSignedIn();
+  const theme = await getStoredTheme();
   const navigation = [
     ["/tj/overview", "Overview"],
     ["/tj", "Farm reviews"],
@@ -41,11 +44,14 @@ export default async function AdminLayout({ children }: LayoutProps<"/tj">) {
   ] as const;
 
   return (
-    <html lang="en" className={`${body.variable} ${display.variable} ${mono.variable} h-full antialiased`}>
-      <body className="portal-shell min-h-full bg-bark-50">
+    <html lang="en" data-theme={theme ?? undefined} suppressHydrationWarning className={`${body.variable} ${display.variable} ${mono.variable} h-full antialiased`}>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
+      <body className="portal-shell min-h-full bg-canvas">
         <div className="flex min-h-screen">
-          <aside className="sticky top-0 hidden h-screen w-72 shrink-0 flex-col bg-bark-900 p-7 text-white lg:flex">
-            <Link href="/tj" className="font-display text-3xl font-medium text-white">Organics</Link>
+          <aside className="sticky top-0 hidden h-screen w-72 shrink-0 flex-col bg-inverse p-7 text-white lg:flex">
+            <Link href="/tj" className="font-display text-3xl font-medium text-white">OSSIL</Link>
             <p className="mt-2 font-mono text-xs uppercase tracking-[0.12em] text-marigold-400">Staff command centre</p>
             {signedIn ? (
               <>
@@ -67,7 +73,7 @@ export default async function AdminLayout({ children }: LayoutProps<"/tj">) {
           <div className="flex min-w-0 flex-1 flex-col">
             <header className="border-b border-bark-200 bg-paper lg:hidden">
               <div className="flex items-center gap-3 px-4 py-3">
-                <Link href="/tj" className="shrink-0 font-display text-xl text-bark-900">Organics <span className="text-bark-600">staff</span></Link>
+                <Link href="/tj" className="shrink-0 font-display text-xl text-bark-900">OSSIL <span className="text-bark-600">staff</span></Link>
                 {signedIn ? <SignOutButton /> : null}
               </div>
               {signedIn ? (

@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 
+import { ImageField } from "@/components/image-field";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowRightIcon, CheckIcon, MapPinIcon } from "@/components/ui/icons";
@@ -24,37 +24,38 @@ export async function FeaturedProductStory({
   const href = localePath(locale, `/products/${product.slug}`);
 
   return (
-    <article className="editorial-panel group grid overflow-hidden rounded-[2rem] md:grid-cols-2">
+    <article className="editorial-panel group grid grid-cols-[minmax(0,1fr)] overflow-hidden rounded-[2rem] md:grid-cols-2">
       <Link
         href={href}
         aria-hidden
         tabIndex={-1}
-        className={`relative min-h-64 overflow-hidden bg-leaf-50 md:min-h-[25rem] ${reverse ? "md:order-2" : ""}`}
+        className={`relative min-h-64 overflow-hidden md:min-h-[26rem] ${reverse ? "md:order-2" : ""}`}
       >
-        {product.imageUrl ? (
-          <Image
-            src={product.imageUrl}
-            alt=""
-            fill
-            priority={priority}
-            sizes="(max-width: 768px) 100vw, 50vw"
-            className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.035]"
-          />
-        ) : (
-          <span className="flex h-full items-center justify-center text-7xl">
-            {product.emoji ?? "🌱"}
-          </span>
-        )}
-        <span className="absolute left-5 top-5">
-          <Badge tone="marigold">{localised(locale, product.category.name, product.category.nameTa)}</Badge>
+        <ImageField
+          src={product.imageUrl}
+          alt=""
+          priority={priority}
+          sizes="(max-width: 768px) 100vw, 50vw"
+          fallbackLabel={t.products.noPhotograph}
+          className="h-full w-full"
+        />
+        <span className="absolute left-5 top-5 z-5">
+          <Badge tone="marigold">
+            {localised(locale, product.category.name, product.category.nameTa)}
+          </Badge>
         </span>
       </Link>
 
-      <div className={`flex flex-col justify-between p-6 sm:p-9 lg:p-12 ${reverse ? "md:order-1" : ""}`}>
-        <div>
+      <div
+        className={`flex min-w-0 flex-col justify-between p-6 sm:p-9 lg:p-12 ${reverse ? "md:order-1" : ""}`}
+      >
+        <div className="min-w-0">
           <p className="section-kicker">{product.farmer?.farmName}</p>
-          <h3 className="mt-5 font-display text-3xl font-medium leading-[1.05] text-bark-900 sm:text-4xl">
-            <Link href={href} className="decoration-marigold-500 decoration-2 underline-offset-8 hover:underline">
+          <h3 className="mt-5 font-display text-3xl leading-[1.05] text-bark-900 sm:text-4xl">
+            <Link
+              href={href}
+              className="decoration-marigold-600 decoration-2 underline-offset-8 hover:underline"
+            >
               {localised(locale, product.name, product.nameTa)}
             </Link>
           </h3>
@@ -64,24 +65,20 @@ export async function FeaturedProductStory({
         </div>
 
         <div className="mt-8">
-          <p className="font-display text-3xl font-medium text-bark-900">
-            {formatMoney(product.priceCents)}
-          </p>
-          <p className="mt-1 text-sm text-bark-600">
-            {format(t.products.perUnitShort, { unit: unitLabel(locale, product.unit) })}
-          </p>
-          <p className="mt-5 flex flex-wrap gap-x-4 gap-y-2 text-xs text-bark-600">
+          <p className="font-display text-3xl text-bark-900">{formatMoney(product.priceCents)}</p>
+          <p className="rule-label mt-2 text-bark-600">{unitLabel(locale, product.unit)}</p>
+          <p className="mt-5 flex flex-wrap gap-x-4 gap-y-2">
             {product.farmer?.verifiedAt ? (
-              <span className="inline-flex items-center gap-1.5 font-semibold text-leaf-700">
-                <CheckIcon />
+              <span className="rule-label inline-flex items-center gap-1.5 text-leaf-700">
+                <CheckIcon className="h-3.5 w-3.5" />
                 {format(t.products.checkedOn, {
                   date: checkedOn(product.farmer.verifiedAt, locale),
                 })}
               </span>
             ) : null}
             {product.region ? (
-              <span className="inline-flex items-center gap-1.5">
-                <MapPinIcon /> {regionLabel(locale, product.region)}
+              <span className="rule-label inline-flex items-center gap-1.5 text-bark-600">
+                <MapPinIcon className="h-3.5 w-3.5" /> {regionLabel(locale, product.region)}
               </span>
             ) : null}
           </p>

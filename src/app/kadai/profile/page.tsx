@@ -36,7 +36,7 @@ export default async function StoreProfilePage({ searchParams }: PageProps<"/kad
         மின்னஞ்சல், மாவட்டம் அல்லது உரிமத்தை மாற்ற நிர்வாகியைத் தொடர்பு கொள்ளுங்கள்.
       </p>
 
-      <dl className="mt-6 grid gap-3 rounded-2xl border border-bark-200 bg-bark-50 p-4 text-sm sm:grid-cols-2">
+      <dl className="mt-6 grid gap-3 rounded-2xl border border-bark-200 bg-canvas p-4 text-sm sm:grid-cols-2">
         <div><dt className="text-bark-600">கடை</dt><dd>{details.storeName}</dd></div>
         <div><dt className="text-bark-600">தொடர்பு நபர்</dt><dd>{details.contactName}</dd></div>
         <div><dt className="text-bark-600">மின்னஞ்சல்</dt><dd className="break-all">{details.email}</dd></div>

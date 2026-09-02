@@ -17,7 +17,7 @@ export async function StickyCallBar({ phone }: { phone: string }) {
     <>
       {/* Reserves the space the fixed bar occupies, so it never sits on the footer. */}
       <div aria-hidden className="h-24 md:hidden" />
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/60 bg-white/90 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur-xl md:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-bark-200 bg-paper/90 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur-xl md:hidden">
         <div className="flex gap-2">
           <Button as="a" href={`tel:${dialNumber(phone)}`} size="lg" className="flex-1">
             <PhoneIcon /> {t.contact.callShort}

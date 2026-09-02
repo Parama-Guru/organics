@@ -24,20 +24,20 @@ export async function notifyApplication({
   await Promise.allSettled([
     sendTextEmail({
       to: applicantEmail,
-      subject: `Organics received your ${kind} application`,
+      subject: `OSSIL received your ${kind} application`,
       text: [
         `Hello ${applicantName},`,
         "",
-        `We received the application for ${entityName}. Nothing goes public until an Organics admin checks it. We will contact you using the details you submitted.`,
+        `We received the application for ${entityName}. Nothing goes public until an OSSIL admin checks it. We will contact you using the details you submitted.`,
         "",
-        "Organics",
+        "OSSIL",
       ].join("\n"),
     }),
     ...(admin
       ? [
           sendTextEmail({
             to: admin,
-            subject: `New ${kind} application on Organics`,
+            subject: `New ${kind} application on OSSIL`,
             text: `${entityName}\nApplicant: ${applicantName}\nEmail: ${applicantEmail}\n\nReview: ${reviewUrl}`,
           }),
         ]
@@ -64,12 +64,12 @@ export async function notifyContactMessage({
   await Promise.allSettled([
     sendTextEmail({
       to: email,
-      subject: "Organics received your message",
-      text: `Hello ${name},\n\nWe received your message and will reply after it is reviewed.\n\nOrganics`,
+      subject: "OSSIL received your message",
+      text: `Hello ${name},\n\nWe received your message and will reply after it is reviewed.\n\nOSSIL`,
     }),
     sendTextEmail({
       to: admin,
-      subject: "New contact message on Organics",
+      subject: "New contact message on OSSIL",
       text: `From: ${name} <${email}>\nRole: ${role}\n\n${message}\n\nReview: ${app.site_url.replace(/\/$/, "")}/tj/messages`,
     }),
   ]);

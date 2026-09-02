@@ -17,6 +17,17 @@ export function isEnabledLocale(value: unknown): value is Locale {
   return isLocale(value) && ENABLED_LOCALES.includes(value);
 }
 
+/**
+ * Language for routes that carry no `[lang]` segment — the seller and staff
+ * sign-in pages. An explicit choice wins, then the remembered site language,
+ * then Tamil. Kept here so the toggle, the pages and the tests agree.
+ */
+export function resolveLocalePreference(explicit: unknown, remembered: unknown): Locale {
+  if (isEnabledLocale(explicit)) return explicit;
+  if (isEnabledLocale(remembered)) return remembered;
+  return DEFAULT_LOCALE;
+}
+
 /** Read by the proxy to keep an explicit choice sticky across visits. */
 export const LOCALE_COOKIE = "NEXT_LOCALE";
 export const LOCALE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;

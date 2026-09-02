@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+
+import { ImageField } from "@/components/image-field";import { notFound } from "next/navigation";
 
 import { dialNumber, showFarmerPhone, whatsappNumber } from "@/components/farmer-contact";
 import { FarmerEnquiryForm } from "@/components/farmer-enquiry-form";
@@ -86,15 +86,15 @@ export default async function StorePage({ params }: PageProps<"/[lang]/stores/[s
       </Link>
 
       <header className="editorial-panel mt-6 animate-rise overflow-hidden rounded-[2rem] sm:rounded-[3rem]">
-        <div className="relative min-h-72 bg-leaf-50 sm:aspect-[16/7]">
+        <div className="relative min-h-72 sm:aspect-[16/7]">
           {store.photoUrl ? (
-            <Image
+            <ImageField
               src={store.photoUrl}
               alt=""
-              fill
               priority
               sizes="(max-width: 896px) 100vw, 56rem"
-              className="object-cover"
+              fallbackLabel={t.products.noPhotograph}
+              className="h-full w-full"
             />
           ) : (
             <StorefrontPlaceholder />
@@ -126,7 +126,7 @@ export default async function StorePage({ params }: PageProps<"/[lang]/stores/[s
                 <Button as="a" href={`https://wa.me/${whatsappNumber(store.phone)}`} target="_blank" rel="noopener noreferrer" variant="secondary" size="lg"><WhatsAppIcon /> {t.contact.whatsapp}</Button>
               </div>
             ) : (
-              <div className="mt-8 max-w-2xl rounded-2xl border border-bark-200 bg-bark-50 p-5">
+              <div className="mt-8 max-w-2xl rounded-2xl border border-bark-200 bg-canvas-2 p-5">
                 <p className="font-semibold text-ink">{t.contact.phoneSoon}</p>
                 <p className="mt-1 leading-relaxed text-bark-600">{t.contact.phoneSoonNote}</p>
               </div>

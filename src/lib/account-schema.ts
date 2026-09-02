@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+import { MINIMUM_SCORE, scorePassword } from "./password-strength";
+import { usernameSchema } from "./username";
+
 // Long over complex: length is what actually resists guessing, and character
 // rules mostly produce "Password1!" and a sticky note.
 const password = z
@@ -10,9 +13,15 @@ const password = z
   // attempt, so the bound is what keeps a login cheap to serve.
   .refine((value) => value.trim().length >= 10, "use at least 10 characters");
 
+/** The meter shown while typing is advice; this is the rule that is enforced. */
+function isStrongEnough(password: string, personal: readonly string[]): boolean {
+  return scorePassword(password, personal).score >= MINIMUM_SCORE;
+}
+
 export const signUpSchema = z
   .object({
     name: z.string().trim().min(2, "tell us your name").max(80),
+    username: usernameSchema,
     email: z.email("enter a valid email").max(200).toLowerCase(),
     password,
     phone: z
@@ -29,7 +38,16 @@ export const signUpSchema = z
   .refine((value) => !value.password.toLowerCase().includes(value.email.split("@")[0]!), {
     path: ["password"],
     message: "do not use your email address as the password",
-  });
+  })
+  .refine(
+    (value) =>
+      isStrongEnough(value.password, [
+        value.email.split("@")[0] ?? "",
+        value.username,
+        value.name,
+      ]),
+    { path: ["password"], message: "choose a stronger password" },
+  );
 
 export const signInSchema = z.object({
   email: z.email("enter a valid email").max(200).toLowerCase(),
@@ -51,12 +69,22 @@ export const profileSchema = z.object({
   locale: z.enum(["ta", "en"]),
 });
 
-export const passwordChangeSchema = z.object({
-  currentPassword: z.string().min(1, "enter your current password").max(200),
-  newPassword: password,
-});
+export const passwordChangeSchema = z
+  .object({
+    currentPassword: z.string().min(1, "enter your current password").max(200),
+    newPassword: password,
+  })
+  .refine((value) => isStrongEnough(value.newPassword, []), {
+    path: ["newPassword"],
+    message: "choose a stronger password",
+  });
 
-export const passwordSetSchema = z.object({ newPassword: password });
+export const passwordSetSchema = z
+  .object({ newPassword: password })
+  .refine((value) => isStrongEnough(value.newPassword, []), {
+    path: ["newPassword"],
+    message: "choose a stronger password",
+  });
 
 export type SignUpInput = z.infer<typeof signUpSchema>;
 export type SignInInput = z.infer<typeof signInSchema>;

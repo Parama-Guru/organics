@@ -114,8 +114,8 @@ export default async function AdminListingsPage({
             aria-current={option.key === tab ? "page" : undefined}
             className={`inline-flex min-h-11 items-center rounded-full border px-4 text-sm ${
               option.key === tab
-                ? "border-bark-900 bg-bark-900 text-white"
-                : "border-bark-200 bg-white text-bark-600 hover:text-bark-900"
+                ? "border-bark-900 bg-inverse text-white"
+                : "border-bark-200 bg-paper text-bark-600 hover:text-bark-900"
             }`}
           >
             {option.label}
@@ -131,7 +131,7 @@ export default async function AdminListingsPage({
       />
 
       {products.length === 0 ? (
-        <p className="mt-6 rounded-2xl border border-dashed border-bark-200 bg-white p-8 text-center text-sm text-bark-600">
+        <p className="mt-6 rounded-2xl border border-dashed border-bark-200 bg-paper p-8 text-center text-sm text-bark-600">
           Nothing here.
         </p>
       ) : (
@@ -139,7 +139,7 @@ export default async function AdminListingsPage({
           {products.map((product) => (
             <li
               key={product.id}
-              className="flex flex-wrap items-start justify-between gap-3 rounded-2xl border border-bark-200 bg-white p-4"
+              className="flex flex-wrap items-start justify-between gap-3 rounded-2xl border border-bark-200 bg-paper p-4"
             >
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">

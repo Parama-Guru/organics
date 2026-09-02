@@ -109,7 +109,33 @@ test("store publication accepts FSSAI-only resellers but rejects stale certifica
 });
 
 test("account passwords cannot contain the email name", () => {
-  const base = { name: "Buyer Name", email: "buyer@example.test", phone: "", region: "" };
+  const base = {
+    name: "Buyer Name",
+    username: "buyer_name",
+    email: "buyer@example.test",
+    phone: "",
+    region: "",
+  };
   assert.equal(signUpSchema.safeParse({ ...base, password: "buyer-very-long-secret" }).success, false);
   assert.equal(signUpSchema.safeParse({ ...base, password: "different-long-secret" }).success, true);
+});
+
+test("sign-up refuses a weak password and a reserved handle", () => {
+  const base = {
+    name: "Buyer Name",
+    username: "meena_01",
+    email: "meena@example.test",
+    phone: "",
+    region: "",
+  };
+  assert.equal(signUpSchema.safeParse({ ...base, password: "password123" }).success, false);
+  assert.equal(
+    signUpSchema.safeParse({ ...base, username: "admin", password: "different-long-secret" }).success,
+    false,
+  );
+  assert.equal(
+    signUpSchema.safeParse({ ...base, username: "MEENA_01", password: "different-long-secret" })
+      .success,
+    true,
+  );
 });

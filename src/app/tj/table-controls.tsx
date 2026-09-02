@@ -35,7 +35,7 @@ export function AdminSearch({
       </label>
       <button
         type="submit"
-        className="min-h-12 rounded-full bg-bark-900 px-6 text-sm font-medium text-white"
+        className="min-h-12 rounded-full bg-inverse px-6 text-sm font-medium text-white"
       >
         Search
       </button>
@@ -79,7 +79,7 @@ export function Pager({
   };
 
   const step =
-    "inline-flex min-h-11 items-center rounded-xl border border-bark-200 bg-white px-4 text-sm";
+    "inline-flex min-h-11 items-center rounded-xl border border-bark-200 bg-paper px-4 text-sm";
 
   return (
     <nav aria-label="Pages" className="mt-6 flex flex-wrap items-center gap-3">

@@ -296,20 +296,20 @@ export default async function AdminHome({ searchParams }: PageProps<"/tj">) {
             name="q"
             defaultValue={query}
             placeholder="Farm, person, email or phone"
-            className="min-h-11 w-full rounded-xl border border-bark-200 bg-white px-3.5 focus:border-marigold-400 focus:outline-none focus:ring-4 focus:ring-marigold-400/25"
+            className="min-h-11 w-full rounded-xl border border-bark-200 bg-paper px-3.5 focus:border-marigold-400 focus:outline-none focus:ring-4 focus:ring-marigold-400/25"
           />
         </label>
         {flaggedOnly ? <input type="hidden" name="flagged" value="1" /> : null}
         <button
           type="submit"
-          className="min-h-11 rounded-xl bg-bark-900 px-5 text-sm font-medium text-white"
+          className="min-h-11 rounded-xl bg-inverse px-5 text-sm font-medium text-white"
         >
           Search
         </button>
         {query ? (
           <Link
             href={flaggedOnly ? "/tj?flagged=1" : "/tj"}
-            className="inline-flex min-h-11 items-center rounded-xl border border-bark-200 bg-white px-5 text-sm text-bark-600"
+            className="inline-flex min-h-11 items-center rounded-xl border border-bark-200 bg-paper px-5 text-sm text-bark-600"
           >
             Clear
           </Link>
@@ -321,7 +321,7 @@ export default async function AdminHome({ searchParams }: PageProps<"/tj">) {
           href={query ? `/tj?q=${encodeURIComponent(query)}` : "/tj"}
           aria-current={!flaggedOnly ? "page" : undefined}
           className={`inline-flex min-h-10 items-center rounded-xl border px-4 ${
-            !flaggedOnly ? "border-bark-900 bg-bark-900 text-white" : "border-bark-200 bg-white text-bark-600"
+            !flaggedOnly ? "border-bark-900 bg-inverse text-white" : "border-bark-200 bg-paper text-bark-600"
           }`}
         >
           All farms
@@ -330,7 +330,7 @@ export default async function AdminHome({ searchParams }: PageProps<"/tj">) {
           href={`/tj?flagged=1${query ? `&q=${encodeURIComponent(query)}` : ""}`}
           aria-current={flaggedOnly ? "page" : undefined}
           className={`inline-flex min-h-10 items-center rounded-xl border px-4 ${
-            flaggedOnly ? "border-marigold-500 bg-marigold-50 text-bark-900" : "border-bark-200 bg-white text-bark-600"
+            flaggedOnly ? "border-marigold-500 bg-marigold-50 text-bark-900" : "border-bark-200 bg-paper text-bark-600"
           }`}
         >
           Flagged for review
@@ -342,7 +342,7 @@ export default async function AdminHome({ searchParams }: PageProps<"/tj">) {
           Waiting for review <span className="text-bark-600">({pending.length})</span>
         </h2>
         {pending.length === 0 ? (
-          <p className="mt-3 rounded-2xl border border-dashed border-bark-200 bg-white p-8 text-center text-sm text-bark-600">
+          <p className="mt-3 rounded-2xl border border-dashed border-bark-200 bg-paper p-8 text-center text-sm text-bark-600">
             {query ? "No waiting application matches that search." : "No applications waiting."}
           </p>
         ) : (
@@ -367,7 +367,7 @@ export default async function AdminHome({ searchParams }: PageProps<"/tj">) {
           Live on the site <span className="text-bark-600">({verifiedTotal})</span>
         </h2>
         {live.length === 0 ? (
-          <p className="mt-3 rounded-2xl border border-dashed border-bark-200 bg-white p-8 text-center text-sm text-bark-600">
+          <p className="mt-3 rounded-2xl border border-dashed border-bark-200 bg-paper p-8 text-center text-sm text-bark-600">
             {query ? "No live farm matches that search." : "No verified farms yet."}
           </p>
         ) : (

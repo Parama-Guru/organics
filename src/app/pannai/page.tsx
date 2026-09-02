@@ -42,13 +42,13 @@ export default async function FarmerHomePage({ searchParams }: PageProps<"/panna
         <div className="flex flex-wrap gap-2">
           <Link
             href={`${FARMER_PORTAL}/enquiries`}
-            className="flex min-h-12 items-center rounded-full border border-bark-200 bg-white px-5 font-medium text-bark-900"
+            className="flex min-h-12 items-center rounded-full border border-bark-200 bg-paper px-5 font-medium text-bark-900"
           >
             விசாரணைகள்
           </Link>
           <Link
             href={`${FARMER_PORTAL}/products/new`}
-            className="flex min-h-12 items-center rounded-full bg-marigold-500 px-6 font-medium text-bark-900"
+            className="flex min-h-12 items-center rounded-full bg-marigold-500 px-6 font-medium text-on-action"
           >
             புதிது சேர்க்க
           </Link>
@@ -109,7 +109,7 @@ export default async function FarmerHomePage({ searchParams }: PageProps<"/panna
                   <p className="mt-1 flex flex-wrap items-center gap-2 text-sm">
                     <span
                       className={`rounded-full px-3 py-1 font-medium ${
-                        product.isActive ? "bg-leaf-100 text-leaf-800" : "bg-bark-100 text-bark-600"
+                        product.isActive ? "bg-leaf-100 text-leaf-800" : "bg-canvas-2 text-bark-600"
                       }`}
                     >
                       {product.isActive ? "கடையில்" : "மறைத்தது"}

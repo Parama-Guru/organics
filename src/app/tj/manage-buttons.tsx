@@ -108,7 +108,7 @@ export function DeleteFarmButton({
         Delete farm
       </Button>
       {confirming ? (
-        <div className="mt-3 rounded-xl border border-red-200 bg-white p-4">
+        <div className="mt-3 rounded-xl border border-red-200 bg-paper p-4">
           <label className="block text-sm font-medium text-bark-900">
             Type <strong>{farmName}</strong> to permanently delete this farm
             {productCount > 0
@@ -120,7 +120,7 @@ export function DeleteFarmButton({
                 setTyped(event.target.value);
                 setTypo(false);
               }}
-              className="mt-2 min-h-11 w-full rounded-xl border border-bark-200 bg-white px-3"
+              className="mt-2 min-h-11 w-full rounded-xl border border-bark-200 bg-paper px-3"
             />
           </label>
           <div className="mt-3 flex flex-wrap gap-2">

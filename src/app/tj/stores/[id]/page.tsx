@@ -188,7 +188,7 @@ export default async function AdminStorePage({ params }: PageProps<"/tj/stores/[
         ) : (
           <ol className="mt-4 grid gap-2">
             {store.reviewEvents.map((event) => (
-              <li key={event.id} className="rounded-xl bg-bark-50 px-4 py-3 text-sm">
+              <li key={event.id} className="rounded-xl bg-canvas-2 px-4 py-3 text-sm">
                 <p className="font-medium text-bark-900">
                   {event.action.replaceAll("_", " ")}
                   {event.fromStatus || event.toStatus ? ` · ${event.fromStatus ?? "—"} → ${event.toStatus ?? "—"}` : ""}

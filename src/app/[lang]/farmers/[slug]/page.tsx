@@ -1,9 +1,9 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { dialNumber, showFarmerPhone, whatsappNumber } from "@/components/farmer-contact";
 import { FarmerEnquiryForm } from "@/components/farmer-enquiry-form";
+import { ImageField } from "@/components/image-field";
 import { JsonLd } from "@/components/json-ld";
 import { SaveButton } from "@/components/save-button";
 import { ProductCard } from "@/components/product-card";
@@ -84,17 +84,15 @@ export default async function FarmerPage({ params }: PageProps<"/[lang]/farmers/
       <header className="editorial-panel mt-6 animate-rise overflow-hidden rounded-[2rem] sm:rounded-[3rem]">
         {/* Full-width banner rather than a side column: the scene is 8:5, and a
             narrow portrait column cropped the herd in half. */}
-        <div className="relative min-h-72 bg-leaf-50 sm:aspect-[16/7]">
-          {farmer.photoUrl ? (
-            <Image
-              src={farmer.photoUrl}
-              alt=""
-              fill
-              priority
-              sizes="(max-width: 1152px) 100vw, 72rem"
-              className="object-cover"
-            />
-          ) : null}
+        <div className="relative min-h-72 sm:aspect-[16/7]">
+          <ImageField
+            src={farmer.photoUrl}
+            alt=""
+            priority
+            sizes="(max-width: 1152px) 100vw, 72rem"
+            fallbackLabel={t.products.noPhotograph}
+            className="h-full w-full"
+          />
         </div>
 
         <div className="grid gap-8 p-6 sm:p-10 lg:grid-cols-[1fr_0.9fr] lg:p-12">
@@ -156,7 +154,7 @@ export default async function FarmerPage({ params }: PageProps<"/[lang]/farmers/
             </div>
 
             {showFarmerPhone() ? null : (
-              <div className="mt-6 max-w-2xl rounded-2xl border border-bark-200 bg-bark-50 p-5">
+              <div className="mt-6 max-w-2xl rounded-2xl border border-bark-200 bg-canvas-2 p-5">
                 <p className="font-semibold text-ink">{t.contact.phoneSoon}</p>
                 <p className="mt-1 leading-relaxed text-bark-600">{t.contact.phoneSoonNote}</p>
               </div>

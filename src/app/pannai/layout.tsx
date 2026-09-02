@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
-import { DM_Mono, DM_Sans, Newsreader, Noto_Sans_Tamil, Noto_Serif_Tamil } from "next/font/google";
+import { DM_Mono, DM_Sans, Instrument_Serif, Noto_Sans_Tamil, Noto_Serif_Tamil } from "next/font/google";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { FARMER_PORTAL, farmerPortalEnabled, getFarmer } from "@/lib/farmer-auth";
+import { THEME_SCRIPT } from "@/lib/theme";
+import { getStoredTheme } from "@/lib/theme-cookie";
 import { SignOutButton } from "@/app/pannai/sign-out-button";
 
 import "../globals.css";
 
 const body = DM_Sans({ subsets: ["latin"], display: "swap", variable: "--font-body-family" });
-const display = Newsreader({ subsets: ["latin"], display: "swap", variable: "--font-display-family" });
+const display = Instrument_Serif({ subsets: ["latin"], weight: "400", display: "swap", variable: "--font-display-family" });
 const mono = DM_Mono({ subsets: ["latin"], weight: ["400", "500"], display: "swap", variable: "--font-mono-family" });
 const tamil = Noto_Sans_Tamil({
   subsets: ["tamil"],
@@ -31,14 +33,18 @@ export default async function FarmerLayout({ children }: LayoutProps<"/pannai">)
   if (!farmerPortalEnabled()) notFound();
 
   const farmer = await getFarmer();
+  const theme = await getStoredTheme();
 
   return (
-    <html lang="ta-IN" className={`${body.variable} ${display.variable} ${mono.variable} ${tamil.variable} ${tamilDisplay.variable} h-full antialiased`}>
-      <body className="portal-shell min-h-full bg-bark-50">
+    <html lang="ta-IN" data-theme={theme ?? undefined} suppressHydrationWarning className={`${body.variable} ${display.variable} ${mono.variable} ${tamil.variable} ${tamilDisplay.variable} h-full antialiased`}>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
+      <body className="portal-shell min-h-full bg-canvas">
         <div className="flex min-h-screen">
-          <aside className="sticky top-0 hidden h-screen w-72 shrink-0 flex-col bg-bark-900 p-7 text-white lg:flex">
+          <aside className="sticky top-0 hidden h-screen w-72 shrink-0 flex-col bg-inverse p-7 text-white lg:flex">
             <Link href={FARMER_PORTAL} className="font-display text-3xl font-medium text-white">
-              Organics
+              OSSIL
             </Link>
             <p className="mt-2 font-mono text-xs uppercase tracking-[0.12em] text-marigold-400">பண்ணை workspace</p>
             {farmer ? (
@@ -62,7 +68,7 @@ export default async function FarmerLayout({ children }: LayoutProps<"/pannai">)
           <div className="flex min-w-0 flex-1 flex-col">
             <header className="border-b border-bark-200 bg-paper lg:hidden">
               <div className="flex flex-wrap items-center gap-2 px-4 py-3">
-                <Link href={FARMER_PORTAL} className="font-display text-xl text-bark-900">Organics <span className="text-bark-600">பண்ணை</span></Link>
+                <Link href={FARMER_PORTAL} className="font-display text-xl text-bark-900">OSSIL <span className="text-bark-600">பண்ணை</span></Link>
                 {farmer ? (
                   <nav aria-label="பண்ணை" className="no-scrollbar ml-auto flex max-w-full items-center gap-1 overflow-x-auto text-sm">
                     <Link href={FARMER_PORTAL} className="flex min-h-11 items-center rounded-xl px-2 text-bark-600">பொருட்கள்</Link>

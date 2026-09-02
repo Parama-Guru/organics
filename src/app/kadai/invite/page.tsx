@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { AcceptStoreInviteForm } from "@/app/kadai/forms";
+import { PORTAL_COPY } from "@/lib/i18n/portal-copy";
 import {
   STORE_PORTAL,
   getStore,
@@ -51,7 +52,7 @@ export default async function AcceptStoreInvitePage({
         இந்த இணைப்பு ஒரே முறை மட்டும் வேலை செய்யும். புதிய கடவுச்சொல் அமைத்ததும் பழையது இருந்தால்
         அது நிறுத்தப்படும்.
       </p>
-      <AcceptStoreInviteForm storeId={storeId} token={token} />
+      <AcceptStoreInviteForm storeId={storeId} token={token} copy={PORTAL_COPY.ta} />
     </div>
   );
 }

@@ -52,8 +52,8 @@ export default async function CareersPage() {
       {/* No invented vacancies. When there is a real one it goes here; until
           then the page says so plainly rather than listing a role nobody is
           hiring for. */}
-      <div className="mt-16 rounded-[2rem] bg-bark-900 p-7 text-white sm:p-10 lg:p-14">
-        <p className="section-kicker !text-marigold-400 before:!bg-marigold-400">{t.careers.rolesHeading}</p>
+      <div className="mt-16 rounded-[2rem] bg-inverse p-7 text-white sm:p-10 lg:p-14">
+        <p className="section-kicker section-kicker--dark">{t.careers.rolesHeading}</p>
         <p className="mt-5 font-display text-4xl text-white sm:text-5xl">{t.careers.noRoles}</p>
         <p className="mt-4 max-w-2xl text-lg leading-relaxed text-bark-100">{t.careers.noRolesBody}</p>
       </div>

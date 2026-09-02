@@ -70,7 +70,11 @@ export default async function ProductPage({ params }: PageProps<"/[lang]/product
       </Link>
 
       <div className="mt-6 grid animate-rise gap-8 lg:grid-cols-[1.12fr_0.88fr] lg:items-start lg:gap-10">
-        <ProductGallery images={product.images} name={name} emoji={product.emoji} />
+        <ProductGallery
+          images={product.images}
+          name={name}
+          emptyLabel={t.products.noPhotograph}
+        />
 
         <div className="editorial-panel flex flex-col rounded-[2rem] p-6 sm:p-9 lg:sticky lg:top-28">
           <p className="section-kicker flex-wrap">

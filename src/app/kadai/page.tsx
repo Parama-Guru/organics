@@ -43,7 +43,7 @@ export default async function StoreHomePage({ searchParams }: PageProps<"/kadai"
     <div>
       <div className="grid gap-6 lg:grid-cols-[1fr_18rem]">
         <div>
-          <p className="section-kicker">சரிபார்த்த Organics கடை</p>
+          <p className="section-kicker">சரிபார்த்த OSSIL கடை</p>
           <h1 className="mt-5 font-display text-5xl font-medium leading-none break-words text-bark-900 sm:text-6xl">
             {details.storeName}
           </h1>
@@ -67,7 +67,7 @@ export default async function StoreHomePage({ searchParams }: PageProps<"/kadai"
       {!publicEligible ? (
         <p role="alert" className="mt-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm leading-relaxed text-red-700">
           உங்கள் கடை சரிபார்க்கப்பட்டிருந்தாலும் FSSAI அல்லது சான்றிதழ் பதிவு முழுமையாக இல்லை,
-          அல்லது காலாவதியாகியுள்ளது. அதனால் பொதுப் பட்டியல் இப்போது மறைக்கப்பட்டுள்ளது. Organics
+          அல்லது காலாவதியாகியுள்ளது. அதனால் பொதுப் பட்டியல் இப்போது மறைக்கப்பட்டுள்ளது. OSSIL
           நிர்வாகியைத் தொடர்பு கொண்டு ஆதாரத்தைப் புதுப்பிக்கவும்.
         </p>
       ) : null}
@@ -114,7 +114,7 @@ export default async function StoreHomePage({ searchParams }: PageProps<"/kadai"
       <section className="mt-8 rounded-[1.75rem] border border-leaf-200 bg-leaf-50 p-6 sm:p-8">
         <h2 className="font-display text-xl text-bark-900">சரிபார்ப்பு பதிவு</h2>
         <p className="mt-2 text-sm text-bark-600">
-          FSSAI, உரிமையாளர் அடையாளம், சான்றிதழ் போன்றவற்றை மாற்ற Organics நிர்வாகியைத் தொடர்பு
+          FSSAI, உரிமையாளர் அடையாளம், சான்றிதழ் போன்றவற்றை மாற்ற OSSIL நிர்வாகியைத் தொடர்பு
           கொள்ளுங்கள். பாதுகாப்புக்காக அவை கடை பக்கத்தில் நேரடியாகத் திருத்த முடியாது.
         </p>
         <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">

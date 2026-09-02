@@ -64,9 +64,9 @@ export async function sendEmailVerification({
     return;
   }
 
-  const subject = locale === "ta" ? "Organics மின்னஞ்சலைச் சரிபார்க்க" : "Verify your Organics email";
+  const subject = locale === "ta" ? "OSSIL மின்னஞ்சலைச் சரிபார்க்க" : "Verify your OSSIL email";
   const text = locale === "ta"
-    ? `இந்த முகவரியை உங்கள் Organics கணக்குடன் இணைக்க கீழே உள்ள இணைப்பை 24 மணி நேரத்திற்குள் திறக்கவும்.\n\n${url}\n\nநீங்கள் கேட்கவில்லை என்றால் இதைப் புறக்கணிக்கவும்.`
-    : `Open the link below within 24 hours to verify this address for your Organics account.\n\n${url}\n\nIf you did not request this, ignore it.`;
+    ? `இந்த முகவரியை உங்கள் OSSIL கணக்குடன் இணைக்க கீழே உள்ள இணைப்பை 24 மணி நேரத்திற்குள் திறக்கவும்.\n\n${url}\n\nநீங்கள் கேட்கவில்லை என்றால் இதைப் புறக்கணிக்கவும்.`
+    : `Open the link below within 24 hours to verify this address for your OSSIL account.\n\n${url}\n\nIf you did not request this, ignore it.`;
   await sendTextEmail({ to: email, subject, text });
 }

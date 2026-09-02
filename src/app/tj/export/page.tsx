@@ -82,7 +82,7 @@ export default async function AdminExportPage() {
         {sets.map((set) => (
           <li
             key={set.type}
-            className="flex flex-col rounded-2xl border border-bark-200 bg-white p-5"
+            className="flex flex-col rounded-2xl border border-bark-200 bg-paper p-5"
           >
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <h2 className="font-display text-lg text-bark-900">{set.title}</h2>
@@ -98,7 +98,7 @@ export default async function AdminExportPage() {
             <a
               href={`/tj/export/download?type=${set.type}`}
               download
-              className="mt-5 inline-flex min-h-11 w-fit items-center rounded-xl bg-bark-900 px-5 text-sm font-medium text-white"
+              className="mt-5 inline-flex min-h-11 w-fit items-center rounded-xl bg-inverse px-5 text-sm font-medium text-white"
             >
               Download CSV
             </a>

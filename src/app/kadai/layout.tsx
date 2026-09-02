@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
-import { DM_Mono, DM_Sans, Newsreader, Noto_Sans_Tamil, Noto_Serif_Tamil } from "next/font/google";
+import { DM_Mono, DM_Sans, Instrument_Serif, Noto_Sans_Tamil, Noto_Serif_Tamil } from "next/font/google";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { StoreSignOutButton } from "@/app/kadai/sign-out-button";
+import { THEME_SCRIPT } from "@/lib/theme";
+import { getStoredTheme } from "@/lib/theme-cookie";
 import { STORE_PORTAL, getStore, storePortalEnabled } from "@/lib/store-auth";
 
 import "../globals.css";
 
 const body = DM_Sans({ subsets: ["latin"], display: "swap", variable: "--font-body-family" });
-const display = Newsreader({ subsets: ["latin"], display: "swap", variable: "--font-display-family" });
+const display = Instrument_Serif({ subsets: ["latin"], weight: "400", display: "swap", variable: "--font-display-family" });
 const mono = DM_Mono({ subsets: ["latin"], weight: ["400", "500"], display: "swap", variable: "--font-mono-family" });
 const tamil = Noto_Sans_Tamil({
   subsets: ["tamil"],
@@ -27,13 +29,17 @@ export const metadata: Metadata = {
 export default async function StoreLayout({ children }: LayoutProps<"/kadai">) {
   if (!storePortalEnabled()) notFound();
   const store = await getStore();
+  const theme = await getStoredTheme();
 
   return (
-    <html lang="ta-IN" className={`${body.variable} ${display.variable} ${mono.variable} ${tamil.variable} ${tamilDisplay.variable} h-full antialiased`}>
-      <body className="portal-shell min-h-full bg-bark-50">
+    <html lang="ta-IN" data-theme={theme ?? undefined} suppressHydrationWarning className={`${body.variable} ${display.variable} ${mono.variable} ${tamil.variable} ${tamilDisplay.variable} h-full antialiased`}>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
+      <body className="portal-shell min-h-full bg-canvas">
         <div className="flex min-h-screen">
-          <aside className="sticky top-0 hidden h-screen w-72 shrink-0 flex-col bg-bark-900 p-7 text-white lg:flex">
-            <Link href={STORE_PORTAL} className="font-display text-3xl font-medium text-white">Organics</Link>
+          <aside className="sticky top-0 hidden h-screen w-72 shrink-0 flex-col bg-inverse p-7 text-white lg:flex">
+            <Link href={STORE_PORTAL} className="font-display text-3xl font-medium text-white">OSSIL</Link>
             <p className="mt-2 font-mono text-xs uppercase tracking-[0.12em] text-marigold-400">கடை workspace</p>
             {store ? (
               <>
@@ -56,7 +62,7 @@ export default async function StoreLayout({ children }: LayoutProps<"/kadai">) {
           <div className="flex min-w-0 flex-1 flex-col">
             <header className="border-b border-bark-200 bg-paper lg:hidden">
               <div className="flex flex-wrap items-center gap-2 px-4 py-3">
-                <Link href={STORE_PORTAL} className="font-display text-xl text-bark-900">Organics <span className="text-bark-600">கடை</span></Link>
+                <Link href={STORE_PORTAL} className="font-display text-xl text-bark-900">OSSIL <span className="text-bark-600">கடை</span></Link>
                 {store ? (
                   <nav aria-label="கடை" className="no-scrollbar ml-auto flex max-w-full items-center gap-1 overflow-x-auto text-sm">
                     <Link href={STORE_PORTAL} className="flex min-h-11 items-center rounded-xl px-2 text-bark-600">முகப்பு</Link>

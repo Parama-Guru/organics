@@ -23,15 +23,15 @@ export function AccountShell({
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-20">
       <div className="editorial-panel grid overflow-hidden rounded-[2rem] lg:grid-cols-[0.9fr_1.1fr] lg:rounded-[3rem]">
-        <aside className="auth-landscape relative order-last min-h-[28rem] overflow-hidden bg-bark-900 p-7 text-white sm:p-10 lg:order-first lg:min-h-[42rem] lg:p-12">
+        <aside className="auth-landscape relative order-last min-h-[28rem] overflow-hidden bg-inverse p-7 text-white sm:p-10 lg:order-first lg:min-h-[42rem] lg:p-12">
           <div aria-hidden className="absolute -right-20 -top-24 h-64 w-64 rounded-full bg-marigold-400/20 blur-3xl" />
           <div aria-hidden className="absolute -bottom-24 -left-20 h-64 w-64 rounded-full bg-leaf-400/20 blur-3xl" />
           <div className="relative z-10 flex h-full flex-col">
-            <p className="section-kicker !text-marigold-400 before:!bg-marigold-400">
+            <p className="section-kicker section-kicker--dark">
               <ShieldCheckIcon /> {t.account.authEyebrow}
             </p>
             <h2 className="mt-8 font-display text-6xl font-medium leading-[0.85] text-white sm:text-7xl lg:text-8xl">
-              Organics
+              OSSIL
             </h2>
             <ul className="mt-auto border-t border-white/15 pt-4">
               {benefits.map(({ icon: Icon, text }) => (

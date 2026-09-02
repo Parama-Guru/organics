@@ -112,7 +112,7 @@ export default async function PlansPage({ searchParams }: PageProps<"/[lang]/acc
             key={plan.name}
             className={`flex flex-col overflow-hidden rounded-[2rem] border p-6 shadow-soft sm:p-9 ${
               index === 1
-                ? "border-bark-900 bg-bark-900 text-white"
+                ? "border-inverse bg-inverse text-white"
                 : "border-bark-200 bg-paper text-bark-900"
             }`}
           >
@@ -182,7 +182,7 @@ export default async function PlansPage({ searchParams }: PageProps<"/[lang]/acc
         {subscription?.paymentEvents.length ? (
           <ul className="mt-4 grid gap-2">
             {subscription.paymentEvents.map((event) => (
-              <li key={event.id} className="flex flex-wrap justify-between gap-2 rounded-xl border border-bark-200 bg-white/70 px-4 py-3 text-sm">
+              <li key={event.id} className="flex flex-wrap justify-between gap-2 rounded-xl border border-bark-200 bg-paper/70 px-4 py-3 text-sm">
                 <span>{billingEventLabel(event.eventType, t)}</span>
                 <span className="text-bark-600">
                   {new Intl.DateTimeFormat(locale === "ta" ? "ta-IN" : "en-IN", {

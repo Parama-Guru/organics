@@ -14,22 +14,25 @@ const base =
   "disabled:pointer-events-none disabled:opacity-55";
 
 const variants: Record<Variant, string> = {
-  // Hover goes lighter, not darker: indigo-on-darker-marigold drops below AA.
+  // Hover goes lighter, not darker: the darker marigold drops below AA.
+  // `on-action` stays dark in both themes, because near-white on marigold is 2.4:1.
   primary:
-    "bg-marigold-500 text-ink shadow-soft hover:-translate-y-0.5 hover:bg-marigold-400 hover:shadow-lift",
+    "bg-marigold-500 text-on-action shadow-soft hover:-translate-y-0.5 hover:bg-marigold-400 hover:shadow-lift",
+  // Fills with ink on hover, the way the reference's outlined pills do, rather
+  // than only shifting a tint nobody notices.
   secondary:
-    "border-leaf-200 bg-leaf-50 text-bark-900 hover:-translate-y-0.5 hover:border-leaf-400 hover:bg-leaf-100 hover:shadow-soft",
+    "border-bark-200 bg-paper text-bark-900 hover:-translate-y-0.5 hover:border-bark-900 hover:bg-inverse hover:text-bark-50 hover:shadow-soft",
   ghost: "text-bark-600 hover:bg-bark-900/5 hover:text-bark-900",
-  dark: "bg-bark-900 text-bark-50 shadow-soft hover:-translate-y-0.5 hover:bg-bark-800 hover:shadow-lift",
-  // For the indigo hero. `secondary` here would composite to pale grey under
+  dark: "bg-inverse text-bark-50 shadow-soft hover:-translate-y-0.5 hover:bg-bark-800 hover:text-inverse hover:shadow-lift",
+  // For an ink chapter. `secondary` there would composite to pale grey under
   // white text (~1.75:1), so it needs its own surface.
   onDark:
-    "border-white/40 bg-white/10 text-white backdrop-blur hover:-translate-y-0.5 hover:border-white hover:bg-white hover:text-bark-900",
+    "border-white/40 bg-white/10 text-white backdrop-blur hover:-translate-y-0.5 hover:border-white hover:bg-bark-50 hover:text-inverse",
   // Deleting is not the same shape of act as hiding, so it does not get to look
   // identical. Outlined rather than filled: a wall of solid red buttons in a
   // list reads as an error state instead of a set of choices.
   danger:
-    "border-red-300 bg-white text-red-700 hover:-translate-y-0.5 hover:border-red-500 hover:bg-red-50 hover:shadow-soft",
+    "border-red-300 bg-paper text-red-700 hover:-translate-y-0.5 hover:border-red-500 hover:bg-red-50 hover:shadow-soft",
 };
 
 const sizes: Record<Size, string> = {

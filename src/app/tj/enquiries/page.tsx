@@ -84,8 +84,8 @@ export default async function AdminEnquiriesPage({ searchParams }: PageProps<"/t
               aria-current={show === value ? "page" : undefined}
               className={`inline-flex min-h-11 items-center rounded-xl border px-4 text-sm capitalize ${
                 show === value
-                  ? "border-bark-900 bg-bark-900 text-white"
-                  : "border-bark-200 bg-white text-bark-600"
+                  ? "border-bark-900 bg-inverse text-white"
+                  : "border-bark-200 bg-paper text-bark-600"
               }`}
             >
               {value}
@@ -102,13 +102,13 @@ export default async function AdminEnquiriesPage({ searchParams }: PageProps<"/t
       />
 
       {enquiries.length === 0 ? (
-        <p className="mt-6 rounded-2xl border border-dashed border-bark-200 bg-white p-8 text-center text-sm text-bark-600">
+        <p className="mt-6 rounded-2xl border border-dashed border-bark-200 bg-paper p-8 text-center text-sm text-bark-600">
           No enquiry matches this view.
         </p>
       ) : (
         <ul className="mt-6 grid gap-3">
           {enquiries.map((enquiry) => (
-            <li key={enquiry.id} className="rounded-2xl border border-bark-200 bg-white p-4">
+            <li key={enquiry.id} className="rounded-2xl border border-bark-200 bg-paper p-4">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">

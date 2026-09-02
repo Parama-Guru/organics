@@ -26,16 +26,16 @@ export async function deliverPrivateEnquiry(enquiry: DeliverableEnquiry): Promis
   const { app } = loadConfig();
   const messageDomain = new URL(app.site_url).hostname;
   const support = app.contact_email
-    ? `Quote reference ${enquiry.id} to Organics support at ${app.contact_email}; staff can relay your response without exposing the buyer's email.`
-    : `Quote reference ${enquiry.id} when contacting Organics support; staff can relay your response without exposing the buyer's email.`;
+    ? `Quote reference ${enquiry.id} to OSSIL support at ${app.contact_email}; staff can relay your response without exposing the buyer's email.`
+    : `Quote reference ${enquiry.id} when contacting OSSIL support; staff can relay your response without exposing the buyer's email.`;
 
   await sendTextEmail({
     to: enquiry.recipientEmail,
     replyTo: enquiry.shareEmail ? enquiry.senderEmail : undefined,
     messageId: `<enquiry-${enquiry.id}@${messageDomain}>`,
-    subject: `[Organics] ${enquiry.subject}`,
+    subject: `[OSSIL] ${enquiry.subject}`,
     text: [
-      `New enquiry through Organics for ${enquiry.recipientName}`,
+      `New enquiry through OSSIL for ${enquiry.recipientName}`,
       "",
       `From: ${enquiry.customer.name}`,
       enquiry.shareEmail
@@ -45,7 +45,7 @@ export async function deliverPrivateEnquiry(enquiry: DeliverableEnquiry): Promis
       enquiry.message,
       "",
       `Reference: ${enquiry.id}`,
-      "Organics does not take payment or guarantee an arrangement. Do not send money before speaking directly.",
+      "OSSIL does not take payment or guarantee an arrangement. Do not send money before speaking directly.",
     ].join("\n"),
   });
 }

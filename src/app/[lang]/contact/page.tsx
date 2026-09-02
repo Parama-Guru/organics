@@ -45,7 +45,7 @@ export default async function ContactPage({ searchParams }: PageProps<"/[lang]/c
       <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_21rem] lg:items-start">
         <ContactForm initialRole={initialRole} />
 
-        <aside className="rounded-[2rem] bg-bark-900 p-7 text-white lg:sticky lg:top-28">
+        <aside className="rounded-[2rem] bg-inverse p-7 text-white lg:sticky lg:top-28">
           <p className="font-mono text-xs uppercase tracking-[0.12em] text-marigold-400">Contact ledger</p>
           <h2 className="mt-4 font-display text-3xl text-white">{t.contactPage.reachHeading}</h2>
           <dl className="mt-4 space-y-4 text-sm">

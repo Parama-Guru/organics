@@ -1,42 +1,67 @@
 @import "tailwindcss";
 
+/* =============================================================================
+   OSSIL design system.
+
+   Structure and motion were read off the reference pages with getComputedStyle:
+   Lassie supplied the editorial serif at a sub-1.0 line height, the pill radii
+   and the two easing curves; Saaspo supplied the dark surface and the idea of a
+   single saturated action hue. The colours themselves are the Rich Heritage
+   scheme — ivory canvas, marigold action, deep emerald proof, midnight sapphire
+   structure — applied on the 60/30/10 split rather than mixed evenly.
+
+   Every pairing was measured for contrast in BOTH modes before it was kept.
+
+   Dark mode is not a second stylesheet: every colour the interface uses is a
+   variable, so re-declaring them under [data-theme="dark"] flips the whole app.
+   That is why `canvas`, `paper` and `inverse` are separate tokens from the ink
+   ramp — a ramp alone cannot express "page background" and "text on a dark
+   panel" at once, and conflating them is what makes most dark modes leak.
+   ========================================================================== */
+
 @theme {
-  /* Leaf — produce accents and active states. */
-  --color-leaf-50: #eaf3ec;
-  --color-leaf-100: #d5e8db;
-  --color-leaf-200: #b3d6bd;
-  --color-leaf-300: #8bbe99;
-  --color-leaf-400: #66a578;
-  --color-leaf-500: #4b8f5e;
-  --color-leaf-600: #3d784e;
-  --color-leaf-700: #326241;
-  --color-leaf-800: #2a5136;
-  --color-leaf-900: #22422c;
+  /* Deep emerald — proof and verification only. Never a call to action. */
+  --color-leaf-50: #eef6f0;
+  --color-leaf-100: #dcede2;
+  --color-leaf-200: #b7d7c1;
+  --color-leaf-300: #86ba95;
+  --color-leaf-400: #529967;
+  --color-leaf-500: #1e6b47;
+  --color-leaf-600: #10704a;
+  --color-leaf-700: #0a5c36;
+  --color-leaf-800: #084b2c;
+  --color-leaf-900: #063b23;
 
-  /* Marigold — primary calls to action only. Too low-contrast for body text.
-     500 is tuned so indigo text on it clears AA; hover goes LIGHTER (400), because
-     the darker shade drops the pairing to ~3.4:1. */
-  --color-marigold-50: #fdf0e2;
-  --color-marigold-100: #fadfc4;
-  --color-marigold-400: #f2a865;
-  --color-marigold-500: #ec9346;
-  --color-marigold-600: #cf6f1c;
+  /* Marigold — the 10% in the 60/30/10 split, reserved for actions. Text on it
+     is always --color-on-action (5.8:1); white on marigold is 2.6:1 and is
+     never used. Hover goes LIGHTER, because the darker shade fails. */
+  --color-marigold-50: #fff4e8;
+  --color-marigold-100: #ffe3c7;
+  --color-marigold-400: #ffa856;
+  --color-marigold-500: #ea7a21;
+  --color-marigold-600: #b4550f;
 
-    /* Warm editorial neutrals. Navy remains the authority colour, but muted ink
-      carries long copy so the directory reads like a field guide, not a system
-      dialog. */
-    --color-bark-50: #f8f5ef;
-    --color-bark-100: #efe9de;
-    --color-bark-200: #d7cdbf;
-    --color-bark-600: #615e73;
-    --color-bark-800: #171b5a;
-    --color-bark-900: #09094b;
-    --color-ink: #20202b;
-    --color-brand: #09094b;
-    --color-paper: #fffdf8;
+  /* Midnight sapphire ramp. 900 is heading text, 600 is muted body, 200 is the
+     hairline; 50/100 are light tones used as text ON dark panels. */
+  --color-bark-50: #f3f6fb;
+  --color-bark-100: #dde5f0;
+  --color-bark-200: #e4dcc8;
+  --color-bark-600: #5c5647;
+  --color-bark-800: #0b2141;
+  --color-bark-900: #05162e;
+  --color-ink: #333333;
+  --color-brand: #05162e;
 
-  /* Latin resolves from Fraunces/Manrope; Tamil glyphs are absent there, so the
-     browser falls through to the Noto Tamil faces per glyph. */
+  /* Surfaces, deliberately outside the ramp so both modes can move them. */
+  --color-canvas: #fffdf6;
+  --color-canvas-2: #f6f1e3;
+  --color-paper: #ffffff;
+  --color-inverse: #05162e;
+  --color-on-action: #05162e;
+
+  /* Latin resolves from the Instrument Serif / DM Sans pair; those carry no
+     Tamil glyphs, so the browser falls through to the Noto Tamil faces per
+     glyph rather than per element. */
   --font-sans:
     var(--font-body-family), var(--font-body-tamil), ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -46,18 +71,74 @@
   --font-mono:
     var(--font-mono-family), ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
 
-  /* Layered, warm-tinted shadows read as depth; flat grey ones look cheap. */
-  --shadow-soft: 0 1px 2px rgb(9 9 75 / 0.04), 0 8px 24px rgb(9 9 75 / 0.06);
-  --shadow-lift: 0 8px 18px rgb(9 9 75 / 0.09), 0 28px 64px rgb(9 9 75 / 0.16);
-  --shadow-glass: 0 1px 0 rgb(255 255 255 / 0.75) inset, 0 14px 48px rgb(9 9 75 / 0.08);
+  /* Tinted with the structure colour rather than plain grey, so depth reads as
+     one material. Re-declared for dark, where a light-mode shadow is invisible. */
+  --shadow-soft: 0 1px 2px rgb(5 22 46 / 0.05), 0 10px 30px rgb(5 22 46 / 0.08);
+  --shadow-lift: 0 10px 22px rgb(5 22 46 / 0.10), 0 34px 72px rgb(5 22 46 / 0.18);
+  --shadow-glass: 0 1px 0 rgb(255 255 255 / 0.7) inset, 0 16px 50px rgb(5 22 46 / 0.10);
 
   /* Tailwind's smallest default is 40rem. 24rem is where the header has real
      slack with the wordmark shown (measured: negative slack at 23rem). */
   --breakpoint-xs: 24rem;
 
-  --animate-rise: rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
-  --animate-fade-in: fade-in 0.45s ease-out both;
-  --animate-pop: pop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  /* Both curves were read off the reference pages: a long decelerating curve for
+     movement, a short one for colour. */
+  --ease-settle: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-tint: cubic-bezier(0.4, 0, 0.2, 1);
+
+  --animate-rise: rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  /* Movement without opacity, for anything carrying a control: a staggered fade
+     leaves buttons part-transparent, which measures as a contrast failure the
+     settled colours do not have. */
+  --animate-lift: lift 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-fade-in: fade-in 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+  --animate-pop: pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --animate-ticker: ticker 46s linear infinite;
+  --animate-sheen: sheen 1.6s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+/* The one selector the whole dark theme hangs off. An inline script in the
+   document head sets it from the stored choice, falling back to the operating
+   system, before first paint — so there is no flash and no second stylesheet. */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-leaf-50: #0a2a1c;
+  --color-leaf-100: #0e3a26;
+  --color-leaf-200: #145036;
+  --color-leaf-300: #1d6b49;
+  --color-leaf-400: #2e8f5f;
+  --color-leaf-500: #3fa873;
+  --color-leaf-600: #46b57d;
+  --color-leaf-700: #57c08a;
+  --color-leaf-800: #9fe4be;
+  --color-leaf-900: #c9f2dc;
+
+  --color-marigold-50: #2a1608;
+  --color-marigold-100: #3d200b;
+  --color-marigold-400: #ffa856;
+  --color-marigold-500: #ff8a34;
+  --color-marigold-600: #ffb273;
+
+  --color-bark-50: #ebf1fa;
+  --color-bark-100: #c7d5e8;
+  --color-bark-200: #1e3157;
+  --color-bark-600: #9dafc8;
+  --color-bark-800: #d8e2f0;
+  --color-bark-900: #ebf1fa;
+  --color-ink: #dce6f5;
+  --color-brand: #ebf1fa;
+
+  --color-canvas: #05162e;
+  --color-canvas-2: #0b1b3d;
+  --color-paper: #0b1b3d;
+  --color-inverse: #0b1b3d;
+  /* Action text stays dark in both modes: near-white on marigold is 2.4:1. */
+  --color-on-action: #05162e;
+
+  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.35), 0 10px 30px rgb(0 0 0 / 0.35);
+  --shadow-lift: 0 10px 22px rgb(0 0 0 / 0.42), 0 34px 72px rgb(0 0 0 / 0.5);
+  --shadow-glass: 0 1px 0 rgb(255 255 255 / 0.08) inset, 0 16px 50px rgb(0 0 0 / 0.45);
 }
 
 @keyframes rise {
@@ -67,6 +148,15 @@
   }
   to {
     opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes lift {
+  from {
+    transform: translateY(1.25rem);
+  }
+  to {
     transform: none;
   }
 }
@@ -91,19 +181,74 @@
   }
 }
 
+/* The track is duplicated in markup, so translating it by exactly half its own
+   width loops seamlessly without measuring anything at runtime. */
+@keyframes ticker {
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes board-drift {
+  to {
+    transform: translate3d(2.5%, -3%, 0) scale(1.08);
+  }
+}
+
+@keyframes seal-float {
+  50% {
+    margin-top: -0.5rem;
+  }
+}
+
+/* A light sweep across a value while it is still counting. */
+@keyframes sheen {
+  0% {
+    background-position: -160% 0;
+  }
+  100% {
+    background-position: 260% 0;
+  }
+}
+
 :root {
   color-scheme: light;
 }
 
 body {
-  background-color: var(--color-bark-50);
+  background-color: var(--color-canvas);
   color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
-  /* Warm light behind the whole page so flat sections still feel lit. */
+  /* Two slow washes rather than a flat fill, so the canvas still reads as lit. */
   background-image:
-    radial-gradient(44rem 26rem at 8% -6%, rgb(236 147 70 / 0.11), transparent 62%),
-    radial-gradient(42rem 24rem at 92% 0%, rgb(75 143 94 / 0.09), transparent 64%);
+    radial-gradient(50rem 30rem at 4% -10%, rgb(234 122 33 / 0.10), transparent 58%),
+    radial-gradient(46rem 28rem at 98% 2%, rgb(10 92 54 / 0.09), transparent 62%);
+}
+
+[data-theme="dark"] body {
+  background-image:
+    radial-gradient(50rem 30rem at 4% -10%, rgb(255 138 52 / 0.14), transparent 58%),
+    radial-gradient(46rem 28rem at 98% 2%, rgb(63 168 115 / 0.12), transparent 62%);
+}
+
+/* Paper grain. Fixed, non-interactive, and drawn once as a data URI, so it costs
+   no request and never scrolls with the content. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.55;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23g)' opacity='0.08'/%3E%3C/svg%3E");
+}
+
+/* Multiply over a dark canvas turns the grain into a black smear. */
+[data-theme="dark"] body::after {
+  mix-blend-mode: overlay;
+  opacity: 0.3;
 }
 
 h1,
@@ -111,7 +256,8 @@ h2,
 h3 {
   font-family: var(--font-display);
   font-optical-sizing: auto;
-  letter-spacing: -0.025em;
+  /* Measured on the reference display face: -0.02em at heading sizes. */
+  letter-spacing: -0.02em;
   text-wrap: balance;
 }
 
@@ -125,7 +271,7 @@ p {
    - Tamil has no upper case: `uppercase` does nothing, and letter-spacing pulls a
      vowel sign away from the consonant it belongs to. Both are neutralised.
    - The above-base and below-base marks need more leading than Latin does, so the
-     tighter display values used for Fraunces would clip them. */
+     tighter display values used for the serif would clip them. */
 html:lang(ta) * {
   letter-spacing: normal;
   text-transform: none;
@@ -142,14 +288,21 @@ html:lang(ta) h3 {
   text-wrap: pretty;
 }
 
+/* Tamil glyphs are wider than Latin at the same point size and take no
+   hyphenation, so the display scale that suits Instrument Serif breaks Tamil
+   words mid-syllable. Measured at 1280px: 78px produced a two-line fragment of
+   a single word. */
+html:lang(ta) .editorial-heading {
+  font-size: clamp(1.9rem, 4.4vw, 3.6rem);
+  line-height: 1.25;
+}
+
 /* Keep keyboard focus clearly visible for accessibility. */
 :focus-visible {
   outline: 2px solid var(--color-leaf-600);
   outline-offset: 2px;
 }
 
-/* Horizontal chip rails on phones: the native scrollbar renders as a full desktop
-   track with arrow buttons under each row, which reads as a rendering fault. */
 /* Card hover, written out rather than composed from `hover:-translate-y-*` and
    `hover:shadow-*`. Two reasons. Tailwind v4 compiles those to the independent
    `translate` / `scale` properties, and this project has to run on older mobile
@@ -159,23 +312,23 @@ html:lang(ta) h3 {
    shorthand ever recomputing. */
 @utility card-lift {
   transition:
-    transform 300ms cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 300ms ease-out,
-    border-color 300ms ease-out;
+    transform 300ms var(--ease-settle),
+    box-shadow 300ms var(--ease-tint),
+    border-color 300ms var(--ease-tint);
 }
 
 .card-lift:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-lift);
-  border-color: color-mix(in oklab, var(--color-marigold-400) 70%, transparent);
+  border-color: color-mix(in oklab, var(--color-marigold-600) 55%, transparent);
 }
 
 .card-lift img {
-  transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 600ms var(--ease-settle);
 }
 
 .card-lift:hover img {
-  transform: scale(1.06);
+  transform: scale(1.05);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -185,6 +338,8 @@ html:lang(ta) h3 {
   }
 }
 
+/* Horizontal chip rails on phones: the native scrollbar renders as a full desktop
+   track with arrow buttons under each row, which reads as a rendering fault. */
 @utility no-scrollbar {
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -204,11 +359,9 @@ html:lang(ta) h3 {
 }
 
 /* Declared as plain rules in the components layer so a `bg-*` utility can still
-   override the tint.
-   Only the unprefixed property is written: hand-adding `-webkit-backdrop-filter`
-   made Lightning CSS emit the prefixed form *alone*, which Chrome ignores, so
-   every panel was tinted but never blurred. It adds whatever prefix the
-   browser targets need. */
+   override the tint. Only the unprefixed backdrop-filter is written: hand-adding
+   `-webkit-backdrop-filter` made Lightning CSS emit the prefixed form *alone*,
+   which Chrome ignores, so every panel was tinted but never blurred. */
 @layer components {
   .glass {
     background-color: var(--color-paper);
@@ -216,19 +369,18 @@ html:lang(ta) h3 {
     box-shadow: var(--shadow-soft);
   }
 
-  /* Dense lists use an opaque paper surface. This removes dozens of expensive
-     backdrop-filter layers and makes photography and typography lead. */
+  /* Dense lists use a flat paper surface. Dropping the shadow here is what makes
+     a grid of thirty cards read as a printed index rather than a pile of chips. */
   .glass-card {
     background-color: var(--color-paper);
     border: 1px solid var(--color-bark-200);
-    box-shadow: var(--shadow-soft);
   }
 
-  /* For glass sitting on the dark navy hero. */
+  /* For panels sitting on an ink chapter. */
   .glass-dark {
-    background-color: rgb(255 255 255 / 0.09);
-    backdrop-filter: blur(18px) saturate(125%);
-    border: 1px solid rgb(255 255 255 / 0.20);
+    background-color: rgb(255 255 255 / 0.07);
+    backdrop-filter: blur(18px) saturate(120%);
+    border: 1px solid rgb(255 255 255 / 0.16);
   }
 
   .editorial-panel {
@@ -237,55 +389,111 @@ html:lang(ta) h3 {
     box-shadow: var(--shadow-soft);
   }
 
+  /* Full-bleed ink section. The canvas is light, so these chapters are what give
+     the page its rhythm; in dark mode they become the raised panel instead. */
+  .chapter-dark {
+    position: relative;
+    isolation: isolate;
+    background-color: var(--color-inverse);
+    color: var(--color-bark-50);
+    background-image:
+      radial-gradient(38rem 22rem at 12% 0%, rgb(234 122 33 / 0.16), transparent 62%),
+      radial-gradient(34rem 20rem at 88% 100%, rgb(10 92 54 / 0.30), transparent 66%);
+  }
+
+  .chapter-dark h1,
+  .chapter-dark h2,
+  .chapter-dark h3 {
+    color: #fff;
+  }
+
   .section-kicker {
     display: inline-flex;
+    /* It has a visible surface now, so a flex or grid parent stretching it would
+       draw a full-width bar instead of a label. */
+    align-self: start;
+    width: fit-content;
+    max-width: 100%;
     align-items: center;
-    gap: 0.45rem;
+    gap: 0.5rem;
+    padding: 0.34rem 0.72rem;
+    border: 1px solid var(--color-bark-200);
+    border-radius: 99rem;
+    background: var(--color-paper);
     color: var(--color-leaf-700);
-    font-size: 0.72rem;
-    font-weight: 700;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 500;
     line-height: 1;
-    letter-spacing: 0.11em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
   }
 
   .section-kicker::before {
     content: "";
-    width: 1.8rem;
-    height: 1px;
+    width: 0.4rem;
+    height: 0.4rem;
+    flex: none;
+    border-radius: 50%;
     background: currentColor;
+  }
+
+  .chapter-dark .section-kicker,
+  .section-kicker--dark {
+    border-color: rgb(255 255 255 / 0.18);
+    background: rgb(255 255 255 / 0.06);
+    color: var(--color-marigold-400);
   }
 
   .editorial-heading {
     color: var(--color-bark-900);
-    font-size: clamp(2rem, 5vw, 4.5rem);
-    line-height: 0.98;
-    font-weight: 450;
+    font-size: clamp(2.35rem, 6.1vw, 5.5rem);
+    line-height: 0.95;
+    font-weight: 400;
+    letter-spacing: -0.028em;
+  }
+
+  .chapter-dark .editorial-heading {
+    color: #fff;
+  }
+
+  /* A count that reads as measured rather than decorative. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
   }
 
   .ledger-row {
     border-top: 1px solid var(--color-bark-200);
   }
 
+  /* Mono, wide-tracked caption used for dates, counts and evidence. */
+  .rule-label {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
   .portal-shell {
-    background-color: var(--color-bark-50);
+    background-color: var(--color-canvas);
     background-image:
-      linear-gradient(rgb(9 9 75 / 0.025) 1px, transparent 1px),
-      linear-gradient(90deg, rgb(9 9 75 / 0.025) 1px, transparent 1px);
-    background-size: 32px 32px;
+      linear-gradient(rgb(5 22 46 / 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(5 22 46 / 0.03) 1px, transparent 1px);
+    background-size: 34px 34px;
   }
 }
 
 /* Browsers without backdrop-filter get an opaque panel instead of unreadable text. */
 @supports not (backdrop-filter: blur(1px)) {
   .glass {
-    background-color: rgb(255 255 255 / 0.96);
+    background-color: var(--color-paper);
   }
   .glass-card {
-    background-color: rgb(255 255 255 / 0.97);
+    background-color: var(--color-paper);
   }
   .glass-dark {
-    background-color: rgb(0 0 128 / 0.86);
+    background-color: var(--color-inverse);
   }
 }
 
@@ -295,7 +503,7 @@ html:lang(ta) h3 {
    sheen is a child pseudo-element rather than a background on the panel itself,
    so it composites on its own layer and does not repaint the content.
    Defaults put the highlight off-panel, so a panel that is never pointed at
-   looks exactly like plain glass. */
+   looks exactly like plain paper. */
 .glass-interactive {
   position: relative;
   isolation: isolate;
@@ -311,11 +519,11 @@ html:lang(ta) h3 {
   border-radius: inherit;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.35s ease;
+  transition: opacity 0.35s var(--ease-tint);
   background: radial-gradient(
     18rem circle at var(--mx) var(--my),
     rgb(255 255 255 / 0.85),
-    rgb(236 147 70 / 0.16) 38%,
+    rgb(234 122 33 / 0.20) 38%,
     transparent 68%
   );
 }
@@ -334,8 +542,6 @@ html:lang(ta) h3 {
   opacity: 1;
 }
 
-/* A hairline that lifts on the same interaction, so the panel edge reads as
-   glass catching light rather than a flat border. */
 .glass-interactive::after {
   content: "";
   position: absolute;
@@ -344,7 +550,7 @@ html:lang(ta) h3 {
   border-radius: inherit;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.35s ease;
+  transition: opacity 0.35s var(--ease-tint);
   box-shadow:
     0 1px 0 rgb(255 255 255 / 0.75) inset,
     0 0 0 1px rgb(255 255 255 / 0.5) inset;
@@ -384,7 +590,268 @@ html:lang(ta) h3 {
   }
 }
 
-/* Motion is decorative here, so honour the OS setting rather than animating anyway. */
+/* -------------------------------------------------------------------------
+   Live ticker. A single row whose edges fade out, so it reads as a running feed
+   rather than a clipped list.
+   ---------------------------------------------------------------------- */
+
+.ticker {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+}
+
+.ticker__track {
+  display: flex;
+  width: max-content;
+  align-items: center;
+  gap: 2.75rem;
+  animation: var(--animate-ticker);
+}
+
+.ticker:hover .ticker__track,
+.ticker:focus-within .ticker__track {
+  animation-play-state: paused;
+}
+
+/* -------------------------------------------------------------------------
+   Harvest index board. The hero object: an ink panel with a drifting light
+   field, a ruled ledger grid and three stacked record cards at different
+   depths. Local CSS geometry only — no WebGL, no canvas, no remote asset.
+   ---------------------------------------------------------------------- */
+
+.index-board {
+  --board-x: 0;
+  --board-y: 0;
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 30rem;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 0.12);
+  border-radius: 2rem;
+  background: #05162e;
+  box-shadow: 0 34px 90px rgb(5 22 46 / 0.34);
+  perspective: 1100px;
+  transform-style: preserve-3d;
+}
+
+.index-board__glow {
+  position: absolute;
+  inset: -20%;
+  z-index: 0;
+  background:
+    radial-gradient(24rem 18rem at 24% 22%, rgb(234 122 33 / 0.38), transparent 62%),
+    radial-gradient(26rem 20rem at 78% 74%, rgb(10 92 54 / 0.55), transparent 66%);
+  animation: board-drift 20s ease-in-out infinite alternate;
+}
+
+.index-board__grid {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background-image:
+    linear-gradient(rgb(255 255 255 / 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.07) 1px, transparent 1px);
+  background-size: 4.5rem 4.5rem;
+  -webkit-mask-image: radial-gradient(70% 70% at 50% 45%, #000, transparent);
+  mask-image: radial-gradient(70% 70% at 50% 45%, #000, transparent);
+  transform: translate3d(calc(var(--board-x) * -6px), calc(var(--board-y) * -4px), 0);
+  transition: transform 700ms var(--ease-settle);
+}
+
+.index-board__horizon {
+  position: absolute;
+  inset: auto -10% -18% -10%;
+  z-index: 2;
+  height: 46%;
+  border-radius: 50% 50% 0 0;
+  background: linear-gradient(180deg, rgb(10 92 54 / 0.65), rgb(5 22 46 / 0.1));
+  transform: translate3d(calc(var(--board-x) * -10px), calc(var(--board-y) * -5px), 0);
+  transition: transform 750ms var(--ease-settle);
+}
+
+.index-board__stack {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  transform-style: preserve-3d;
+}
+
+.index-board__card {
+  position: absolute;
+  width: min(20rem, 74%);
+  padding: 1rem 1.15rem;
+  border: 1px solid var(--color-bark-200);
+  border-radius: 1.25rem;
+  background: var(--color-paper);
+  color: var(--color-bark-900);
+  box-shadow: 0 22px 55px rgb(5 22 46 / 0.45);
+  transition: transform 600ms var(--ease-settle);
+}
+
+.index-board__card b,
+.index-board__card small {
+  display: block;
+}
+
+.index-board__card b {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 400;
+  line-height: 1.05;
+}
+
+.index-board__card small {
+  margin-top: 0.3rem;
+  color: var(--color-bark-800);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.index-board__card--back {
+  transform: translate3d(calc(var(--board-x) * -12px), calc(-7.6rem + var(--board-y) * -8px), -60px)
+    rotate(-4deg);
+  background: color-mix(in oklab, var(--color-paper) 92%, var(--color-bark-200));
+}
+
+.index-board__card--mid {
+  transform: translate3d(calc(var(--board-x) * -20px), calc(0.2rem + var(--board-y) * -12px), 10px)
+    rotate(1.5deg);
+}
+
+.index-board__card--front {
+  transform: translate3d(calc(var(--board-x) * -30px), calc(7.6rem + var(--board-y) * -18px), 70px)
+    rotate(-1.5deg);
+}
+
+.index-board__chip {
+  position: absolute;
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.42rem 0.8rem;
+  border-radius: 99rem;
+  background: var(--color-marigold-500);
+  color: var(--color-on-action);
+  font-family: var(--font-mono);
+  font-size: 0.63rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: 0 14px 34px rgb(5 22 46 / 0.4);
+  transition: transform 480ms var(--ease-settle);
+}
+
+.index-board__chip--one {
+  left: 6%;
+  top: 12%;
+  transform: translate3d(calc(var(--board-x) * 24px), calc(var(--board-y) * 16px), 110px);
+}
+
+.index-board__chip--two {
+  right: 5%;
+  bottom: 14%;
+  background: var(--color-paper);
+  color: var(--color-leaf-700);
+  transform: translate3d(calc(var(--board-x) * 32px), calc(var(--board-y) * 20px), 130px);
+}
+
+.index-board__seal {
+  position: absolute;
+  z-index: 5;
+  right: 7%;
+  top: 9%;
+  display: grid;
+  width: 3.1rem;
+  height: 3.1rem;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--color-marigold-500);
+  color: var(--color-on-action);
+  box-shadow: 0 14px 34px rgb(5 22 46 / 0.45);
+  transform: translate3d(calc(var(--board-x) * 34px), calc(var(--board-y) * 22px), 150px);
+  transition: transform 420ms var(--ease-settle);
+  animation: seal-float 5s ease-in-out infinite;
+}
+
+@media (max-width: 40rem) {
+  .index-board {
+    min-height: 22rem;
+    border-radius: 1.5rem;
+  }
+
+  .index-board__seal {
+    display: none;
+  }
+
+  .index-board__chip--one {
+    left: 4%;
+    top: 6%;
+  }
+
+  .index-board__chip--two {
+    right: 4%;
+    bottom: 7%;
+  }
+}
+
+/* -------------------------------------------------------------------------
+   Scroll reveals. Content is visible by default; browsers that support the
+   scripting media feature hide it only while the observer can run, so a no-JS
+   page never loses anything. Directional variants move vertically and clip
+   horizontally, because translating sideways widened the document.
+   ---------------------------------------------------------------------- */
+
+.reveal {
+  opacity: 1;
+  transform: none;
+}
+
+@media (scripting: enabled) {
+  .reveal {
+    opacity: 0;
+    transition:
+      opacity 700ms var(--ease-tint) var(--reveal-delay, 0ms),
+      transform 850ms var(--ease-settle) var(--reveal-delay, 0ms),
+      clip-path 850ms var(--ease-settle) var(--reveal-delay, 0ms);
+    will-change: opacity, transform, clip-path;
+  }
+
+  .reveal-up {
+    transform: translateY(2.5rem);
+  }
+
+  .reveal-left {
+    transform: translateY(2rem) scale(0.99);
+    clip-path: inset(0 5% 0 0 round 1.75rem);
+  }
+
+  .reveal-right {
+    transform: translateY(2rem) scale(0.99);
+    clip-path: inset(0 0 0 5% round 1.75rem);
+  }
+
+  .reveal-scale {
+    transform: scale(0.96);
+  }
+
+  .reveal[data-visible="true"] {
+    opacity: 1;
+    transform: none;
+    clip-path: inset(0);
+  }
+}
+
+/* Motion is decorative here, so honour the OS setting rather than animating
+   anyway. Coarse pointers lose the parallax too: there is nothing to track. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -396,478 +863,10 @@ html:lang(ta) h3 {
   }
 }
 
-/* -------------------------------------------------------------------------
-   Living Farm Atlas. The landscape is built from local CSS/SVG geometry: no
-   WebGL, tracking script, remote asset, or delayed canvas. Each depth plane
-   moves by a different amount under a fine pointer and becomes still under
-   reduced motion. */
-
-.farm-world {
-  --farm-x: 0;
-  --farm-y: 0;
-  position: relative;
-  isolation: isolate;
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
-  min-height: 30rem;
-  overflow: hidden;
-  border: 1px solid rgb(255 255 255 / 0.45);
-  border-radius: 2.5rem;
-  background: #c9e6d9;
-  box-shadow:
-    0 1px 0 rgb(255 255 255 / 0.65) inset,
-    0 30px 80px rgb(9 9 75 / 0.22);
-  perspective: 900px;
-  transform-style: preserve-3d;
-}
-
-.farm-world__sky {
-  position: absolute;
-  inset: 0 0 42%;
-  background:
-    linear-gradient(180deg, #dff3ed 0%, #b9ded5 62%, #e9d9ae 100%);
-  transform: translate3d(
-    calc(var(--farm-x) * -3px),
-    calc(var(--farm-y) * -2px),
-    -40px
-  ) scale(1.08);
-  transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.farm-world__sun {
-  position: absolute;
-  right: 16%;
-  top: 12%;
-  width: 5.5rem;
-  height: 5.5rem;
-  border-radius: 50%;
-  background: #f5bd58;
-  box-shadow: 0 0 0 1.6rem rgb(245 189 88 / 0.12), 0 0 5rem rgb(245 189 88 / 0.45);
-  transform: translate3d(
-    calc(var(--farm-x) * -8px),
-    calc(var(--farm-y) * -5px),
-    0
-  );
-  transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.farm-world__cloud {
-  position: absolute;
-  width: 7rem;
-  height: 1.6rem;
-  border-radius: 99rem;
-  background: rgb(255 255 255 / 0.64);
-  filter: blur(0.5px);
-  animation: cloud-drift 14s ease-in-out infinite alternate;
-}
-
-.farm-world__cloud::before,
-.farm-world__cloud::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  border-radius: 50%;
-  background: inherit;
-}
-
-.farm-world__cloud::before {
-  left: 1rem;
-  width: 2.8rem;
-  height: 2.8rem;
-}
-
-.farm-world__cloud::after {
-  right: 1.1rem;
-  width: 2.1rem;
-  height: 2.1rem;
-}
-
-.farm-world__cloud--one {
-  left: 8%;
-  top: 15%;
-}
-
-.farm-world__cloud--two {
-  right: 3%;
-  top: 34%;
-  width: 4.4rem;
-  height: 1rem;
-  opacity: 0.72;
-  animation-delay: -7s;
-}
-
-.farm-world__mountains {
-  position: absolute;
-  inset-inline: -5%;
-  width: 110%;
-  transition: transform 750ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.farm-world__mountains--far {
-  bottom: 31%;
-  height: 48%;
-  opacity: 0.72;
-  transform: translate3d(
-    calc(var(--farm-x) * -5px),
-    calc(var(--farm-y) * -3px),
-    -20px
-  ) scale(1.04);
-}
-
-.farm-world__mountains--near {
-  bottom: 25%;
-  height: 36%;
-  transform: translate3d(
-    calc(var(--farm-x) * -11px),
-    calc(var(--farm-y) * -5px),
-    18px
-  ) scale(1.04);
-}
-
-.farm-world__field {
-  position: absolute;
-  transform-origin: 50% 100%;
-  transition: transform 650ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.farm-world__field--back {
-  inset: 54% -8% -10%;
-  background:
-    repeating-linear-gradient(102deg, transparent 0 2rem, rgb(255 255 255 / 0.09) 2rem 2.2rem),
-    linear-gradient(180deg, #80a95e, #47763e);
-  clip-path: polygon(0 12%, 47% 0, 100% 16%, 100% 100%, 0 100%);
-  transform: translate3d(calc(var(--farm-x) * -6px), calc(var(--farm-y) * -2px), 24px);
-}
-
-.farm-world__field--left,
-.farm-world__field--right {
-  bottom: -3%;
-  width: 55%;
-  height: 42%;
-  overflow: hidden;
-  background: #6f9448;
-  transform: rotate(var(--field-rotate, 0deg)) rotateX(57deg) translate3d(calc(var(--farm-x) * -10px), 8%, 75px);
-}
-
-.farm-world__field--left {
-  --field-rotate: 5deg;
-  left: -8%;
-  clip-path: polygon(0 14%, 100% 0, 78% 100%, 0 100%);
-}
-
-.farm-world__field--right {
-  --field-rotate: -5deg;
-  right: -8%;
-  clip-path: polygon(0 0, 100% 14%, 100% 100%, 22% 100%);
-}
-
-.farm-world__field span {
-  position: absolute;
-  inset-inline: -20%;
-  top: calc(var(--row) * 14%);
-  height: 5%;
-  border-top: 0.28rem solid rgb(240 193 75 / 0.78);
-  box-shadow: 0 -0.18rem rgb(37 91 50 / 0.62);
-  transform: rotate(-4deg);
-}
-
-.farm-world__field--right span {
-  transform: rotate(4deg);
-}
-
-.farm-world__path {
-  position: absolute;
-  z-index: 4;
-  left: 42%;
-  bottom: -4%;
-  width: 25%;
-  height: 47%;
-  background: linear-gradient(180deg, #d9bd86, #a97d45);
-  clip-path: polygon(44% 0, 58% 0, 100% 100%, 0 100%);
-  transform: translate3d(calc(var(--farm-x) * -2px), 0, 80px);
-}
-
-.farm-world__house {
-  position: absolute;
-  z-index: 6;
-  left: 51%;
-  bottom: 31%;
-  width: 7.6rem;
-  height: 6.5rem;
-  transform: translate3d(
-    calc(var(--farm-x) * -18px),
-    calc(var(--farm-y) * -9px),
-    90px
-  );
-  transition: transform 550ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.farm-world__wall {
-  position: absolute;
-  inset: 2rem 0 0;
-  border-radius: 0.35rem;
-  background: #f4e7cf;
-  box-shadow: 0.7rem 0.8rem 1.3rem rgb(9 9 75 / 0.18);
-}
-
-.farm-world__roof {
-  position: absolute;
-  z-index: 2;
-  left: -0.7rem;
-  top: 0;
-  width: 9rem;
-  height: 3.2rem;
-  background: #a54932;
-  clip-path: polygon(50% 0, 100% 100%, 0 100%);
-}
-
-.farm-world__door,
-.farm-world__window {
-  position: absolute;
-  z-index: 3;
-  bottom: 0;
-  background: #334c3a;
-}
-
-.farm-world__door {
-  left: 3.2rem;
-  width: 1.4rem;
-  height: 2.8rem;
-}
-
-.farm-world__window {
-  right: 1.1rem;
-  bottom: 1.8rem;
-  width: 1.25rem;
-  height: 1.1rem;
-  background: #76a8a1;
-  box-shadow: -4.8rem 0 #76a8a1;
-}
-
-.farm-world__tree {
-  position: absolute;
-  z-index: 6;
-  width: 4.4rem;
-  height: 7rem;
-  transform: translate3d(calc(var(--farm-x) * -14px), calc(var(--farm-y) * -7px), 88px) scale(var(--tree-scale, 1));
-  transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.farm-world__tree span {
-  position: absolute;
-  left: 50%;
-  bottom: 0;
-  width: 0.55rem;
-  height: 3.5rem;
-  border-radius: 1rem;
-  background: #76513c;
-}
-
-.farm-world__tree i {
-  position: absolute;
-  inset: 0 0 2rem;
-  border-radius: 54% 46% 57% 43%;
-  background: #2f6845;
-  box-shadow: inset -1rem -0.7rem rgb(25 76 48 / 0.32);
-}
-
-.farm-world__tree--one { --tree-scale: 0.78; left: 36%; bottom: 30%; }
-.farm-world__tree--two { --tree-scale: 0.62; right: 12%; bottom: 29%; }
-.farm-world__tree--three { --tree-scale: 0.52; left: 13%; bottom: 29%; }
-
-.farm-world__crop-front {
-  position: absolute;
-  z-index: 9;
-  inset: auto -2% -1% 0;
-  height: 20%;
-  display: flex;
-  align-items: end;
-  justify-content: space-around;
-  transform: translate3d(calc(var(--farm-x) * -24px), calc(var(--farm-y) * -10px), 125px);
-  transition: transform 450ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.farm-world__crop-front > span {
-  --tilt: calc((var(--stalk) - 7) * 0.55deg);
-  position: relative;
-  width: 0.24rem;
-  height: var(--stalk-height);
-  border-radius: 99rem;
-  background: #315a31;
-  transform: rotate(var(--tilt));
-  transform-origin: 50% 100%;
-  animation: stalk-sway 3.8s ease-in-out infinite alternate;
-  animation-delay: calc(var(--stalk) * -180ms);
-}
-
-.farm-world__crop-front i,
-.farm-world__crop-front b {
-  position: absolute;
-  width: 1.2rem;
-  height: 0.55rem;
-  border-radius: 100% 0 100% 0;
-  background: #739c45;
-}
-
-.farm-world__crop-front i { left: -1rem; top: 45%; transform: rotate(22deg); }
-.farm-world__crop-front b { right: -1rem; top: 64%; transform: rotate(158deg); }
-
-.farm-world__card {
-  position: absolute;
-  z-index: 12;
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-  min-width: 9.5rem;
-  padding: 0.75rem 0.9rem;
-  border: 1px solid rgb(255 255 255 / 0.78);
-  border-radius: 1.1rem;
-  background: rgb(255 253 248 / 0.82);
-  color: var(--color-bark-900);
-  box-shadow: 0 18px 45px rgb(9 9 75 / 0.16);
-  backdrop-filter: blur(14px);
-  transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.farm-world__card b,
-.farm-world__card small {
-  display: block;
-}
-
-.farm-world__card b {
-  font-family: var(--font-display);
-  font-size: 1rem;
-  font-weight: 600;
-  line-height: 1.1;
-}
-
-.farm-world__card small {
-  margin-top: 0.18rem;
-  max-width: 9rem;
-  color: var(--color-bark-600);
-  font-size: 0.62rem;
-  font-weight: 700;
-  line-height: 1.25;
-}
-
-.farm-world__card-icon {
-  display: grid;
-  width: 2rem;
-  height: 2rem;
-  flex: none;
-  place-items: center;
-  border-radius: 50%;
-  background: var(--color-leaf-100);
-  color: var(--color-leaf-800);
-}
-
-.farm-world__card--verify {
-  left: 5%;
-  top: 15%;
-  transform: translate3d(calc(var(--farm-x) * 20px), calc(var(--farm-y) * 14px), 140px) rotate(-2deg);
-}
-
-.farm-world__card--place {
-  right: 4%;
-  bottom: 17%;
-  color: var(--color-leaf-700);
-  transform: translate3d(calc(var(--farm-x) * 28px), calc(var(--farm-y) * 17px), 160px) rotate(2deg);
-}
-
-.farm-world__seal {
-  position: absolute;
-  z-index: 14;
-  right: 7%;
-  top: 8%;
-  display: grid;
-  width: 3.2rem;
-  height: 3.2rem;
-  place-items: center;
-  border-radius: 50%;
-  background: var(--color-bark-900);
-  color: var(--color-marigold-400);
-  font-size: 1.55rem;
-  box-shadow: 0 12px 32px rgb(9 9 75 / 0.24);
-  transform: translate3d(calc(var(--farm-x) * 32px), calc(var(--farm-y) * 20px), 180px);
-  transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
-  animation: seal-float 4.5s ease-in-out infinite;
-}
-
-@keyframes cloud-drift {
-  to { transform: translateX(1.5rem); }
-}
-
-@keyframes stalk-sway {
-  from { transform: rotate(var(--tilt)); }
-  to { transform: rotate(calc(var(--tilt) + 2deg)); }
-}
-
-@keyframes seal-float {
-  50% { margin-top: -0.45rem; }
-}
-
-/* Content is visible by default. Browsers that support the scripting media
-   feature hide only while the observer is active, so a no-JS page never loses
-   its content. */
-.reveal {
-  opacity: 1;
-  transform: none;
-}
-
-@media (scripting: enabled) {
-  .reveal {
-    opacity: 0;
-    transition:
-      opacity 700ms ease var(--reveal-delay, 0ms),
-      transform 850ms cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms),
-      clip-path 850ms cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms);
-    will-change: opacity, transform, clip-path;
-  }
-
-  .reveal-up { transform: translateY(2.5rem); }
-  .reveal-left {
-    transform: translateY(2rem) scale(0.99);
-    clip-path: inset(0 5% 0 0 round 2rem);
-  }
-  .reveal-right {
-    transform: translateY(2rem) scale(0.99);
-    clip-path: inset(0 0 0 5% round 2rem);
-  }
-  .reveal-scale { transform: scale(0.96); }
-
-  .reveal[data-visible="true"] {
-    opacity: 1;
-    transform: none;
-    clip-path: inset(0);
-  }
-}
-
-@media (max-width: 40rem) {
-  .farm-world {
-    min-height: 23rem;
-    border-radius: 1.75rem;
-  }
-
-  .farm-world__card--verify {
-    left: 4%;
-    top: 5%;
-  }
-
-  .farm-world__card--place {
-    right: 3%;
-    bottom: 9%;
-  }
-
-  .farm-world__seal {
-    display: none;
-  }
-}
-
 @media (prefers-reduced-motion: reduce), (hover: none), (pointer: coarse) {
-  .farm-world *,
-  .farm-world *::before,
-  .farm-world *::after {
+  .index-board *,
+  .index-board *::before,
+  .index-board *::after {
     animation: none !important;
     transition: none !important;
   }
@@ -875,8 +874,124 @@ html:lang(ta) h3 {
   .reveal {
     opacity: 1 !important;
     transform: none !important;
+    clip-path: none !important;
   }
 }
+
+/* The theme control shows the mode it will switch TO. Which half is visible is
+   decided in CSS rather than in React, because the server cannot know the
+   operating system preference and a rendered guess would mismatch on hydration. */
+.theme-toggle__to-light {
+  display: none;
+}
+
+[data-theme="dark"] .theme-toggle__to-dark {
+  display: none;
+}
+
+[data-theme="dark"] .theme-toggle__to-light {
+  display: contents;
+}
+
+/* -------------------------------------------------------------------------
+   Specimen frame. The catalogue artwork is full-bleed and every piece carries a
+   different background colour, so a grid of it reads as clashing blocks. One
+   frame treatment — inset ring, top light, foot shade and a slight desaturation
+   that lifts on hover — makes the whole index read as one system.
+   ---------------------------------------------------------------------- */
+
+.specimen {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(110% 78% at 50% 4%, rgb(255 255 255 / 0.9), transparent 62%),
+    linear-gradient(180deg, #f6f1e3 0%, #e9e0cb 100%);
+}
+
+[data-theme="dark"] .specimen {
+  background:
+    radial-gradient(110% 78% at 50% 4%, rgb(234 122 33 / 0.14), transparent 62%),
+    linear-gradient(180deg, #0f2549 0%, #071a34 100%);
+}
+
+.specimen--ink {
+  background:
+    radial-gradient(110% 78% at 50% 4%, rgb(234 122 33 / 0.18), transparent 62%),
+    linear-gradient(180deg, #0b2141 0%, #05162e 100%);
+}
+
+.specimen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.14) 0%, transparent 26%),
+    linear-gradient(180deg, transparent 62%, rgb(5 22 46 / 0.18));
+  box-shadow: inset 0 0 0 1px rgb(5 22 46 / 0.08);
+}
+
+/* Only drawn when there is no artwork at all, so an empty listing still has a
+   composed frame instead of a blank rectangle. */
+.specimen__plate {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 1;
+  width: 62%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.55);
+  box-shadow: 0 20px 44px rgb(5 22 46 / 0.14);
+  transform: translate(-50%, -50%);
+  transition: transform 700ms var(--ease-settle);
+}
+
+[data-theme="dark"] .specimen__plate,
+.specimen--ink .specimen__plate {
+  background: rgb(255 255 255 / 0.07);
+  box-shadow: 0 20px 44px rgb(0 0 0 / 0.4);
+}
+
+.specimen__art {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  transition:
+    transform 800ms var(--ease-settle),
+    filter 500ms var(--ease-tint);
+  filter: saturate(0.9) contrast(1.02);
+}
+
+.group:hover .specimen__plate {
+  transform: translate(-50%, -50%) scale(1.05) rotate(6deg);
+}
+
+.group:hover .specimen__art {
+  transform: scale(1.06);
+  filter: saturate(1.05) contrast(1.02);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .specimen__plate,
+  .specimen__art {
+    transition: none;
+  }
+
+  .group:hover .specimen__plate {
+    transform: translate(-50%, -50%);
+  }
+
+  .group:hover .specimen__art {
+    transform: none;
+  }
+}
+
+/* -------------------------------------------------------------------------
+   Sign-in landscape. A ruled ink field behind the account and portal forms.
+   ---------------------------------------------------------------------- */
 
 .auth-landscape::before,
 .auth-landscape::after {
@@ -886,32 +1001,41 @@ html:lang(ta) h3 {
 }
 
 .auth-landscape::before {
-  right: -12%;
-  bottom: -12%;
-  width: 88%;
-  height: 50%;
+  right: -14%;
+  bottom: -14%;
+  width: 90%;
+  height: 52%;
   border-radius: 50% 0 0;
   background:
-    repeating-linear-gradient(105deg, transparent 0 1.5rem, rgb(236 147 70 / 0.18) 1.5rem 1.65rem),
-    #2d5f42;
+    repeating-linear-gradient(104deg, transparent 0 1.5rem, rgb(234 122 33 / 0.22) 1.5rem 1.62rem),
+    #0a5c36;
   transform: skewY(-8deg);
 }
 
 .auth-landscape::after {
-  right: 8%;
-  bottom: 21%;
+  right: 9%;
+  bottom: 22%;
   width: 8rem;
   height: 8rem;
   border-radius: 50%;
-  background: rgb(236 147 70 / 0.22);
+  background: rgb(234 122 33 / 0.3);
   filter: blur(1px);
 }
+
+/* -------------------------------------------------------------------------
+   Shopfront placeholder. Drawn rather than photographed, and clearly a drawing,
+   so a missing photograph is never mistaken for the real shop.
+   ---------------------------------------------------------------------- */
 
 .storefront-illustration {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  background: linear-gradient(180deg, #dff0e8 0 58%, #afca93 58% 100%);
+  background: linear-gradient(180deg, #f6f1e3 0 58%, #b7cfae 58% 100%);
+}
+
+[data-theme="dark"] .storefront-illustration {
+  background: linear-gradient(180deg, #0f2549 0 58%, #123a2a 58% 100%);
 }
 
 .storefront-illustration__sun {
@@ -921,15 +1045,15 @@ html:lang(ta) h3 {
   width: 4.5rem;
   height: 4.5rem;
   border-radius: 50%;
-  background: #f4bc57;
-  box-shadow: 0 0 0 1.1rem rgb(244 188 87 / 0.14);
+  background: var(--color-marigold-500);
+  box-shadow: 0 0 0 1.1rem rgb(234 122 33 / 0.18);
 }
 
 .storefront-illustration__ground {
   position: absolute;
   inset: 66% -10% -20%;
   border-radius: 50% 50% 0 0;
-  background: #5f8d58;
+  background: #0a5c36;
   transform: rotate(-4deg);
 }
 
@@ -940,8 +1064,8 @@ html:lang(ta) h3 {
   width: 48%;
   height: 48%;
   border-radius: 0.45rem;
-  background: #fff6e7;
-  box-shadow: 1rem 1.1rem 2.2rem rgb(9 9 75 / 0.18);
+  background: var(--color-paper);
+  box-shadow: 1rem 1.1rem 2.2rem rgb(5 22 46 / 0.24);
   transform: translateX(-50%);
 }
 
@@ -951,15 +1075,15 @@ html:lang(ta) h3 {
   inset: -13% -6% auto;
   height: 26%;
   border-radius: 0.4rem 0.4rem 1rem 1rem;
-  background: repeating-linear-gradient(90deg, #a84935 0 14%, #f1d9b0 14% 28%);
-  box-shadow: 0 0.45rem 0 rgb(9 9 75 / 0.10);
+  background: repeating-linear-gradient(90deg, #0a5c36 0 14%, var(--color-marigold-500) 14% 28%);
+  box-shadow: 0 0.45rem 0 rgb(5 22 46 / 0.12);
 }
 
 .storefront-illustration__door,
 .storefront-illustration__window {
   position: absolute;
   bottom: 0;
-  background: #376253;
+  background: #084b2c;
 }
 
 .storefront-illustration__door {
@@ -973,8 +1097,8 @@ html:lang(ta) h3 {
   bottom: 18%;
   width: 38%;
   height: 30%;
-  border: 0.25rem solid #4c7368;
-  background: #b9ded7;
+  border: 0.25rem solid #10704a;
+  background: #b7d7c1;
 }
 
 .storefront-illustration__sign {
@@ -986,8 +1110,8 @@ html:lang(ta) h3 {
   height: 1.8rem;
   place-items: center;
   border-radius: 50%;
-  background: var(--color-bark-900);
-  color: var(--color-marigold-400);
+  background: #05162e;
+  color: var(--color-marigold-500);
   font-family: var(--font-display);
   font-style: normal;
   transform: translateX(-50%);
@@ -999,13 +1123,22 @@ html:lang(ta) h3 {
   width: 1.1rem;
   height: 4.6rem;
   border-radius: 80% 20% 80% 20%;
-  background: #2f6845;
+  background: #084b2c;
   transform-origin: 50% 100%;
-  box-shadow: 1rem 0 #477f55, -0.8rem 0.3rem #3a744c;
+  box-shadow:
+    1rem 0 #10704a,
+    -0.8rem 0.3rem #0a5c36;
 }
 
-.storefront-illustration__plant--one { left: 14%; transform: rotate(-10deg); }
-.storefront-illustration__plant--two { right: 12%; transform: rotate(10deg) scale(0.8); }
+.storefront-illustration__plant--one {
+  left: 14%;
+  transform: rotate(-10deg);
+}
+
+.storefront-illustration__plant--two {
+  right: 12%;
+  transform: rotate(10deg) scale(0.8);
+}
 
 .storefront-illustration--compact .storefront-illustration__shop {
   width: 58%;

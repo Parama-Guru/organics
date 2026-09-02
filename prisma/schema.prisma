@@ -251,6 +251,11 @@ model Customer {
   id            String         @id @default(cuid())
   // Stored lower-cased; the unique index is what stops duplicate signups.
   email         String         @unique
+  // Public handle, lower-cased and unique. Deliberately NOT a sign-in
+  // credential: it is checked for availability live while someone types, and an
+  // identifier that answers "does this exist" must never also open a login.
+  // Null for accounts created before handles existed.
+  username      String?        @unique
   // Null for Google-only accounts. Otherwise scrypt:<salt-hex>:<key-hex>.
   passwordHash  String?
   // Google supplies a verified email; local accounts set this through a

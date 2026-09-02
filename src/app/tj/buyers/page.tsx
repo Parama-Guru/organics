@@ -73,7 +73,7 @@ export default async function AdminBuyersPage({ searchParams }: PageProps<"/tj/b
       <AdminSearch action="/tj/buyers" query={query} placeholder="Name, email or phone" />
 
       {customers.length === 0 ? (
-        <p className="mt-6 rounded-2xl border border-dashed border-bark-200 bg-white p-8 text-center text-sm text-bark-600">
+        <p className="mt-6 rounded-2xl border border-dashed border-bark-200 bg-paper p-8 text-center text-sm text-bark-600">
           {query ? "Nobody matches that search." : "Nobody has signed up yet."}
         </p>
       ) : (
@@ -81,7 +81,7 @@ export default async function AdminBuyersPage({ searchParams }: PageProps<"/tj/b
           {customers.map((customer) => (
             <li
               key={customer.id}
-              className="flex flex-wrap items-start justify-between gap-3 rounded-2xl border border-bark-200 bg-white p-4"
+              className="flex flex-wrap items-start justify-between gap-3 rounded-2xl border border-bark-200 bg-paper p-4"
             >
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">

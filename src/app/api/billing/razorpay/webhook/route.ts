@@ -309,7 +309,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!local) {
-      const ownedByOrganics = Boolean(attemptId || note(entity, "organics_customer_id"));
+      const ownedByOSSIL = Boolean(attemptId || note(entity, "organics_customer_id"));
       await prisma.paymentEvent.update({
         where: { id: event.id },
         data: { status: "FAILED", failureCode: "UNMATCHED_SUBSCRIPTION" },
@@ -318,7 +318,7 @@ export async function POST(request: NextRequest) {
       // operator/reconciliation worker can cancel or recover the mapping.
       return NextResponse.json(
         { error: "unmatched subscription" },
-        { status: ownedByOrganics ? 503 : 200 },
+        { status: ownedByOSSIL ? 503 : 200 },
       );
     }
 

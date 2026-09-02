@@ -49,14 +49,14 @@ export async function SiteFooter() {
 
   return (
     <footer className="mt-24 px-3 pb-3 sm:mt-36 sm:px-5 sm:pb-5">
-      <div className="mx-auto max-w-[90rem] overflow-hidden rounded-[2rem] bg-bark-900 px-5 pb-6 pt-9 text-white sm:rounded-[3rem] sm:px-10 sm:pb-8 sm:pt-12 lg:px-14">
+      <div className="mx-auto max-w-[90rem] overflow-hidden rounded-[2rem] bg-inverse px-5 pb-6 pt-9 text-white sm:rounded-[3rem] sm:px-10 sm:pb-8 sm:pt-12 lg:px-14">
         <div className="border-b border-white/15 pb-9 sm:pb-12">
-          <p className="section-kicker !text-marigold-400 before:!bg-marigold-400">
+          <p className="section-kicker section-kicker--dark">
             {t.footer.trustHeading}
           </p>
           <div className="mt-5 grid gap-6 lg:grid-cols-[1.5fr_0.7fr] lg:items-end">
             <p className="font-display text-[clamp(3.8rem,11vw,10rem)] font-medium leading-[0.78] tracking-[-0.05em] text-white">
-              Organics
+              OSSIL
             </p>
             <p className="max-w-lg text-base leading-relaxed text-bark-100/80 lg:pb-1 lg:text-lg">
               {showFarmerPhone() ? t.footer.blurb : t.footer.blurbSoon}
@@ -68,10 +68,10 @@ export async function SiteFooter() {
         <div className="grid grid-cols-2 gap-x-6 gap-y-10 py-10 md:grid-cols-[1.4fr_1fr_1fr_1fr] md:py-12">
           <div className="col-span-2 md:col-span-1">
           <p className="flex items-center gap-2 font-display text-2xl text-white">
-            <span className="grid h-11 w-11 place-items-center rounded-full bg-marigold-500 text-bark-900">
+            <span className="grid h-11 w-11 place-items-center rounded-full bg-marigold-500 text-on-action">
               <LeafMark className="text-2xl" />
             </span>
-            Living farm atlas
+            {app.name}
           </p>
           <p className="mt-4 max-w-sm leading-relaxed text-bark-100/70">
             {showFarmerPhone() ? t.footer.blurb : t.footer.blurbSoon}
@@ -189,7 +189,7 @@ export async function SiteFooter() {
         </div>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/15 pt-6 text-sm text-bark-100/55">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/15 pt-6 text-sm text-bark-100/75">
           <span>{format(t.footer.copyright, { year: new Date().getFullYear() })}</span>
           <span className="font-mono text-xs uppercase tracking-[0.12em]">Tamil Nadu · India</span>
         </div>

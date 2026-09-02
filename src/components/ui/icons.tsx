@@ -277,3 +277,30 @@ export function UserIcon({ className = "" }: Props) {
     </svg>
   );
 }
+
+export function SunIcon({ className = "" }: Props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden className={`${base} ${className}`}>
+      <circle cx="12" cy="12" r="4.2" stroke="currentColor" strokeWidth="1.7" />
+      <path
+        d="M12 2.6v2.2M12 19.2v2.2M21.4 12h-2.2M4.8 12H2.6M18.6 5.4l-1.6 1.6M7 17l-1.6 1.6M18.6 18.6 17 17M7 7 5.4 5.4"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+export function MoonIcon({ className = "" }: Props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden className={`${base} ${className}`}>
+      <path
+        d="M20.5 14.6A8.6 8.6 0 0 1 9.4 3.5a8.6 8.6 0 1 0 11.1 11.1Z"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}

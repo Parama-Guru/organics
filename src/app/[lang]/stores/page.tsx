@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 
+import { ImageField } from "@/components/image-field";
 import { dialNumber, showFarmerPhone } from "@/components/farmer-contact";
 import { GlassPanel } from "@/components/glass-panel";
 import { PhoneSoonNotice } from "@/components/phone-soon-notice";
@@ -62,7 +62,7 @@ export default async function StoresPage({ searchParams }: PageProps<"/[lang]/st
             name="q"
             defaultValue={query}
             placeholder={t.stores.searchPlaceholder}
-            className="min-h-12 w-full rounded-full border border-bark-200 bg-bark-50 px-5 focus:border-leaf-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-leaf-400/20"
+            className="min-h-12 w-full rounded-full border border-bark-200 bg-canvas-2 px-5 focus:border-leaf-500 focus:bg-paper focus:outline-none focus:ring-4 focus:ring-leaf-400/20"
           />
         </label>
         <Button type="submit" variant="dark">
@@ -98,15 +98,15 @@ export default async function StoresPage({ searchParams }: PageProps<"/[lang]/st
                   surface="card"
                   className="card-lift grid h-full overflow-hidden rounded-[2rem] sm:grid-cols-[0.85fr_1.15fr]"
                 >
-                <div className="relative min-h-56 bg-leaf-50 sm:min-h-full">
+                <div className="relative min-h-56 overflow-hidden sm:min-h-full">
                   {store.photoUrl ? (
-                    <Image
+                    <ImageField
                       src={store.photoUrl}
                       alt=""
-                      fill
                       priority={index < 3}
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      className="object-cover"
+                      fallbackLabel={t.products.noPhotograph}
+                      className="h-full w-full"
                     />
                   ) : (
                     <StorefrontPlaceholder compact />
@@ -165,9 +165,9 @@ export default async function StoresPage({ searchParams }: PageProps<"/[lang]/st
         </div>
       )}
 
-      <aside className="mt-20 grid grid-cols-[minmax(0,1fr)] gap-6 rounded-[2rem] bg-bark-900 p-7 text-white sm:p-10 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+      <aside className="mt-20 grid grid-cols-[minmax(0,1fr)] gap-6 rounded-[2rem] bg-inverse p-7 text-white sm:p-10 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
         <div>
-        <p className="section-kicker !text-marigold-400 before:!bg-marigold-400">{t.storeApplication.badge}</p>
+        <p className="section-kicker section-kicker--dark">{t.storeApplication.badge}</p>
         <h2 className="mt-5 font-display text-4xl text-white">{t.stores.registerCta}</h2>
         <p className="mt-3 max-w-2xl leading-relaxed text-bark-100">{t.stores.registerCtaBody}</p>
         </div>

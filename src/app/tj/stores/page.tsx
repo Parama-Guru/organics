@@ -132,8 +132,8 @@ export default async function AdminStoresPage({ searchParams }: PageProps<"/tj/s
               aria-current={active ? "page" : undefined}
               className={`inline-flex min-h-11 items-center rounded-xl border px-4 text-sm ${
                 active
-                  ? "border-bark-900 bg-bark-900 text-white"
-                  : "border-bark-200 bg-white text-bark-600"
+                  ? "border-bark-900 bg-inverse text-white"
+                  : "border-bark-200 bg-paper text-bark-600"
               }`}
             >
               {filter.label}
@@ -157,7 +157,7 @@ export default async function AdminStoresPage({ searchParams }: PageProps<"/tj/s
           href={`/tj/stores${status || query ? `?${[status ? `status=${status}` : "", query ? `q=${encodeURIComponent(query)}` : ""].filter(Boolean).join("&")}` : ""}`}
           aria-current={!flaggedOnly ? "page" : undefined}
           className={`inline-flex min-h-10 items-center rounded-xl border px-4 ${
-            !flaggedOnly ? "border-bark-900 bg-bark-900 text-white" : "border-bark-200 bg-white text-bark-600"
+            !flaggedOnly ? "border-bark-900 bg-inverse text-white" : "border-bark-200 bg-paper text-bark-600"
           }`}
         >
           All shops
@@ -166,7 +166,7 @@ export default async function AdminStoresPage({ searchParams }: PageProps<"/tj/s
           href={`/tj/stores?${[status ? `status=${status}` : "", query ? `q=${encodeURIComponent(query)}` : "", "flagged=1"].filter(Boolean).join("&")}`}
           aria-current={flaggedOnly ? "page" : undefined}
           className={`inline-flex min-h-10 items-center rounded-xl border px-4 ${
-            flaggedOnly ? "border-marigold-500 bg-marigold-50 text-bark-900" : "border-bark-200 bg-white text-bark-600"
+            flaggedOnly ? "border-marigold-500 bg-marigold-50 text-bark-900" : "border-bark-200 bg-paper text-bark-600"
           }`}
         >
           Flagged for review
@@ -174,7 +174,7 @@ export default async function AdminStoresPage({ searchParams }: PageProps<"/tj/s
       </div>
 
       {stores.length === 0 ? (
-        <p className="mt-6 rounded-2xl border border-dashed border-bark-200 bg-white p-8 text-center text-sm text-bark-600">
+        <p className="mt-6 rounded-2xl border border-dashed border-bark-200 bg-paper p-8 text-center text-sm text-bark-600">
           {query || status ? "No shop matches that." : "No shop has applied yet."}
         </p>
       ) : (
@@ -239,7 +239,7 @@ export default async function AdminStoresPage({ searchParams }: PageProps<"/tj/s
                     </p>
                   ) : null}
                   {store.reviewNote ? (
-                    <p className="mt-2 rounded-xl bg-bark-50 p-2.5 text-sm text-bark-600">
+                    <p className="mt-2 rounded-xl bg-canvas p-2.5 text-sm text-bark-600">
                       Note: {store.reviewNote}
                     </p>
                   ) : null}

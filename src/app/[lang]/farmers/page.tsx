@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 
+import { ImageField } from "@/components/image-field";
 import { dialNumber, showFarmerPhone } from "@/components/farmer-contact";
 import { GlassPanel } from "@/components/glass-panel";
 import { PhoneSoonNotice } from "@/components/phone-soon-notice";
@@ -80,7 +80,7 @@ export default async function FarmersPage({ searchParams }: PageProps<"/[lang]/f
           </dl>
         </div>
 
-        <aside className="rounded-[2rem] bg-bark-900 p-7 text-white sm:p-9">
+        <aside className="rounded-[2rem] bg-inverse p-7 text-white sm:p-9">
           <p className="font-mono text-xs uppercase tracking-[0.12em] text-marigold-400">Verification dossier</p>
           <h2 className="mt-4 font-display text-3xl text-white">{t.trust.heading}</h2>
           <ul className="mt-3 space-y-2.5 text-sm leading-relaxed text-ink">
@@ -108,7 +108,7 @@ export default async function FarmersPage({ searchParams }: PageProps<"/[lang]/f
             name="q"
             defaultValue={query}
             placeholder={t.farmers.searchPlaceholder}
-            className="min-h-12 w-full rounded-full border border-bark-200 bg-bark-50 px-5 focus:border-leaf-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-leaf-400/20"
+            className="min-h-12 w-full rounded-full border border-bark-200 bg-canvas-2 px-5 focus:border-leaf-500 focus:bg-paper focus:outline-none focus:ring-4 focus:ring-leaf-400/20"
           />
         </label>
         <Button type="submit" variant="dark">
@@ -146,17 +146,15 @@ export default async function FarmersPage({ searchParams }: PageProps<"/[lang]/f
                   surface="card"
                   className="card-lift group grid h-full overflow-hidden rounded-[2rem] sm:grid-cols-[0.85fr_1.15fr]"
                 >
-                <div className="relative min-h-56 overflow-hidden bg-leaf-50 sm:min-h-full">
-                  {farmer.photoUrl ? (
-                    <Image
-                      src={farmer.photoUrl}
-                      alt=""
-                      fill
-                      priority={index < 3}
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      className="object-cover"
-                    />
-                  ) : null}
+                <div className="relative min-h-56 overflow-hidden sm:min-h-full">
+                  <ImageField
+                    src={farmer.photoUrl}
+                    alt=""
+                    priority={index < 3}
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    fallbackLabel={t.products.noPhotograph}
+                    className="h-full w-full"
+                  />
                 </div>
 
                 <div className="flex flex-1 flex-col p-6 sm:p-8">

@@ -43,7 +43,7 @@ export default async function FarmerEnquiriesPage() {
       <h1 className="font-display text-3xl text-bark-900">வாங்குபவர் விசாரணைகள்</h1>
       <p className="mt-2 max-w-2xl leading-relaxed text-bark-600">
         வாங்குபவர் அனுமதித்தால் மட்டும் அவருடைய மின்னஞ்சல் தெரியும். இல்லையெனில் குறிப்பெண்ணுடன்
-        Organics நிர்வாகி வழியாகப் பதில் சொல்லுங்கள்.
+        OSSIL நிர்வாகி வழியாகப் பதில் சொல்லுங்கள்.
       </p>
       <SellerEnquiryList
         enquiries={enquiries}

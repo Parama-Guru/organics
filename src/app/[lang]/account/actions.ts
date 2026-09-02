@@ -66,7 +66,7 @@ export async function signUpAction(
 ): Promise<ActionState> {
   if (!accountsEnabled()) return { error: "unavailable" };
 
-  const values = textValues(form, ["name", "email", "phone", "region"]);
+  const values = textValues(form, ["name", "username", "email", "phone", "region"]);
   // 20/hour, not 5: Indian mobile carriers put whole cities behind one CGNAT
   // address, so a tight per-IP cap locks out strangers rather than attackers.
   const gate = await limit("signup", 20, 3600);
@@ -74,6 +74,7 @@ export async function signUpAction(
 
   const parsed = signUpSchema.safeParse({
     name: form.get("name"),
+    username: form.get("username"),
     email: form.get("email"),
     password: form.get("password"),
     phone: form.get("phone") ?? "",
@@ -84,7 +85,7 @@ export async function signUpAction(
     return { error: "invalid", fields: fieldsFrom(parsed.error.issues), values };
   }
 
-  const { name, email, password, phone, region } = parsed.data;
+  const { name, username, email, password, phone, region } = parsed.data;
   const passwordHash = await hashPassword(password);
 
   let customerId: string;
@@ -92,6 +93,7 @@ export async function signUpAction(
     const customer = await prisma.customer.create({
       data: {
         email,
+        username,
         passwordHash,
         passwordSetAt: new Date(),
         profileCompletedAt: new Date(),

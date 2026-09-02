@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 
 import { signInAction, signUpAction, type ActionState } from "@/app/[lang]/account/actions";
+import { PasswordField, UsernameField } from "@/components/credential-fields";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { useI18n } from "@/lib/i18n/client";
@@ -31,49 +32,56 @@ export function AccountForm({ mode, next }: { mode: "signIn" | "signUp"; next?: 
   // an email address just to correct a password.
   const kept = state.values ?? {};
 
+  // Held here, not inside each field, so the strength meter can score the
+  // password against the same name, handle and email the server will use.
+  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const signingUp = mode === "signUp";
+
   return (
     <form action={formAction} className="mt-7 grid gap-4">
-      {mode === "signUp" ? (
-        <Field
-          label={t.account.name}
-          name="name"
-          defaultValue={kept.name ?? ""}
-          autoComplete="name"
-          required
-          minLength={2}
-          maxLength={80}
-          invalid={bad.has("name")}
-          error={bad.has("name") ? t.account.fieldName : undefined}
-        />
-      ) : null}
-
-      <Field
-        label={t.account.email}
-        name="email"
-        type="email"
-        defaultValue={kept.email ?? ""}
-        autoComplete="email"
-        required
-        maxLength={200}
-        invalid={bad.has("email")}
-        error={bad.has("email") ? t.account.fieldEmail : undefined}
-      />
-
-      <Field
-        label={t.account.password}
-        hint={mode === "signUp" ? t.account.passwordHint : undefined}
-        name="password"
-        type="password"
-        autoComplete={mode === "signUp" ? "new-password" : "current-password"}
-        required
-        minLength={mode === "signUp" ? 10 : 1}
-        maxLength={200}
-        invalid={bad.has("password")}
-        error={bad.has("password") ? t.account.fieldPassword : undefined}
-      />
-
-      {mode === "signUp" ? (
+      {signingUp ? (
         <>
+          <Field
+            label={t.account.name}
+            name="name"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            autoComplete="name"
+            required
+            minLength={2}
+            maxLength={80}
+            invalid={bad.has("name")}
+            error={bad.has("name") ? t.account.fieldName : undefined}
+          />
+          <UsernameField
+            value={username}
+            onChange={setUsername}
+            invalid={bad.has("username")}
+            error={bad.has("username") ? t.account.fieldUsername : undefined}
+          />
+          <Field
+            label={t.account.email}
+            name="email"
+            type="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            autoComplete="email"
+            required
+            maxLength={200}
+            invalid={bad.has("email")}
+            error={bad.has("email") ? t.account.fieldEmail : undefined}
+          />
+          <PasswordField
+            value={password}
+            onChange={setPassword}
+            personal={[email.split("@")[0] ?? "", username, name]}
+            invalid={bad.has("password")}
+            error={bad.has("password") ? t.account.fieldPassword : undefined}
+          />
           <Field
             label={t.account.phone}
             hint={t.account.phoneHint}
@@ -96,7 +104,32 @@ export function AccountForm({ mode, next }: { mode: "signIn" | "signUp"; next?: 
             invalid={bad.has("region")}
           />
         </>
-      ) : null}
+      ) : (
+        <>
+          <Field
+            label={t.account.email}
+            name="email"
+            type="email"
+            defaultValue={kept.email ?? ""}
+            autoComplete="email"
+            required
+            maxLength={200}
+            invalid={bad.has("email")}
+            error={bad.has("email") ? t.account.fieldEmail : undefined}
+          />
+          <Field
+            label={t.account.password}
+            name="password"
+            type="password"
+            autoComplete="current-password"
+            required
+            minLength={1}
+            maxLength={200}
+            invalid={bad.has("password")}
+            error={bad.has("password") ? t.account.fieldPassword : undefined}
+          />
+        </>
+      )}
 
       {messageKey ? (
         <p
@@ -108,24 +141,20 @@ export function AccountForm({ mode, next }: { mode: "signIn" | "signUp"; next?: 
       ) : null}
 
       <Button type="submit" size="lg" disabled={pending}>
-        {pending
-          ? t.account.working
-          : mode === "signUp"
-            ? t.account.submitSignUp
-            : t.account.submitSignIn}
+        {pending ? t.account.working : signingUp ? t.account.submitSignUp : t.account.submitSignIn}
       </Button>
 
       <p className="text-sm text-bark-600">
-        {mode === "signUp" ? t.account.haveAccount : t.account.noAccount}{" "}
+        {signingUp ? t.account.haveAccount : t.account.noAccount}{" "}
         <Link
           href={
             next
-              ? `${localePath(locale, mode === "signUp" ? "/account/sign-in" : "/account/sign-up")}?next=${encodeURIComponent(next)}`
-              : localePath(locale, mode === "signUp" ? "/account/sign-in" : "/account/sign-up")
+              ? `${localePath(locale, signingUp ? "/account/sign-in" : "/account/sign-up")}?next=${encodeURIComponent(next)}`
+              : localePath(locale, signingUp ? "/account/sign-in" : "/account/sign-up")
           }
           className="font-semibold text-brand underline underline-offset-4"
         >
-          {mode === "signUp" ? t.account.signInInstead : t.account.createOne}
+          {signingUp ? t.account.signInInstead : t.account.createOne}
         </Link>
       </p>
     </form>

@@ -1,5 +1,5 @@
 # =============================================================================
-# Organics — application configuration (single source of truth).
+# OSSIL — application configuration (single source of truth).
 #
 #   conf/config.example.yaml   tracked in git. No secrets: ${VAR} references only.
 #   conf/config.yaml           gitignored. Real local values. Copy this file.
@@ -15,7 +15,7 @@
 # =============================================================================
 
 app:
-  name: "Organics"
+  name: "OSSIL"
   env: "${APP_ENV:-dev}" # dev | prod
   site_url: "${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}"
   currency: "${NEXT_PUBLIC_CURRENCY:-INR}" # ISO 4217, inlined into the client bundle

@@ -32,7 +32,7 @@ export function NewFarmerForm() {
     <form
       onSubmit={handleSubmit}
       method="post"
-      className="mt-6 grid gap-4 rounded-3xl border border-bark-200 bg-white p-6 sm:grid-cols-2"
+      className="mt-6 grid gap-4 rounded-3xl border border-bark-200 bg-paper p-6 sm:grid-cols-2"
     >
       <Field label="Farm name" name="farmName" required maxLength={120} />
       <Field label="Contact name" name="contactName" required maxLength={120} />

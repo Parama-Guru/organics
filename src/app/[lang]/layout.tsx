@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DM_Mono, DM_Sans, Newsreader, Noto_Sans_Tamil, Noto_Serif_Tamil } from "next/font/google";
+import { DM_Mono, DM_Sans, Instrument_Serif, Noto_Sans_Tamil, Noto_Serif_Tamil } from "next/font/google";
 
 import { loadConfig } from "@conf/config";
 import { SiteFooter } from "@/components/site-footer";
@@ -8,12 +8,17 @@ import { accountsEnabled, getCustomer } from "@/lib/customer-auth";
 import { I18nProvider } from "@/lib/i18n/client";
 import { HTML_LANG, ENABLED_LOCALES } from "@/lib/i18n/config";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
+import { THEME_SCRIPT } from "@/lib/theme";
+import { getStoredTheme } from "@/lib/theme-cookie";
 
 import "../globals.css";
 
 // next/font self-hosts these at build time, so the CSP stays `font-src 'self'`.
-const display = Newsreader({
+// Instrument Serif stands in for the reference's licensed display face: same
+// high-contrast editorial character, but under the OFL and free to ship.
+const display = Instrument_Serif({
   subsets: ["latin"],
+  weight: "400",
   display: "swap",
   variable: "--font-display-family",
 });
@@ -31,8 +36,9 @@ const mono = DM_Mono({
   variable: "--font-mono-family",
 });
 
-// Fraunces and Manrope carry no Tamil glyphs. These sit next in the stack, so the
-// browser resolves per glyph: Latin stays Fraunces/Manrope, Tamil falls through here.
+// The Latin faces carry no Tamil glyphs. These sit next in the stack, so the
+// browser resolves per glyph: Latin stays Instrument Serif / DM Sans, Tamil
+// falls through here.
 const displayTamil = Noto_Serif_Tamil({
   subsets: ["tamil"],
   display: "swap",
@@ -81,14 +87,22 @@ export default async function RootLayout({ children }: LayoutProps<"/[lang]">) {
   const locale = await getLocale();
   const t = await getDictionary();
   const accountsOn = accountsEnabled();
+  const theme = await getStoredTheme();
   // Only a boolean crosses into the client bundle; the session itself never does.
   const signedIn = accountsOn ? (await getCustomer()) !== null : false;
 
   return (
     <html
       lang={HTML_LANG[locale]}
+      data-theme={theme ?? undefined}
+      // The pre-paint script resolves the system preference, so this attribute
+      // can legitimately differ from what the server rendered.
+      suppressHydrationWarning
       className={`${display.variable} ${body.variable} ${mono.variable} ${displayTamil.variable} ${bodyTamil.variable} h-full antialiased`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
       <body className="flex min-h-full flex-col">
         <I18nProvider locale={locale} t={t}>
           <a

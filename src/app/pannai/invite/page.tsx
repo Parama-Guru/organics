@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import { AcceptInviteForm } from "@/app/pannai/forms";
 import { FARMER_PORTAL, farmerInviteMatches, getFarmer } from "@/lib/farmer-auth";
+import { PORTAL_COPY } from "@/lib/i18n/portal-copy";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -54,7 +55,7 @@ export default async function AcceptInvitePage({
           ? "நீங்கள் இப்போது அமைக்கும் கடவுச்சொல் பழையதற்குப் பதிலாக வரும். இந்த இணைப்பு ஒரே முறை மட்டும் வேலை செய்யும்."
           : "ஒரு கடவுச்சொல்லைத் தேர்ந்தெடுத்தால் உள்ளே செல்லலாம். இந்த இணைப்பு ஒரே முறை மட்டும் வேலை செய்யும்."}
       </p>
-      <AcceptInviteForm farmId={farmId} token={token} />
+      <AcceptInviteForm farmId={farmId} token={token} copy={PORTAL_COPY.ta} />
     </div>
   );
 }

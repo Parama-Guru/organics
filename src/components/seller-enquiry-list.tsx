@@ -34,7 +34,7 @@ export function SellerEnquiryList({
 }) {
   if (enquiries.length === 0) {
     return (
-      <div className="mt-6 rounded-2xl border border-dashed border-bark-200 bg-white p-8 text-center text-bark-600">
+      <div className="mt-6 rounded-2xl border border-dashed border-bark-200 bg-paper p-8 text-center text-bark-600">
         {empty}
       </div>
     );
@@ -46,7 +46,7 @@ export function SellerEnquiryList({
         {enquiries.map((enquiry) => (
           <li
             key={enquiry.id}
-            className={`rounded-2xl border bg-white p-5 ${
+            className={`rounded-2xl border bg-paper p-5 ${
               enquiry.sellerReadAt ? "border-bark-200" : "border-marigold-300"
             }`}
           >
@@ -65,7 +65,7 @@ export function SellerEnquiryList({
                   </a>
                 ) : (
                   <p className="mt-1 text-sm text-bark-600">
-                    வாங்குபவர் மின்னஞ்சலைப் பகிரவில்லை. Organics நிர்வாகியிடம் இந்தக் குறிப்பைக்
+                    வாங்குபவர் மின்னஞ்சலைப் பகிரவில்லை. OSSIL நிர்வாகியிடம் இந்தக் குறிப்பைக்
                     கொண்டு பதில் சொல்லுங்கள்: {enquiry.id}
                   </p>
                 )}
@@ -81,7 +81,7 @@ export function SellerEnquiryList({
             </p>
             {enquiry.deliveryStatus !== "SENT" ? (
               <p className="mt-3 rounded-xl bg-marigold-50 p-3 text-sm text-bark-700">
-                மின்னஞ்சல் சென்றிருக்காமல் இருக்கலாம்; இந்தப் பதிவு பாதுகாப்பாக Organics-இல் உள்ளது.
+                மின்னஞ்சல் சென்றிருக்காமல் இருக்கலாம்; இந்தப் பதிவு பாதுகாப்பாக OSSIL-இல் உள்ளது.
               </p>
             ) : null}
           </li>

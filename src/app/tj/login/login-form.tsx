@@ -3,21 +3,24 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { PortalLanguageToggle } from "@/components/portal-language-toggle";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
+import type { Locale } from "@/lib/i18n/config";
+import type { PortalCopy } from "@/lib/i18n/portal-copy";
 
-const MESSAGES: Record<string, string> = {
-  bad_passphrase: "That passphrase is not right.",
-  rate_limited: "Too many attempts. Wait about 15 minutes and try again.",
-  forbidden_origin: "That request was blocked. Reload the page and try again.",
-  invalid_fields: "Enter the passphrase.",
-  not_found: "The admin area is not configured on this deployment.",
-};
-
-export function AdminLoginForm() {
+export function AdminLoginForm({ locale, copy }: { locale: Locale; copy: PortalCopy }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  const messages: Record<string, string> = {
+    bad_passphrase: copy.adminBadPassphrase,
+    rate_limited: copy.errorRateLimited,
+    forbidden_origin: copy.adminBlocked,
+    invalid_fields: copy.errorInvalid,
+    not_found: copy.adminMissing,
+  };
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -34,52 +37,60 @@ export function AdminLoginForm() {
 
       if (!response.ok) {
         const result = await response.json().catch(() => ({}));
-        setError(MESSAGES[result.code] ?? "Could not sign in.");
+        setError(messages[result.code] ?? copy.adminBadPassphrase);
         return;
       }
       router.replace("/tj");
       router.refresh();
     } catch {
-      setError("Network error. Please try again.");
+      setError(copy.adminNetwork);
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      method="post"
-      className="mx-auto mt-16 max-w-sm rounded-3xl border border-bark-200 bg-white p-6 shadow-soft"
-    >
-      <h1 className="font-display text-2xl text-bark-900">Sign in</h1>
-      <p className="mt-1 text-sm text-bark-600">
-        This area manages verification, listings, enquiries, sponsorships and buyer support. It is not linked from the public site.
-      </p>
+    // The toggle submits its own form, so it has to sit beside this one rather
+    // than inside it: a nested <form> is invalid HTML and breaks hydration.
+    <div lang={locale} className="mx-auto mt-16 max-w-sm">
+      <div className="flex items-start justify-between gap-4">
+        <h1 className="font-display text-2xl text-bark-900">{copy.adminTitle}</h1>
+        <PortalLanguageToggle
+          locale={locale}
+          returnTo="/tj/login"
+          label={copy.language}
+          switchTo={copy.switchTo}
+        />
+      </div>
+      <p className="mt-1 text-sm text-bark-600">{copy.adminIntro}</p>
 
-      <div className="mt-5">
+      <form
+        onSubmit={handleSubmit}
+        method="post"
+        className="mt-5 rounded-3xl border border-bark-200 bg-paper p-6 shadow-soft"
+      >
         <Field
-          label="Admin passphrase"
+          label={copy.adminPassphrase}
           name="passphrase"
           type="password"
           required
           maxLength={200}
           autoComplete="current-password"
         />
-      </div>
 
-      {error ? (
-        <p
-          role="alert"
-          className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700"
-        >
-          {error}
-        </p>
-      ) : null}
+        {error ? (
+          <p
+            role="alert"
+            className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+          >
+            {error}
+          </p>
+        ) : null}
 
-      <Button type="submit" size="lg" disabled={busy} className="mt-5 w-full">
-        {busy ? "Checking…" : "Sign in"}
-      </Button>
-    </form>
+        <Button type="submit" size="lg" disabled={busy} className="mt-5 w-full">
+          {busy ? copy.adminChecking : copy.adminSubmit}
+        </Button>
+      </form>
+    </div>
   );
 }

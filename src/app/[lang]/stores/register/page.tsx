@@ -28,7 +28,7 @@ export default async function StoreRegisterPage() {
       </header>
 
       <div className="mt-12 grid grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[20rem_minmax(0,1fr)] lg:items-start">
-      <aside className="rounded-[2rem] bg-bark-900 p-6 text-white lg:sticky lg:top-28 lg:p-8">
+      <aside className="rounded-[2rem] bg-inverse p-6 text-white lg:sticky lg:top-28 lg:p-8">
         <p className="font-mono text-xs uppercase tracking-[0.12em] text-marigold-400">Store review field guide</p>
       <ol className="mt-5 border-t border-white/15">
         {steps.map((step, index) => (
