@@ -5,7 +5,8 @@ import { contactMessageSchema } from "@/lib/contact-schema";
 import { notifyContactMessage } from "@/lib/notifications";
 import { prisma } from "@/lib/prisma";
 import { readBoundedJson } from "@/lib/request-body";
-import { clientKeyFromHeaders, rateLimit } from "@/lib/rate-limit";
+import { clientKeyFromHeaders } from "@/lib/rate-limit";
+import { consumeRateLimit } from "@/lib/session-store";
 import { isSameOrigin } from "@/lib/same-origin";
 
 export const dynamic = "force-dynamic";
@@ -24,7 +25,11 @@ export async function POST(request: NextRequest) {
 
   // Five an hour: enough for someone who sends one, spots a typo and sends it
   // again, and low enough that the table cannot be filled from one address.
-  const limit = rateLimit(`contact:${clientKeyFromHeaders(request.headers)}`, 5, 3_600_000);
+  const limit = await consumeRateLimit(
+    `contact:${clientKeyFromHeaders(request.headers)}`,
+    5,
+    3_600,
+  );
   if (!limit.allowed) {
     return NextResponse.json(
       {

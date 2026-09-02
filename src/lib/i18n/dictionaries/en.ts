@@ -678,6 +678,18 @@ export const en = {
     browse: "Browse produce",
   },
 
+  // Shown when a page fails to render, most often because the database was
+  // briefly unreachable. It says what happened and offers the one useful
+  // action, rather than a bare 500.
+  failure: {
+    heading: "That did not load",
+    body: "Something went wrong at our end, not yours. It is usually momentary — try again, and if it keeps happening please tell us.",
+    retry: "Try again",
+    home: "Go to the home page",
+    contact: "Tell us about it",
+    reference: "Reference {id}",
+  },
+
   privacy: {
     heading: "Privacy",
     intro: "What we collect, why, and how long we keep it.",

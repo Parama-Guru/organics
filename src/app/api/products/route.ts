@@ -2,7 +2,8 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { getProducts, type ProductSummary } from "@/lib/products";
 import { allowedSort, productQuerySchema } from "@/lib/product-query-schema";
-import { clientKeyFromHeaders, rateLimit } from "@/lib/rate-limit";
+import { clientKeyFromHeaders } from "@/lib/rate-limit";
+import { consumeRateLimit } from "@/lib/session-store";
 import { sellerDetailsUnlocked } from "@/lib/seller-visibility";
 
 export const dynamic = "force-dynamic";
@@ -18,7 +19,11 @@ function withoutPrice(product: ProductSummary): GuestProduct {
 }
 
 export async function GET(request: NextRequest) {
-  const limit = rateLimit(`products:${clientKeyFromHeaders(request.headers)}`, 60, 60_000);
+  const limit = await consumeRateLimit(
+    `products:${clientKeyFromHeaders(request.headers)}`,
+    60,
+    60,
+  );
 
   if (!limit.allowed) {
     return NextResponse.json(

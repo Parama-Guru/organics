@@ -9,7 +9,8 @@ import { notifyApplication } from "@/lib/notifications";
 import { prisma } from "@/lib/prisma";
 import { regionIdForName } from "@/lib/regions";
 import { readBoundedJson } from "@/lib/request-body";
-import { clientKeyFromHeaders, rateLimit } from "@/lib/rate-limit";
+import { clientKeyFromHeaders } from "@/lib/rate-limit";
+import { consumeRateLimit } from "@/lib/session-store";
 import { isSameOrigin } from "@/lib/same-origin";
 
 export const dynamic = "force-dynamic";
@@ -33,7 +34,11 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const limit = rateLimit(`farmer-apply:${clientKeyFromHeaders(request.headers)}`, 3, 3_600_000);
+  const limit = await consumeRateLimit(
+    `farmer-apply:${clientKeyFromHeaders(request.headers)}`,
+    3,
+    3_600,
+  );
   if (!limit.allowed) {
     return NextResponse.json(
       {

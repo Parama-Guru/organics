@@ -154,6 +154,35 @@ export async function getProducts(options: {
 }) {
   const { categorySlug, region, search, sort = "name", limit = 60, locale = DEFAULT_LOCALE } = options;
 
+  // The unfiltered shop is the single most requested view and is identical for
+  // every visitor, so it is worth keeping. Filtered and searched views are not
+  // cached: one entry per combination of chips and phrases would be unbounded.
+  //
+  // Safe to cache because the only Date in productSummarySelect is
+  // farmer.verifiedAt, and checkedOn takes the string that survives JSON.
+  if (!categorySlug && !region && !search?.trim() && sort === "name" && limit === 60) {
+    return listProductsCached(locale);
+  }
+
+  return listProducts({ categorySlug, region, search, sort, limit, locale });
+}
+
+const listProductsCached = unstable_cache(
+  (locale: Locale) => listProducts({ locale }),
+  ["shop-products"],
+  { revalidate: 120, tags: ["catalog"] },
+);
+
+async function listProducts(options: {
+  categorySlug?: string;
+  region?: string;
+  search?: string;
+  sort?: ProductSort;
+  limit?: number;
+  locale?: Locale;
+}) {
+  const { categorySlug, region, search, sort = "name", limit = 60, locale = DEFAULT_LOCALE } = options;
+
   const searchIds = search?.trim() ? await searchProductIds(search.trim()) : null;
 
   // An empty result short-circuits instead of sending `IN ()` to Postgres.

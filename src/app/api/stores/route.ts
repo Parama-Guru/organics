@@ -6,7 +6,8 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { regionIdForName } from "@/lib/regions";
 import { readBoundedJson } from "@/lib/request-body";
-import { clientKeyFromHeaders, rateLimit } from "@/lib/rate-limit";
+import { clientKeyFromHeaders } from "@/lib/rate-limit";
+import { consumeRateLimit } from "@/lib/session-store";
 import { isSameOrigin } from "@/lib/same-origin";
 import { storeApplicationSchema } from "@/lib/store-application-schema";
 import { notifyApplication } from "@/lib/notifications";
@@ -33,7 +34,11 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const limit = rateLimit(`store-apply:${clientKeyFromHeaders(request.headers)}`, 3, 3_600_000);
+  const limit = await consumeRateLimit(
+    `store-apply:${clientKeyFromHeaders(request.headers)}`,
+    3,
+    3_600,
+  );
   if (!limit.allowed) {
     return NextResponse.json(
       {

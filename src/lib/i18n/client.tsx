@@ -23,3 +23,12 @@ export function useI18n(): I18nValue {
   if (!value) throw new Error("useI18n must be used inside I18nProvider");
   return value;
 }
+
+/**
+ * For the error boundary, which has to render even when the layout that seeds
+ * the provider is the thing that failed. Throwing there would replace one blank
+ * screen with another.
+ */
+export function useOptionalI18n(): I18nValue | null {
+  return useContext(I18nContext);
+}

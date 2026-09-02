@@ -13,25 +13,26 @@ type Result = {
   group: string;
   name: string;
   pass: boolean;
+  skipped: boolean;
   detail: string;
 };
 
 const results: Result[] = [];
 
-function record(group: string, name: string, pass: boolean, detail = "") {
-  results.push({ group, name, pass, detail });
-  const mark = pass ? "PASS" : "FAIL";
+function record(group: string, name: string, pass: boolean, detail = "", skipped = false) {
+  results.push({ group, name, pass, skipped, detail });
+  const mark = skipped ? "SKIP" : pass ? "PASS" : "FAIL";
   console.log(`${mark}  ${group} — ${name}${detail ? `  (${detail})` : ""}`);
 }
 
 async function check(
   group: string,
   name: string,
-  fn: () => Promise<{ pass: boolean; detail?: string }>,
+  fn: () => Promise<{ pass: boolean; detail?: string; skipped?: boolean }>,
 ) {
   try {
-    const { pass, detail } = await fn();
-    record(group, name, pass, detail ?? "");
+    const { pass, detail, skipped } = await fn();
+    record(group, name, pass, detail ?? "", skipped ?? false);
   } catch (error) {
     record(group, name, false, `threw: ${(error as Error).message}`);
   }
@@ -167,12 +168,17 @@ async function securityTests() {
     return { pass: res.status >= 400, detail: `status ${res.status}` };
   });
 
+  // These two spend the contact endpoint's five-an-hour budget, which now lives
+  // in Redis and so survives a restart and earlier runs of this suite. When the
+  // limiter answers first the check is skipped rather than passed: a 429 says
+  // nothing about whether the body guard works.
   await check(group, "malformed JSON is rejected, not crashed on", async () => {
     const res = await fetch(`${BASE}/api/contact`, {
       method: "POST",
       headers: { ...json, origin: BASE },
       body: "{not json",
     });
+    if (res.status === 429) return { pass: true, skipped: true, detail: "rate limited, not proven this run" };
     return { pass: res.status === 400, detail: `status ${res.status}` };
   });
 
@@ -182,7 +188,8 @@ async function securityTests() {
       headers: { ...json, origin: BASE },
       body: JSON.stringify({ role: "BUYER", name: "x", email: "a@b.test", message: "z".repeat(2_000_000) }),
     });
-    return { pass: res.status === 400 || res.status === 413, detail: `status ${res.status}` };
+    if (res.status === 429) return { pass: true, skipped: true, detail: "rate limited, not proven this run" };
+    return { pass: res.status === 413 || res.status === 400, detail: `status ${res.status}` };
   });
 
   await check(group, "staff area is not reachable without a session", async () => {
@@ -256,6 +263,7 @@ type LoadResult = {
   ok: number;
   failed: number;
   rateLimited: number;
+  ttfb50: number;
   p50: number;
   p95: number;
   p99: number;
@@ -265,6 +273,7 @@ type LoadResult = {
 
 async function loadTest(path: string, requests: number, concurrency: number): Promise<LoadResult> {
   const timings: number[] = [];
+  const ttfbs: number[] = [];
   let ok = 0;
   let failed = 0;
   let rateLimited = 0;
@@ -278,18 +287,23 @@ async function loadTest(path: string, requests: number, concurrency: number): Pr
       const t0 = Date.now();
       try {
         const res = await fetch(`${BASE}${path}`);
+        const ttfb = Date.now() - t0;
+        // Pages with a loading.tsx stream: headers arrive with the skeleton long
+        // before the content does. Timing the fetch alone would measure the
+        // skeleton and claim a speed-up that a reader never gets, so the body
+        // has to be drained before the clock stops.
+        await res.arrayBuffer();
         const elapsed = Date.now() - t0;
-        // A refusal is the rate limiter working, not a failure, but it is far
-        // too fast to belong in the latency figures.
+
         if (res.status === 429) {
           rateLimited++;
         } else if (res.ok) {
           ok++;
           timings.push(elapsed);
+          ttfbs.push(ttfb);
         } else {
           failed++;
         }
-        await res.arrayBuffer();
       } catch {
         failed++;
       }
@@ -299,6 +313,7 @@ async function loadTest(path: string, requests: number, concurrency: number): Pr
   await Promise.all(Array.from({ length: concurrency }, worker));
   const seconds = (Date.now() - started) / 1000;
   const sorted = timings.sort((a, b) => a - b);
+  const sortedTtfb = ttfbs.sort((a, b) => a - b);
 
   return {
     path,
@@ -307,6 +322,7 @@ async function loadTest(path: string, requests: number, concurrency: number): Pr
     ok,
     failed,
     rateLimited,
+    ttfb50: percentile(sortedTtfb, 50),
     p50: percentile(sorted, 50),
     p95: percentile(sorted, 95),
     p99: percentile(sorted, 99),
@@ -334,7 +350,7 @@ async function loadTests(): Promise<LoadResult[]> {
     console.log(
       `${path.padEnd(30)} n=${result.requests} c=${result.concurrency} ` +
         `ok=${result.ok} fail=${result.failed} 429=${result.rateLimited} ` +
-        `p50=${result.p50}ms p95=${result.p95}ms p99=${result.p99}ms rps=${result.rps}`,
+        `ttfb50=${result.ttfb50}ms p50=${result.p50}ms p95=${result.p95}ms p99=${result.p99}ms rps=${result.rps}`,
     );
   }
   return out;
@@ -352,7 +368,13 @@ async function main() {
   const load = await loadTests();
 
   const failures = results.filter((r) => !r.pass);
-  console.log(`\n${results.length - failures.length}/${results.length} checks passed.`);
+  const skipped = results.filter((r) => r.skipped);
+  console.log(
+    `\n${results.length - failures.length - skipped.length}/${results.length} checks passed` +
+      (skipped.length ? `, ${skipped.length} skipped` : "") +
+      (failures.length ? `, ${failures.length} failed` : "") +
+      ".",
+  );
   if (failures.length) {
     console.log("\nFailures:");
     for (const f of failures) console.log(`  ${f.group} — ${f.name}: ${f.detail}`);
