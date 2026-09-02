@@ -86,7 +86,7 @@ export default async function StoresPage({ searchParams }: PageProps<"/[lang]/st
             name="q"
             defaultValue={query}
             placeholder={t.stores.searchPlaceholder}
-            className="min-h-12 w-full rounded-full border border-bark-200 bg-canvas-2 px-5 focus:border-leaf-500 focus:bg-paper focus:outline-none focus:ring-4 focus:ring-leaf-400/20"
+            className="focus-ring min-h-12 w-full rounded-full border border-bark-200 bg-canvas-2 px-5 focus:bg-paper"
           />
         </label>
         <Button type="submit" variant="dark">

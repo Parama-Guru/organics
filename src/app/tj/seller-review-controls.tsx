@@ -12,8 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 const field =
-  "mt-1.5 min-h-11 w-full rounded-xl border border-bark-200 bg-paper px-3.5 " +
-  "focus:border-marigold-400 focus:outline-none focus:ring-4 focus:ring-marigold-400/25";
+  "focus-ring mt-1.5 min-h-11 w-full rounded-xl border border-bark-200 bg-paper px-3.5";
 
 export function SellerFlagButton({
   kind,
@@ -76,7 +75,7 @@ export function SellerFlagButton({
               onChange={(event) => setReason(event.target.value)}
               rows={3}
               maxLength={500}
-              className="mt-2 w-full rounded-xl border border-bark-200 bg-paper px-3 py-2.5 focus:border-marigold-400 focus:outline-none focus:ring-4 focus:ring-marigold-400/25"
+              className="mt-2 w-full rounded-xl border border-bark-200 bg-paper px-3 py-2.5 "
             />
           </label>
           <div className="mt-3 flex flex-wrap gap-2">

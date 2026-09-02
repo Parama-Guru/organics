@@ -158,7 +158,7 @@ export default async function ProductsPage({ searchParams }: PageProps<"/[lang]/
           maxLength={100}
           placeholder={t.products.searchPlaceholder}
           aria-label={t.products.searchLabel}
-          className="min-h-12 w-full rounded-full border border-bark-200 bg-canvas-2 py-3 pl-12 pr-5 transition-[border-color,box-shadow,background-color] placeholder:text-bark-600/55 focus:border-leaf-500 focus:bg-paper focus:outline-none focus:ring-4 focus:ring-leaf-400/20"
+          className="focus-ring min-h-12 w-full rounded-full border border-bark-200 bg-canvas-2 py-3 pl-12 pr-5 placeholder:text-bark-600/55 focus:bg-paper"
         />
         <SearchIcon
           aria-hidden

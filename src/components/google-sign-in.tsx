@@ -40,7 +40,7 @@ export function GoogleSignIn({
             autoComplete="current-password"
             required
             maxLength={200}
-            className="min-h-11 rounded-xl border border-bark-200 bg-paper px-3 text-base shadow-inner outline-none focus:border-leaf-500 focus:ring-2 focus:ring-leaf-200"
+            className="focus-ring min-h-11 rounded-xl border border-bark-200 bg-paper px-3 text-base shadow-inner"
           />
         </label>
         <Button type="submit" variant="secondary" size="lg" className="w-full">

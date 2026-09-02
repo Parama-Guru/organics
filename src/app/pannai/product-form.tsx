@@ -26,8 +26,7 @@ type Existing = {
 };
 
 const control =
-  "mt-2 w-full rounded-2xl border border-bark-200 bg-paper px-4 py-3 " +
-  "focus:border-leaf-500 focus:outline-none focus:ring-4 focus:ring-leaf-400/20";
+  "focus-ring mt-2 w-full rounded-2xl border border-bark-200 bg-paper px-4 py-3";
 
 function Field({
   label,

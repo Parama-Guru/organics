@@ -116,7 +116,7 @@ export default async function HomePage({ searchParams }: PageProps<"/[lang]">) {
             action={localePath(locale, "/products")}
             method="get"
             role="search"
-            className="mt-8 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-full border border-bark-200 bg-paper p-1.5 shadow-soft focus-within:border-bark-900"
+            className="field-shell mt-8 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-full border border-bark-200 bg-paper p-1.5 shadow-soft"
           >
             <label className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-2 pl-3">
               <SearchIcon className="text-bark-600" />

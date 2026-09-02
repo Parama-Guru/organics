@@ -30,7 +30,7 @@ export function AdminSearch({
           name="q"
           defaultValue={query}
           placeholder={placeholder}
-          className="min-h-12 w-full rounded-full border border-bark-200 bg-paper px-5 focus:border-leaf-500 focus:outline-none focus:ring-4 focus:ring-leaf-400/20"
+          className="focus-ring min-h-12 w-full rounded-full border border-bark-200 bg-paper px-5"
         />
       </label>
       <button

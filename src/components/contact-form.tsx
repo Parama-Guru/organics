@@ -85,7 +85,7 @@ export function ContactForm({ initialRole }: { initialRole?: string }) {
           {roles.map((option) => (
             <label
               key={option.value}
-              className="flex cursor-pointer items-start gap-3 rounded-2xl border border-bark-200 bg-canvas p-4 transition-colors has-[:checked]:border-leaf-500 has-[:checked]:bg-leaf-50 has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-leaf-400/20"
+              className="field-choice flex cursor-pointer items-start gap-3 rounded-2xl border border-bark-200 bg-canvas p-4 transition-colors has-[:checked]:border-leaf-500 has-[:checked]:bg-leaf-50"
             >
               <input
                 type="radio"

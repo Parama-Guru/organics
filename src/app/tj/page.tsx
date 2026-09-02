@@ -296,7 +296,7 @@ export default async function AdminHome({ searchParams }: PageProps<"/tj">) {
             name="q"
             defaultValue={query}
             placeholder="Farm, person, email or phone"
-            className="min-h-11 w-full rounded-xl border border-bark-200 bg-paper px-3.5 focus:border-marigold-400 focus:outline-none focus:ring-4 focus:ring-marigold-400/25"
+            className="focus-ring min-h-11 w-full rounded-xl border border-bark-200 bg-paper px-3.5"
           />
         </label>
         {flaggedOnly ? <input type="hidden" name="flagged" value="1" /> : null}

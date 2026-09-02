@@ -92,7 +92,7 @@ export function DecisionButtons({
               rows={3}
               maxLength={500}
               required
-              className="mt-2 w-full rounded-xl border border-bark-200 bg-paper px-3 py-2.5 focus:border-marigold-400 focus:outline-none focus:ring-4 focus:ring-marigold-400/25"
+              className="focus-ring mt-2 w-full rounded-xl border border-bark-200 bg-paper px-3 py-2.5"
             />
           </label>
           <p className="mt-2 text-sm text-bark-600">{CONFIRM[reasonFor]}</p>

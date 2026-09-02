@@ -1,11 +1,8 @@
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 
 const control =
-  "mt-2 w-full rounded-2xl border border-bark-200 bg-canvas px-4 py-3 " +
-  "transition-[border-color,box-shadow,background-color] duration-200 " +
-  "placeholder:text-bark-600/55 hover:border-bark-200 " +
-  "focus:border-leaf-500 focus:bg-paper focus:outline-none " +
-  "focus:ring-4 focus:ring-leaf-400/20";
+  "focus-ring mt-2 w-full rounded-2xl border border-bark-200 bg-canvas px-4 py-3 " +
+  "placeholder:text-bark-600/55 focus:bg-paper";
 
 // Colour alone would not carry for a colour-blind user; aria-invalid on the
 // control is what the message is actually tied to.

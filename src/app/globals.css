@@ -97,11 +97,22 @@
   --animate-sheen: sheen 1.6s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 }
 
+/* Focus is a single decision, not a per-component one. Deep enough against the
+   ivory canvas to be obvious, and it carries the verification green rather than
+   the action orange so a focused field never reads as a button. */
+:root {
+  --focus-ring-color: #0a5c36;
+  --focus-ring-halo: rgb(16 112 74 / 0.22);
+}
+
 /* The one selector the whole dark theme hangs off. An inline script in the
    document head sets it from the stored choice, falling back to the operating
    system, before first paint — so there is no flash and no second stylesheet. */
 [data-theme="dark"] {
   color-scheme: dark;
+
+  --focus-ring-color: #6fd3a1;
+  --focus-ring-halo: rgb(111 211 161 / 0.26);
 
   --color-leaf-50: #0a2a1c;
   --color-leaf-100: #0e3a26;
@@ -297,10 +308,72 @@ html:lang(ta) .editorial-heading {
   line-height: 1.25;
 }
 
-/* Keep keyboard focus clearly visible for accessibility. */
-:focus-visible {
-  outline: 2px solid var(--color-leaf-600);
-  outline-offset: 2px;
+/* One focus treatment for the whole application.
+ *
+ * Inside @layer base on purpose. Written unlayered it outranked every Tailwind
+ * utility, including `outline-none`, so a bare input inside a pill-shaped shell
+ * drew a square ring straight across the pill.
+ *
+ * An outline follows the element's own border-radius, so anything that carries
+ * its own shape is correct here. Controls whose shape lives on a parent use
+ * .field-shell below instead.
+ */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--focus-ring-color);
+    outline-offset: 2px;
+  }
+}
+
+/* A shell that owns the focus indicator for the control inside it: the ring
+   follows the shell's radius, and the inner control draws nothing. */
+.field-shell {
+  transition:
+    border-color 200ms var(--ease-tint),
+    box-shadow 200ms var(--ease-tint);
+}
+
+.field-shell:focus-within {
+  border-color: var(--focus-ring-color);
+  box-shadow: 0 0 0 4px var(--focus-ring-halo);
+}
+
+.field-shell:focus-within :is(input, select, textarea):focus-visible {
+  outline: none;
+}
+
+/* The same ring for a control that does carry its own shape. Replaces four
+   different hand-written combinations of border, outline and ring. */
+@utility focus-ring {
+  transition:
+    border-color 200ms var(--ease-tint),
+    box-shadow 200ms var(--ease-tint),
+    background-color 200ms var(--ease-tint);
+}
+
+.focus-ring:focus-visible {
+  outline: none;
+  border-color: var(--focus-ring-color);
+  box-shadow: 0 0 0 4px var(--focus-ring-halo);
+}
+
+/* Pointer focus on a text control should look the same as keyboard focus: the
+   caret is already there, so hiding the ring only makes the field look dead. */
+.focus-ring:is(input, select, textarea):focus {
+  outline: none;
+  border-color: var(--focus-ring-color);
+  box-shadow: 0 0 0 4px var(--focus-ring-halo);
+}
+
+/* A wrapper that rings when the control it contains is focused, for checkboxes
+   and radios that are too small to carry a visible ring themselves. */
+.field-choice:has(:focus-visible) {
+  border-color: var(--focus-ring-color);
+  box-shadow: 0 0 0 4px var(--focus-ring-halo);
+}
+
+.field-choice:has(:focus-visible) :is(input):focus-visible {
+  outline: none;
 }
 
 /* Card hover, written out rather than composed from `hover:-translate-y-*` and

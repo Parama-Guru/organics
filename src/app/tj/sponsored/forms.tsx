@@ -41,7 +41,7 @@ export function PromotionForm({
           name="targetType"
           value={targetType}
           onChange={(event) => setTargetType(event.target.value as "FARMER" | "STORE")}
-          className="min-h-11 rounded-xl border border-bark-200 bg-paper px-3"
+          className="focus-ring min-h-11 rounded-xl border border-bark-200 bg-paper px-3"
         >
           <option value="FARMER">Farmer</option>
           <option value="STORE">Organic store</option>
@@ -49,26 +49,26 @@ export function PromotionForm({
       </label>
       <label className="grid gap-1 text-sm font-medium">
         Verified target
-        <select name="targetId" required className="min-h-11 rounded-xl border border-bark-200 bg-paper px-3">
+        <select name="targetId" required className="focus-ring min-h-11 rounded-xl border border-bark-200 bg-paper px-3">
           <option value="">Choose…</option>
           {options.map((option) => <option key={option.id} value={option.id}>{option.name}</option>)}
         </select>
       </label>
       <label className="grid gap-1 text-sm font-medium">
         Starts
-        <input name="startsAt" type="date" required defaultValue={defaultStart} className="min-h-11 rounded-xl border border-bark-200 px-3" />
+        <input name="startsAt" type="date" required defaultValue={defaultStart} className="focus-ring min-h-11 rounded-xl border border-bark-200 bg-paper px-3" />
       </label>
       <label className="grid gap-1 text-sm font-medium">
         Ends
-        <input name="endsAt" type="date" required defaultValue={defaultEnd} className="min-h-11 rounded-xl border border-bark-200 px-3" />
+        <input name="endsAt" type="date" required defaultValue={defaultEnd} className="focus-ring min-h-11 rounded-xl border border-bark-200 bg-paper px-3" />
       </label>
       <label className="grid gap-1 text-sm font-medium">
         Priority (0–100)
-        <input name="priority" type="number" min="0" max="100" defaultValue="10" required className="min-h-11 rounded-xl border border-bark-200 px-3" />
+        <input name="priority" type="number" min="0" max="100" defaultValue="10" required className="focus-ring min-h-11 rounded-xl border border-bark-200 bg-paper px-3" />
       </label>
       <label className="grid gap-1 text-sm font-medium">
         Internal note
-        <input name="note" maxLength={500} className="min-h-11 rounded-xl border border-bark-200 px-3" />
+        <input name="note" maxLength={500} className="focus-ring min-h-11 rounded-xl border border-bark-200 bg-paper px-3" />
       </label>
       <div className="flex items-center gap-3 sm:col-span-2">
         <Button type="submit" disabled={pending}>{pending ? "Creating…" : "Create promotion"}</Button>
