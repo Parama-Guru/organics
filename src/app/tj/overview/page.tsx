@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { isSignedIn } from "@/lib/admin-auth";
 import { farmerPortalEnabled } from "@/lib/farmer-auth";
 import { prisma } from "@/lib/prisma";
+import { storePortalEnabled } from "@/lib/store-auth";
+import { publicStoreWhere } from "@/lib/stores";
 
 export const dynamic = "force-dynamic";
 
@@ -41,7 +43,7 @@ function Stat({
   );
 
   const className =
-    "block rounded-2xl border border-bark-200 bg-white p-5" +
+    `block rounded-[1.5rem] border bg-paper p-6 shadow-soft ${alarming && value > 0 ? "border-red-300" : "border-bark-200"}` +
     (href ? " transition-colors hover:border-bark-400" : "");
 
   return href ? (
@@ -61,7 +63,9 @@ export default async function AdminOverview() {
 
   const [
     pendingFarms,
+    flaggedFarms,
     liveFarms,
+    farmEvidenceHolds,
     suspendedFarms,
     liveListings,
     hiddenListings,
@@ -73,8 +77,12 @@ export default async function AdminOverview() {
     newBuyers,
     savedProducts,
     pendingStores,
+    flaggedStores,
     liveStores,
+    storeEvidenceHolds,
     closedStores,
+    storesWithLogin,
+    storesWithoutLogin,
     unansweredMessages,
     newMessages,
     unresolvedEnquiries,
@@ -83,19 +91,43 @@ export default async function AdminOverview() {
     recentEdits,
   ] = await Promise.all([
     prisma.farmer.count({ where: { status: "PENDING" } }),
-    prisma.farmer.count({ where: { status: "VERIFIED" } }),
+    prisma.farmer.count({ where: { flaggedAt: { not: null } } }),
+    prisma.farmer.count({ where: { status: "VERIFIED", certifiedUntil: { gte: now } } }),
+    prisma.farmer.count({
+      where: {
+        status: "VERIFIED",
+        OR: [{ certifiedUntil: null }, { certifiedUntil: { lt: now } }],
+      },
+    }),
     prisma.farmer.count({ where: { status: { in: ["SUSPENDED", "REJECTED"] } } }),
-    prisma.product.count({ where: { isActive: true, farmer: { status: "VERIFIED" }, stock: { gt: 0 } } }),
+    prisma.product.count({
+      where: {
+        isActive: true,
+        farmer: { status: "VERIFIED", certifiedUntil: { gte: now } },
+        stock: { gt: 0 },
+      },
+    }),
     prisma.product.count({ where: { isActive: false } }),
     // Switched on, but the farm behind them is not verified, so no shopper can
     // see them. The farm usually does not know.
     prisma.product.count({
-      where: { isActive: true, farmer: { status: { not: "VERIFIED" } } },
+      where: {
+        isActive: true,
+        OR: [
+          { farmer: { status: { not: "VERIFIED" } } },
+          { farmer: { certifiedUntil: null } },
+          { farmer: { certifiedUntil: { lt: now } } },
+        ],
+      },
     }),
     // Live, visible, and publicly marked "not available now" because nothing is
     // left to sell. The farm rarely realises.
     prisma.product.count({
-      where: { isActive: true, farmer: { status: "VERIFIED" }, stock: 0 },
+      where: {
+        isActive: true,
+        farmer: { status: "VERIFIED", certifiedUntil: { gte: now } },
+        stock: 0,
+      },
     }),
     prisma.farmer.count({ where: { status: "VERIFIED", passwordHash: { not: null } } }),
     prisma.farmer.count({ where: { status: "VERIFIED", passwordHash: null } }),
@@ -103,14 +135,28 @@ export default async function AdminOverview() {
     prisma.customer.count({ where: { createdAt: { gte: sevenDaysAgo } } }),
     prisma.savedProduct.count(),
     prisma.organicStore.count({ where: { status: "PENDING" } }),
-    prisma.organicStore.count({ where: { status: "VERIFIED" } }),
+    prisma.organicStore.count({ where: { flaggedAt: { not: null } } }),
+    prisma.organicStore.count({ where: publicStoreWhere(now) }),
+    prisma.organicStore.count({
+      where: { status: "VERIFIED", NOT: publicStoreWhere(now) },
+    }),
     prisma.organicStore.count({ where: { status: { in: ["SUSPENDED", "REJECTED"] } } }),
+    prisma.organicStore.count({ where: { status: "VERIFIED", passwordHash: { not: null } } }),
+    prisma.organicStore.count({ where: { status: "VERIFIED", passwordHash: null } }),
     prisma.contactMessage.count({ where: { handledAt: null } }),
     prisma.contactMessage.count({ where: { createdAt: { gte: sevenDaysAgo } } }),
     prisma.privateEnquiry.count({ where: { handledAt: null } }),
     prisma.privateEnquiry.count({ where: { handledAt: null, deliveryStatus: "FAILED" } }),
     prisma.sponsoredPlacement.count({
-      where: { status: "ACTIVE", startsAt: { lte: now }, endsAt: { gt: now } },
+      where: {
+        status: "ACTIVE",
+        startsAt: { lte: now },
+        endsAt: { gt: now },
+        OR: [
+          { farmer: { status: "VERIFIED", certifiedUntil: { gte: now } } },
+          { store: publicStoreWhere(now) },
+        ],
+      },
     }),
     prisma.product.findMany({
       where: { updatedAt: { gte: sevenDaysAgo } },
@@ -129,16 +175,25 @@ export default async function AdminOverview() {
 
   return (
     <>
-      <h1 className="font-display text-2xl text-bark-900">Overview</h1>
-      <p className="mt-1 text-sm text-bark-600">
+      <p className="section-kicker">Live operations</p>
+      <h1 className="mt-5 font-display text-5xl font-medium leading-none text-bark-900 sm:text-7xl">Command centre</h1>
+      <p className="mt-5 max-w-2xl text-lg leading-relaxed text-bark-600">
         Everything the site is showing right now, and anything that needs a decision.
       </p>
 
-      <section className="mt-6">
-        <h2 className="font-display text-lg text-bark-900">Farms</h2>
+      <section className="mt-12 border-t border-bark-200 pt-7">
+        <h2 className="font-display text-3xl text-bark-900">Farms</h2>
         <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Stat label="Waiting for review" value={pendingFarms} href="/tj" alarming />
+          <Stat label="Flagged for review" value={flaggedFarms} href="/tj?flagged=1" alarming />
           <Stat label="Live on the site" value={liveFarms} href="/tj" />
+          <Stat
+            label="Hidden by expired evidence"
+            value={farmEvidenceHolds}
+            href="/tj"
+            note="Verified status, but not publicly eligible"
+            alarming
+          />
           <Stat label="Rejected or suspended" value={suspendedFarms} href="/tj" />
           {farmerPortalEnabled() ? (
             <Stat
@@ -152,8 +207,8 @@ export default async function AdminOverview() {
         </div>
       </section>
 
-      <section className="mt-8">
-        <h2 className="font-display text-lg text-bark-900">Listings</h2>
+      <section className="mt-12 border-t border-bark-200 pt-7">
+        <h2 className="font-display text-3xl text-bark-900">Listings</h2>
         <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Stat label="Live" value={liveListings} href="/tj/listings?show=live" />
           <Stat label="Hidden by the farm" value={hiddenListings} href="/tj/listings?show=hidden" />
@@ -175,8 +230,8 @@ export default async function AdminOverview() {
         </div>
       </section>
 
-      <section className="mt-8">
-        <h2 className="font-display text-lg text-bark-900">Organic stores</h2>
+      <section className="mt-12 border-t border-bark-200 pt-7">
+        <h2 className="font-display text-3xl text-bark-900">Organic stores</h2>
         <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Stat
             label="Waiting for review"
@@ -184,21 +239,43 @@ export default async function AdminOverview() {
             href="/tj/stores?status=PENDING"
             alarming
           />
+          <Stat
+            label="Flagged for review"
+            value={flaggedStores}
+            href="/tj/stores?flagged=1"
+            alarming
+          />
           <Stat label="Live on the site" value={liveStores} href="/tj/stores?status=VERIFIED" />
+          <Stat
+            label="Hidden by evidence"
+            value={storeEvidenceHolds}
+            href="/tj/stores?status=VERIFIED"
+            note="Incomplete or expired verification"
+            alarming
+          />
           <Stat label="Rejected or suspended" value={closedStores} href="/tj/stores" />
+          {storePortalEnabled() ? (
+            <Stat
+              label="Stores that can sign in"
+              value={storesWithLogin}
+              note={`${storesWithoutLogin} verified without a login`}
+            />
+          ) : (
+            <Stat label="Store portal" value={0} note="Not configured on this server" />
+          )}
         </div>
       </section>
 
-      <section className="mt-8">
-        <h2 className="font-display text-lg text-bark-900">Buyers</h2>
+      <section className="mt-12 border-t border-bark-200 pt-7">
+        <h2 className="font-display text-3xl text-bark-900">Buyers</h2>
         <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Stat label="Accounts" value={buyers} href="/tj/buyers" />
           <Stat label="Joined this week" value={newBuyers} href="/tj/buyers" />
         </div>
       </section>
 
-      <section className="mt-8">
-        <h2 className="font-display text-lg text-bark-900">Messages</h2>
+      <section className="mt-12 border-t border-bark-200 pt-7">
+        <h2 className="font-display text-3xl text-bark-900">Messages</h2>
         <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Stat
             label="Unanswered"
@@ -211,8 +288,8 @@ export default async function AdminOverview() {
         </div>
       </section>
 
-      <section className="mt-8">
-        <h2 className="font-display text-lg text-bark-900">Buyer enquiries and promotion</h2>
+      <section className="mt-12 border-t border-bark-200 pt-7">
+        <h2 className="font-display text-3xl text-bark-900">Buyer enquiries and promotion</h2>
         <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Stat label="Unresolved enquiries" value={unresolvedEnquiries} href="/tj/enquiries" alarming />
           <Stat

@@ -17,7 +17,10 @@ export async function notifyApplication({
 }): Promise<void> {
   if (!mailConfigured()) return;
 
-  const admin = loadConfig().app.contact_email;
+  const app = loadConfig().app;
+  const admin = app.contact_email;
+  const reviewPath = kind === "farmer" ? "/tj" : "/tj/stores?status=PENDING";
+  const reviewUrl = `${app.site_url.replace(/\/$/, "")}${reviewPath}`;
   await Promise.allSettled([
     sendTextEmail({
       to: applicantEmail,
@@ -35,7 +38,7 @@ export async function notifyApplication({
           sendTextEmail({
             to: admin,
             subject: `New ${kind} application on Organics`,
-            text: `${entityName}\nApplicant: ${applicantName}\nEmail: ${applicantEmail}\n\nReview it in /tj.`,
+            text: `${entityName}\nApplicant: ${applicantName}\nEmail: ${applicantEmail}\n\nReview: ${reviewUrl}`,
           }),
         ]
       : []),
@@ -54,7 +57,8 @@ export async function notifyContactMessage({
   message: string;
 }): Promise<void> {
   if (!mailConfigured()) return;
-  const admin = loadConfig().app.contact_email;
+  const app = loadConfig().app;
+  const admin = app.contact_email;
   if (!admin) return;
 
   await Promise.allSettled([
@@ -66,7 +70,7 @@ export async function notifyContactMessage({
     sendTextEmail({
       to: admin,
       subject: "New contact message on Organics",
-      text: `From: ${name} <${email}>\nRole: ${role}\n\n${message}\n\nReview it in /tj/messages.`,
+      text: `From: ${name} <${email}>\nRole: ${role}\n\n${message}\n\nReview: ${app.site_url.replace(/\/$/, "")}/tj/messages`,
     }),
   ]);
 }

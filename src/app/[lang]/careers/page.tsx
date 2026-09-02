@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 import { loadConfig } from "@conf/config";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowRightIcon } from "@/components/ui/icons";
 import { localePath } from "@/lib/i18n/config";
@@ -23,43 +22,40 @@ export default async function CareersPage() {
   ];
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
-      <Badge tone="marigold">{t.careers.badge}</Badge>
-      <h1 className="mt-4 font-display text-4xl leading-tight sm:text-5xl">
+    <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-20">
+      <header className="border-b border-bark-200 pb-10 sm:pb-14">
+      <p className="section-kicker">{t.careers.badge}</p>
+      <h1 className="editorial-heading mt-6 max-w-5xl">
         {t.careers.titleLead}
         <span className="text-marigold-600">{t.careers.titleAccent}</span>
         {t.careers.titleTail}
       </h1>
-      <p className="mt-4 max-w-2xl text-lg leading-relaxed text-bark-600">{t.careers.intro}</p>
+      <p className="mt-6 max-w-2xl text-lg leading-relaxed text-bark-600 sm:text-xl">{t.careers.intro}</p>
+      </header>
 
-      <h2 className="mt-14 font-display text-2xl sm:text-3xl">
+      <h2 className="mt-14 font-display text-4xl font-medium sm:text-5xl">
         {t.careers.valuesHeading}
-        <span aria-hidden className="ml-3 inline-block h-1 w-12 rounded-full bg-leaf-500" />
       </h2>
-      <ul className="mt-6 grid gap-4 sm:grid-cols-3">
+      <ul className="mt-8 border-t border-bark-200">
         {values.map((value, index) => (
           <li
             key={value.title}
-            style={{ animationDelay: `${index * 80}ms` }}
-            className="glass animate-rise rounded-2xl p-5"
+            className="grid gap-4 border-b border-bark-200 py-7 sm:grid-cols-[4rem_0.8fr_1.2fr] sm:py-9"
           >
-            <h3 className="font-display text-lg">{value.title}</h3>
-            <p className="mt-1.5 text-sm leading-relaxed text-bark-600">{value.body}</p>
+            <span className="font-mono text-xs text-leaf-700">0{index + 1}</span>
+            <h3 className="font-display text-2xl">{value.title}</h3>
+            <p className="leading-relaxed text-bark-600">{value.body}</p>
           </li>
         ))}
       </ul>
 
-      <h2 className="mt-14 font-display text-2xl sm:text-3xl">
-        {t.careers.rolesHeading}
-        <span aria-hidden className="ml-3 inline-block h-1 w-12 rounded-full bg-marigold-500" />
-      </h2>
-
       {/* No invented vacancies. When there is a real one it goes here; until
           then the page says so plainly rather than listing a role nobody is
           hiring for. */}
-      <div className="glass mt-6 rounded-3xl p-8">
-        <p className="font-display text-xl">{t.careers.noRoles}</p>
-        <p className="mt-2 max-w-2xl leading-relaxed text-bark-600">{t.careers.noRolesBody}</p>
+      <div className="mt-16 rounded-[2rem] bg-bark-900 p-7 text-white sm:p-10 lg:p-14">
+        <p className="section-kicker !text-marigold-400 before:!bg-marigold-400">{t.careers.rolesHeading}</p>
+        <p className="mt-5 font-display text-4xl text-white sm:text-5xl">{t.careers.noRoles}</p>
+        <p className="mt-4 max-w-2xl text-lg leading-relaxed text-bark-100">{t.careers.noRolesBody}</p>
       </div>
 
       <aside className="mt-10 rounded-3xl border border-leaf-200 bg-leaf-50/70 p-8">

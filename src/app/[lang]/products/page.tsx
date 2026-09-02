@@ -79,27 +79,32 @@ export default async function ProductsPage({ searchParams }: PageProps<"/[lang]/
   const isFiltered = Boolean(filters.category || filters.region || filters.search);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-      <h1 className="font-display text-3xl sm:text-4xl">
-        {activeCategory
-          ? localised(locale, activeCategory.name, activeCategory.nameTa)
-          : t.products.allProduce}
-        {activeRegion ? (
-          <span className="text-bark-600">
-            {" "}
-            {format(t.products.fromRegion, { region: regionLabel(locale, activeRegion) })}
-          </span>
-        ) : null}
-      </h1>
-      <p className="mt-2 text-bark-600">
-        {(activeCategory
-          ? localisedOrNull(locale, activeCategory.description, activeCategory.descriptionTa)
-          : null) ?? t.products.everythingNow}
-      </p>
+    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-20">
+      <header className="grid grid-cols-[minmax(0,1fr)] gap-6 border-b border-bark-200 pb-10 lg:grid-cols-[minmax(0,0.65fr)_minmax(0,1.35fr)] lg:items-end lg:pb-14">
+        <p className="section-kicker">{t.nav.shop}</p>
+        <div>
+          <h1 className="editorial-heading">
+            {activeCategory
+              ? localised(locale, activeCategory.name, activeCategory.nameTa)
+              : t.products.allProduce}
+            {activeRegion ? (
+              <span className="block text-bark-600">
+                {format(t.products.fromRegion, { region: regionLabel(locale, activeRegion) })}
+              </span>
+            ) : null}
+          </h1>
+          <p className="mt-6 max-w-2xl text-lg leading-relaxed text-bark-600">
+            {(activeCategory
+              ? localisedOrNull(locale, activeCategory.description, activeCategory.descriptionTa)
+              : null) ?? t.products.everythingNow}
+          </p>
+        </div>
+      </header>
 
       <PhoneSoonNotice className="mt-4" />
 
-      <form method="get" className="relative mt-6 flex max-w-md gap-2" role="search">
+      <section aria-label={t.products.searchLabel} className="editorial-panel mt-8 rounded-[2rem] p-4 sm:p-7">
+      <form method="get" className="relative flex max-w-2xl gap-2" role="search">
         {filters.category ? (
           <input type="hidden" name="category" value={filters.category} />
         ) : null}
@@ -111,7 +116,7 @@ export default async function ProductsPage({ searchParams }: PageProps<"/[lang]/
           maxLength={100}
           placeholder={t.products.searchPlaceholder}
           aria-label={t.products.searchLabel}
-          className="w-full rounded-full border border-bark-200 bg-white/80 py-2.5 pl-11 pr-5 shadow-soft backdrop-blur transition-[border-color,box-shadow] placeholder:text-bark-600/55 focus:border-marigold-400 focus:outline-none focus:ring-4 focus:ring-marigold-400/25"
+          className="min-h-12 w-full rounded-full border border-bark-200 bg-bark-50 py-3 pl-12 pr-5 transition-[border-color,box-shadow,background-color] placeholder:text-bark-600/55 focus:border-leaf-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-leaf-400/20"
         />
         <SearchIcon
           aria-hidden
@@ -129,7 +134,7 @@ export default async function ProductsPage({ searchParams }: PageProps<"/[lang]/
           cost a second line instead of hiding most of themselves. */}
       <nav
         aria-label={t.products.category}
-        className="mt-6 flex flex-wrap items-center gap-2"
+        className="mt-7 flex flex-wrap items-center gap-2"
       >
         <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-bark-600">
           {t.products.category}
@@ -205,13 +210,14 @@ export default async function ProductsPage({ searchParams }: PageProps<"/[lang]/
           ))}
         </nav>
       </div>
+      </section>
 
       {/* One card per row below 400px. At two-up a card is ~166px wide, which
           is narrower than a single Tamil word: "கருவேப்பிலைக்" broke across two
           lines mid-word. Tamil takes no hyphen, so a mid-word break just reads
           as a mistake. */}
       {products.length === 0 ? (
-        <div className="glass mt-4 animate-rise rounded-3xl p-12 text-center">
+        <div className="editorial-panel mt-8 animate-rise rounded-[2rem] p-12 text-center">
           <BasketIcon className="mx-auto text-5xl text-bark-200" />
           <p className="mt-4 font-display text-xl">{t.products.noMatch}</p>
           <p className="mx-auto mt-1 max-w-sm text-sm text-bark-600">{t.products.noMatchHint}</p>
@@ -222,7 +228,7 @@ export default async function ProductsPage({ searchParams }: PageProps<"/[lang]/
           ) : null}
         </div>
       ) : (
-        <div className="mt-4 grid grid-cols-1 gap-3 min-[400px]:grid-cols-2 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
+        <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {products.map((product, index) => (
             <div
               key={product.id}

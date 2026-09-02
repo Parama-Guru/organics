@@ -30,12 +30,12 @@ export function AdminSearch({
           name="q"
           defaultValue={query}
           placeholder={placeholder}
-          className="min-h-11 w-full rounded-xl border border-bark-200 bg-white px-3.5 focus:border-marigold-400 focus:outline-none focus:ring-4 focus:ring-marigold-400/25"
+          className="min-h-12 w-full rounded-full border border-bark-200 bg-paper px-5 focus:border-leaf-500 focus:outline-none focus:ring-4 focus:ring-leaf-400/20"
         />
       </label>
       <button
         type="submit"
-        className="min-h-11 rounded-xl bg-bark-900 px-5 text-sm font-medium text-white"
+        className="min-h-12 rounded-full bg-bark-900 px-6 text-sm font-medium text-white"
       >
         Search
       </button>
@@ -46,7 +46,7 @@ export function AdminSearch({
               ? `${action}?${new URLSearchParams(hidden).toString()}`
               : action
           }
-          className="inline-flex min-h-11 items-center rounded-xl border border-bark-200 bg-white px-5 text-sm text-bark-600"
+          className="inline-flex min-h-12 items-center rounded-full border border-bark-200 bg-paper px-5 text-sm text-bark-600"
         >
           Clear
         </Link>

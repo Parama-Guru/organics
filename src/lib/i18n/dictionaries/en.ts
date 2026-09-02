@@ -336,6 +336,12 @@ export const en = {
     fromThisFarm: "From this farm",
     nothingListed: "Nothing listed from this farm right now.",
     viewFarm: "View farm",
+    searchPlaceholder: "Farm name or district",
+    search: "Search",
+    clear: "Clear",
+    countOne: "1 farm listed",
+    countMany: "{count} farms listed",
+    emptySearch: "No farm matches that search.",
   },
 
   sell: {
@@ -451,6 +457,7 @@ export const en = {
     certifierHint: "NPOP, PGS-India or equivalent, if you hold one",
     certifierPlaceholder: "NPOP / India Organic — Indocert",
     certificateNo: "Certificate number",
+    certifiedUntil: "Certificate valid until",
     certificate: "Certificate link",
     optional: "optional",
     about: "About the shop",
@@ -567,6 +574,8 @@ export const en = {
     followHeading: "Follow",
     howWeCheck: "How we check farms",
     privacy: "Privacy",
+    terms: "Terms",
+    refunds: "Cancellation and refunds",
     contact: "Contact us",
     careers: "Careers",
     joinAsStore: "Register your store",
@@ -616,7 +625,7 @@ export const en = {
       "An account unlocks checked seller details, a private shortlist and private enquiries. We store your email, name, a one-way password hash, and the phone number and district if you choose to give them. Google sign-in stores Google's durable account identifier and the verified email seen when you link it, but no Google token or profile photo. An enquiry sends your name and message to the selected seller; your email becomes Reply-To only when you explicitly choose that option after verification. We store the enquiry for delivery and staff follow-up. Signing in sets an HTTP-only session cookie, which is revoked when you sign out.",
     s2Title: "Farmers and organic stores who apply",
     s2Body:
-      "We collect the farm or store name, contact name, phone, email, district, description and verification evidence to review and publish the directory entry. Farms provide organic certificate details and the last four Aadhaar digits; stores provide FSSAI and optional organic certificate details. We never ask for the full Aadhaar number. Contact email and government-ID digits stay private. Public name, district, description, address where relevant, and current verification details are shown; phone numbers are shown only after consent and launch approval.",
+      "We collect the farm or store name, contact name, phone, email, district, description and verification evidence to review and publish the directory entry. Farms provide organic certificate details and the last four Aadhaar digits; stores provide FSSAI and optional organic certificate details. We never ask for the full Aadhaar number. Contact email and government-ID digits stay private. Public name, district, description, address where relevant, and current verification details are shown; phone numbers are shown only after consent and launch approval. Invited sellers receive a private portal session so they can manage permitted public details and read enquiries; legal identity and verification evidence remain staff-controlled.",
     s3Title: "How long we keep it",
     s3Body:
       "Applications and contact messages are kept while review or support work requires them; you can ask us to correct or delete them. A seller listing is removed on a verified request. Deleting a buyer account removes its profile, sign-in identities, shortlist, enquiries and subscription record. If payments are enabled, limited provider event IDs, amounts, currency and processing results may remain without the customer relation for fraud, accounting and webhook audit; no card details are stored.",
@@ -624,6 +633,62 @@ export const en = {
     s4Body:
       "You can delete your account from its security page after password or linked-Google confirmation. Deletion is permanent. If a recurring payment exists, Organics first stops future charges; the account is kept and an error is shown if that cannot be confirmed.",
     s4Contact: "To ask for a copy of what we hold, or to have something corrected, write to us:",
+    s5Title: "Sponsored placement measurement",
+    s5Body:
+      "Sponsored cards are labelled. We count only daily totals for card views and clicks. We do not store a visitor ID, customer ID, IP address or user-agent with those totals, and no third-party advertising script is used. Short-lived rate limits reduce artificial traffic and are not retained as advertising profiles.",
+  },
+
+  legal: {
+    termsHeading: "Terms of use",
+    termsIntro:
+      "These terms explain what Organics provides, what it does not provide, and the rules for using the directory.",
+    effective: "Effective 2 September 2026.",
+    termsDirectoryTitle: "A directory, not the seller",
+    termsDirectoryBody:
+      "Organics helps buyers discover checked farms and organic stores. We do not own stock, set seller prices, accept produce orders, arrange delivery or hold money for a buyer-to-seller purchase. Any produce purchase is agreed directly with that seller.",
+    termsAccountTitle: "Accounts and access",
+    termsAccountBody:
+      "Give accurate details, keep sign-in methods private, and tell us promptly if an account may be compromised. Do not share paid access, scrape protected seller details, probe another account or use the service unlawfully. We may suspend access needed to protect people, sellers or the service.",
+    termsSellerTitle: "Farmer and store responsibilities",
+    termsSellerBody:
+      "A seller must provide truthful contact, licence, certification, address and listing information; have authority to publish it; and report material changes or expiry promptly. Organics may request evidence, flag a record for review, hide listings, suspend an entry or remove claims that cannot be supported.",
+    termsEnquiryTitle: "Enquiries and acceptable use",
+    termsEnquiryBody:
+      "Use private enquiries for genuine produce or store questions. Do not send spam, threats, discriminatory content, illegal requests or personal data that is not needed. A buyer's email may be used as Reply-To only when that verified buyer explicitly chooses to share it.",
+    termsSponsoredTitle: "Sponsored placement",
+    termsSponsoredBody:
+      "A paid placement is always labelled Sponsored / விளம்பரம். Sponsorship changes ordering only; it does not replace verification, guarantee quality or prevent suspension. Measurement is aggregate and first-party as described in the privacy notice.",
+    termsBillingTitle: "Trials, subscriptions and renewal",
+    termsBillingBody:
+      "When billing is enabled, one 14-day trial is available per eligible account. Monthly and annual prices, the exact access end or renewal date, and cancellation state are shown before payment. Authorization is hosted by Razorpay; Organics stores no card details. A subscription renews until cancelled. Cancellation stops a future renewal and access continues through the paid-through date. The cancellation and refund policy forms part of these terms.",
+    termsBillingDisabled:
+      "Billing is currently disabled. Signed-in access is free and no trial or recurring charge is started.",
+    termsLimitsTitle: "Verification and service limits",
+    termsLimitsBody:
+      "Verification checks records at a point in time; it is not a guarantee of every harvest, item, statement, availability or transaction. Buyers should confirm current certification, price, quantity, collection and quality with the seller. Nothing here removes rights or responsibilities that cannot lawfully be excluded.",
+    termsChangesTitle: "Changes and contact",
+    termsChangesBody:
+      "We may update these terms when the service changes and will publish the effective date here. Material changes to paid access apply prospectively. Contact Organics through the contact page for questions, corrections or complaints.",
+    refundsHeading: "Cancellation and refunds",
+    refundsIntro:
+      "This policy separates purchases made directly from sellers from payments for Organics directory access.",
+    refundsSellerTitle: "Produce and store purchases",
+    refundsSellerBody:
+      "Organics does not take payment for produce, reserve stock or fulfil an order. Cancellation, replacement and refund requests for a purchase made with a farmer or store must be taken to that seller. Organics can review or suspend a misleading directory entry, but cannot reverse money it never received.",
+    refundsAccessTitle: "Organics access charges",
+    refundsAccessBody:
+      "Billing is currently disabled, so Organics is not charging for access. When enabled, checkout remains provider-hosted and a captured, verified charge is required before paid access is granted.",
+    refundsCancelTitle: "Stop renewal",
+    refundsCancelBody:
+      "Cancel renewal from the access page before the next renewal date. Cancellation does not remove the period already paid for: access continues through the displayed paid-through date and no later renewal is requested.",
+    refundsEligibleTitle: "When an access refund is available",
+    refundsEligibleBody:
+      "Contact us for a duplicate, incorrect or unrecognized charge as soon as possible. A first paid Organics access charge may be refunded when requested within 7 calendar days; a renewal may be refunded when requested within 3 calendar days. We also refund where applicable law requires it. Abuse, chargeback fraud and periods already refunded are excluded.",
+    refundsProcessTitle: "How to request and receive it",
+    refundsProcessBody:
+      "Use the account email and include the payment reference; never send card or bank credentials. We may verify account control and usage needed to investigate the request. Approved refunds go back through the original provider. Bank or card processing time is outside Organics and commonly takes 5–10 working days.",
+    signupAgreement: "By creating an account, you agree to the terms of use.",
+    billingAgreement: "By continuing to payment, you agree to the terms and cancellation/refund policy.",
   },
 
   // Keyed by the `code` the API returns, so wording is never sent over the wire.

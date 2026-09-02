@@ -32,27 +32,36 @@ export function StoreDecisionButtons({
 }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [reasonFor, setReasonFor] = useState<Status | null>(null);
+  const [reason, setReason] = useState("");
 
-  function run(status: Status) {
+  function run(status: Status, note?: string) {
     const question = CONFIRM[status];
-    if (question && !window.confirm(question)) return;
+    if (question && !REASON[status] && !window.confirm(question)) return;
 
     const form = new FormData();
     form.set("storeId", storeId);
-
-    const asks = REASON[status];
-    if (asks) {
-      const note = window.prompt(asks);
-      // Cancel means cancel the decision, not "decide without a reason".
-      if (note === null) return;
-      if (note.trim()) form.set("note", note.trim().slice(0, 500));
-    }
+    if (note) form.set("note", note.trim().slice(0, 500));
 
     startTransition(async () => {
       setError(null);
       const result: ActionResult = await decideStore(status, form);
       if (!result.ok) setError(result.message);
+      else {
+        setReasonFor(null);
+        setReason("");
+      }
     });
+  }
+
+  function choose(status: Status) {
+    if (REASON[status]) {
+      setError(null);
+      setReason("");
+      setReasonFor(status);
+      return;
+    }
+    run(status);
   }
 
   return (
@@ -64,7 +73,7 @@ export function StoreDecisionButtons({
           size="sm"
           variant={action.variant ?? "secondary"}
           disabled={pending}
-          onClick={() => run(action.status)}
+          onClick={() => choose(action.status)}
         >
           {action.label}
         </Button>
@@ -74,6 +83,42 @@ export function StoreDecisionButtons({
           {error}
         </p>
       ) : null}
+      {reasonFor ? (
+        <div className="w-full rounded-xl border border-marigold-200 bg-marigold-50 p-4">
+          <label className="block text-sm font-medium text-bark-900">
+            {REASON[reasonFor]}
+            <textarea
+              value={reason}
+              onChange={(event) => setReason(event.target.value)}
+              rows={3}
+              maxLength={500}
+              required
+              className="mt-2 w-full rounded-xl border border-bark-200 bg-white px-3 py-2.5 focus:border-marigold-400 focus:outline-none focus:ring-4 focus:ring-marigold-400/25"
+            />
+          </label>
+          <p className="mt-2 text-sm text-bark-600">{CONFIRM[reasonFor]}</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button
+              type="button"
+              size="sm"
+              variant="danger"
+              disabled={pending || reason.trim().length < 3}
+              onClick={() => run(reasonFor, reason)}
+            >
+              Confirm {reasonFor.toLowerCase()}
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              disabled={pending}
+              onClick={() => setReasonFor(null)}
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -81,15 +126,16 @@ export function StoreDecisionButtons({
 export function DeleteStoreButton({ storeId, storeName }: { storeId: string; storeName: string }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [mismatch, setMismatch] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+  const [typed, setTyped] = useState("");
 
   function run() {
-    if (
-      !window.confirm(
-        `Delete ${storeName}? This erases the shop and its application. It cannot be undone.`,
-      )
-    ) {
+    if (typed.trim().toLowerCase() !== storeName.trim().toLowerCase()) {
+      setMismatch(true);
       return;
     }
+    setMismatch(false);
 
     const form = new FormData();
     form.set("storeId", storeId);
@@ -98,14 +144,49 @@ export function DeleteStoreButton({ storeId, storeName }: { storeId: string; sto
       setError(null);
       const result: ActionResult = await deleteStore(form);
       if (!result.ok) setError(result.message);
+      else setConfirming(false);
     });
   }
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <Button type="button" size="sm" variant="danger" disabled={pending} onClick={run}>
+      <Button
+        type="button"
+        size="sm"
+        variant="danger"
+        disabled={pending}
+        onClick={() => setConfirming(true)}
+      >
         Delete
       </Button>
+      {confirming ? (
+        <div className="w-full rounded-xl border border-red-200 bg-red-50 p-4">
+          <label className="block text-sm font-medium text-bark-900">
+            Type <strong>{storeName}</strong> to permanently delete this shop and its application.
+            <input
+              value={typed}
+              onChange={(event) => {
+                setTyped(event.target.value);
+                setMismatch(false);
+              }}
+              className="mt-2 min-h-11 w-full rounded-xl border border-bark-200 bg-white px-3"
+            />
+          </label>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button type="button" size="sm" variant="danger" disabled={pending || !typed} onClick={run}>
+              Delete permanently
+            </Button>
+            <Button type="button" size="sm" variant="secondary" disabled={pending} onClick={() => setConfirming(false)}>
+              Cancel
+            </Button>
+          </div>
+        </div>
+      ) : null}
+      {mismatch ? (
+        <p role="alert" className="text-sm text-red-700">
+          That did not match the shop name. Nothing was deleted.
+        </p>
+      ) : null}
       {error ? (
         <p role="alert" className="text-sm text-red-700">
           {error}

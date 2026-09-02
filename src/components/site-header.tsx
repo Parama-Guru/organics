@@ -37,38 +37,35 @@ export function SiteHeader({
         key={item.path}
         href={href}
         aria-current={active ? "page" : undefined}
-        className={`relative flex min-h-11 shrink-0 items-center whitespace-nowrap rounded-lg px-2 font-medium transition-colors sm:px-3 ${
-          active ? "text-bark-900" : "text-bark-600 hover:text-bark-900"
+        className={`relative flex min-h-11 shrink-0 items-center whitespace-nowrap rounded-full px-3 font-medium transition-colors sm:px-4 ${
+          active
+            ? "bg-bark-900 text-white shadow-soft"
+            : "text-bark-600 hover:bg-bark-100 hover:text-bark-900"
         }`}
       >
         {item.label}
-        <span
-          aria-hidden
-          className={`absolute inset-x-2 bottom-0 h-0.5 rounded-full bg-marigold-500 transition-transform duration-300 sm:inset-x-3 sm:-bottom-0.5 ${
-            active ? "scale-x-100" : "scale-x-0"
-          }`}
-        />
       </Link>
     );
   });
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/60 bg-white/65 backdrop-blur-xl backdrop-saturate-150">
+    <header className="sticky top-0 z-40 px-3 pt-3 sm:px-5 sm:pt-4">
       {/* Below `sm` the nav gets its own row. Sharing one row with the brand, the
           language toggle and the sell button left it 12px wide, so on Tamil the
           Shop and Farmers links were completely unreachable. */}
-      <div className="mx-auto flex h-16 max-w-6xl items-center gap-2 px-4 sm:gap-4 sm:px-6">
+      <div className="mx-auto flex min-h-16 max-w-6xl items-center gap-2 rounded-[1.35rem] border border-white/80 bg-paper/88 px-3 shadow-glass backdrop-blur-xl backdrop-saturate-150 sm:gap-4 sm:px-4">
         <Link
           href={localePath(locale, "/")}
-          className="group flex min-h-11 shrink-0 items-center gap-2 font-semibold tracking-tight"
+          aria-label="Organics"
+          className="group flex min-h-11 shrink-0 items-center gap-2.5 rounded-2xl pr-2 font-semibold tracking-tight"
         >
           <span
             aria-hidden
-            className="flex h-9 w-9 items-center justify-center rounded-xl bg-leaf-100 text-xl text-leaf-700 shadow-soft transition-transform duration-300 group-hover:-rotate-6"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-bark-900 text-xl text-marigold-400 shadow-soft transition-transform duration-300 group-hover:-rotate-6"
           >
             <LeafMark />
           </span>
-          <span className="font-display text-lg text-bark-900 sm:text-xl">Organics</span>
+          <span className="hidden font-display text-xl font-medium text-bark-900 xs:inline sm:text-2xl">Organics</span>
         </Link>
 
         <nav
@@ -91,7 +88,7 @@ export function SiteHeader({
               // sell button beside it, the Tamil wording pushed the row 23px past
               // the viewport. aria-label keeps the icon-only link named.
               aria-label={signedIn ? t.nav.account : t.nav.signIn}
-              className="flex h-11 min-h-11 min-w-11 shrink-0 items-center justifyk-0 items-center justify-center gap-1.5 rounded-lg px-2.5 text-sm font-medium text-bark-600 transition-colors hover:text-bark-900"
+              className="flex h-11 min-h-11 min-w-11 shrink-0 items-center justify-center gap-1.5 rounded-full px-2.5 text-sm font-medium text-bark-600 transition-colors hover:bg-bark-100 hover:text-bark-900"
             >
               <UserIcon />
               <span className="hidden sm:inline">
@@ -114,7 +111,7 @@ export function SiteHeader({
 
       <nav
         aria-label="Main"
-        className="no-scrollbar mx-auto flex max-w-6xl items-center gap-1 overflow-x-auto border-t border-white/60 px-4 text-sm sm:hidden"
+        className="no-scrollbar mx-auto mt-2 flex max-w-6xl items-center gap-1 overflow-x-auto rounded-2xl border border-white/80 bg-paper/90 px-2 text-sm shadow-soft backdrop-blur-xl sm:hidden"
       >
         {navLinks}
       </nav>

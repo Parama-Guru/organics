@@ -45,6 +45,13 @@ export default async function SignUpPage({ searchParams }: PageProps<"/[lang]/ac
           >
             {t.footer.privacy}
           </Link>
+          {" "}{t.legal.signupAgreement}{" "}
+          <Link
+            href={localePath(locale, "/terms")}
+            className="font-semibold text-brand underline underline-offset-4"
+          >
+            {t.footer.terms}
+          </Link>
         </p>
     </AccountShell>
   );

@@ -5,6 +5,8 @@ import { dialNumber, showFarmerPhone } from "@/components/farmer-contact";
 import { GlassPanel } from "@/components/glass-panel";
 import { PhoneSoonNotice } from "@/components/phone-soon-notice";
 import { SaveButton } from "@/components/save-button";
+import { SponsoredCardTracker } from "@/components/sponsored-card-tracker";
+import { Reveal } from "@/components/reveal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowRightIcon, CheckIcon, MapPinIcon, PhoneIcon } from "@/components/ui/icons";
@@ -24,13 +26,15 @@ export async function generateMetadata() {
   return { title: t.meta.farmersTitle, description: t.meta.farmersDescription };
 }
 
-export default async function FarmersPage() {
-  const [baseFarmers, locale, t, sponsorships] = await Promise.all([
-    getVerifiedFarmers(),
+export default async function FarmersPage({ searchParams }: PageProps<"/[lang]/farmers">) {
+  const [params, locale, t, sponsorships] = await Promise.all([
+    searchParams,
     getLocale(),
     getDictionary(),
     activeSponsoredIds(),
   ]);
+  const query = (Array.isArray(params.q) ? params.q[0] : params.q)?.trim() ?? "";
+  const baseFarmers = await getVerifiedFarmers(query);
   const farmers = sponsoredFirst(baseFarmers, sponsorships.farmer);
 
   const customer = accountsEnabled() ? await getCustomer() : null;
@@ -51,83 +55,111 @@ export default async function FarmersPage() {
     : new Set<string>();
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-      <div className="grid gap-8 lg:grid-cols-[1fr_20rem] lg:items-end">
+    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-20">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-8 border-b border-bark-200 pb-10 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] lg:items-end lg:pb-14">
         <div>
-          <Badge tone="leaf">
-            <CheckIcon /> {t.farmers.everyFarmVerified}
-          </Badge>
-          <h1 className="mt-4 font-display text-4xl sm:text-5xl">{t.farmers.title}</h1>
-          <p className="mt-3 max-w-2xl text-lg leading-relaxed text-ink">
+          <p className="section-kicker"><CheckIcon /> {t.farmers.everyFarmVerified}</p>
+          <h1 className="editorial-heading mt-6">{t.farmers.title}</h1>
+          <p className="mt-6 max-w-2xl text-lg leading-relaxed text-bark-600 sm:text-xl">
             {phoneShown ? t.farmers.intro : t.farmers.introSoon}
           </p>
           <PhoneSoonNotice className="mt-4 max-w-2xl" />
-          <dl className="mt-6 flex flex-wrap gap-x-10 gap-y-4">
+          <dl className="mt-8 grid max-w-2xl grid-cols-3 border-y border-bark-200 py-5">
             <div>
               <dt className="text-sm text-bark-600">{t.home.statFarms}</dt>
-              <dd className="font-display text-3xl text-brand">{farmers.length}</dd>
+              <dd className="mt-1 font-display text-4xl text-brand">{farmers.length}</dd>
             </div>
-            <div>
+            <div className="border-l border-bark-200 pl-4 sm:pl-8">
               <dt className="text-sm text-bark-600">{t.home.statChecked}</dt>
-              <dd className="font-display text-3xl text-brand">100%</dd>
+              <dd className="mt-1 font-display text-4xl text-brand">100%</dd>
             </div>
-            <div>
+            <div className="border-l border-bark-200 pl-4 sm:pl-8">
               <dt className="text-sm text-bark-600">{t.home.statCommission}</dt>
-              <dd className="font-display text-3xl text-brand">0%</dd>
+              <dd className="mt-1 font-display text-4xl text-brand">0%</dd>
             </div>
           </dl>
         </div>
 
-        <aside className="rounded-3xl border border-leaf-200 bg-leaf-50/70 p-6">
-          <h2 className="font-display text-lg">{t.trust.heading}</h2>
+        <aside className="rounded-[2rem] bg-bark-900 p-7 text-white sm:p-9">
+          <p className="font-mono text-xs uppercase tracking-[0.12em] text-marigold-400">Verification dossier</p>
+          <h2 className="mt-4 font-display text-3xl text-white">{t.trust.heading}</h2>
           <ul className="mt-3 space-y-2.5 text-sm leading-relaxed text-ink">
             {[t.trust.check1Title, t.trust.check2Title, t.trust.check3Title].map((line) => (
-              <li key={line} className="flex gap-2.5">
-                <CheckIcon className="mt-1 shrink-0 text-leaf-700" />
+              <li key={line} className="flex gap-2.5 border-t border-white/15 py-3 text-bark-100">
+                <CheckIcon className="mt-1 shrink-0 text-marigold-400" />
                 {line}
               </li>
             ))}
           </ul>
           <Link
             href={localePath(locale, "/how-we-check")}
-            className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand underline-offset-4 hover:underline"
+            className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-white underline-offset-4 hover:underline"
           >
             {t.footer.howWeCheck} <ArrowRightIcon />
           </Link>
         </aside>
       </div>
 
+      <form method="get" className="editorial-panel mt-8 flex flex-wrap gap-2 rounded-[1.75rem] p-4 sm:p-5">
+        <label className="min-w-0 flex-1 sm:max-w-md">
+          <span className="sr-only">{t.farmers.searchPlaceholder}</span>
+          <input
+            type="search"
+            name="q"
+            defaultValue={query}
+            placeholder={t.farmers.searchPlaceholder}
+            className="min-h-12 w-full rounded-full border border-bark-200 bg-bark-50 px-5 focus:border-leaf-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-leaf-400/20"
+          />
+        </label>
+        <Button type="submit" variant="dark">
+          {t.farmers.search}
+        </Button>
+        {query ? (
+          <Button as={Link} href={localePath(locale, "/farmers")} variant="secondary">
+            {t.farmers.clear}
+          </Button>
+        ) : null}
+      </form>
+
+      <p className="mt-4 text-sm text-bark-600">
+        {farmers.length === 1
+          ? t.farmers.countOne
+          : format(t.farmers.countMany, { count: farmers.length })}
+      </p>
+
       {farmers.length === 0 ? (
         <div className="glass mt-10 rounded-3xl p-12 text-center">
-          <p className="font-display text-xl">{t.farmers.none}</p>
+          <p className="font-display text-xl">
+            {query ? t.farmers.emptySearch : t.farmers.none}
+          </p>
           <Button as={Link} href={localePath(locale, "/sell")} className="mt-5">
             {t.farmers.applyToList}
           </Button>
         </div>
       ) : (
-        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-10 grid gap-6 lg:grid-cols-2">
           {farmers.map((farmer, index) => (
-            <GlassPanel
-              key={farmer.id}
-              as="article"
-              surface="card"
-              style={{ animationDelay: `${index * 60}ms` }}
-              className="card-lift group flex animate-rise flex-col overflow-hidden rounded-3xl"
-            >
-              <div className="relative h-36 overflow-hidden bg-leaf-50">
-                {farmer.photoUrl ? (
-                  <Image
-                    src={farmer.photoUrl}
-                    alt=""
-                    fill
-                    priority={index < 3}
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    className="object-cover"
-                  />
-                ) : null}
-              </div>
+            <Reveal key={farmer.id} delay={Math.min(index, 8) * 60}>
+              <SponsoredCardTracker placementId={farmer.sponsorshipId}>
+                <GlassPanel
+                  as="article"
+                  surface="card"
+                  className="card-lift group grid h-full overflow-hidden rounded-[2rem] sm:grid-cols-[0.85fr_1.15fr]"
+                >
+                <div className="relative min-h-56 overflow-hidden bg-leaf-50 sm:min-h-full">
+                  {farmer.photoUrl ? (
+                    <Image
+                      src={farmer.photoUrl}
+                      alt=""
+                      fill
+                      priority={index < 3}
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      className="object-cover"
+                    />
+                  ) : null}
+                </div>
 
-              <div className="flex flex-1 flex-col p-6">
+                <div className="flex flex-1 flex-col p-6 sm:p-8">
                 {/* Below the picture rather than over it: these sat on the farm
                     scene and covered the part that says what the farm grows. */}
                 <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
@@ -140,7 +172,7 @@ export default async function FarmersPage() {
                   </span>
                 </p>
 
-                <h2 className="mt-2 font-display text-xl break-words">
+                <h2 className="mt-4 font-display text-3xl font-medium leading-none break-words">
                   <Link
                     href={localePath(locale, `/farmers/${farmer.slug}`)}
                     className="decoration-marigold-500 decoration-2 underline-offset-4 hover:underline"
@@ -199,8 +231,10 @@ export default async function FarmersPage() {
                     </Button>
                   ) : null}
                 </div>
-              </div>
-            </GlassPanel>
+                </div>
+                </GlassPanel>
+              </SponsoredCardTracker>
+            </Reveal>
           ))}
         </div>
       )}

@@ -9,12 +9,13 @@ const MESSAGES: Record<string, string> = {
   rateLimited: "மிகப் பல முயற்சிகள். சுமார் 15 நிமிடங்கள் கழித்து முயலுங்கள்.",
   unavailable: "இந்தப் பகுதி இப்போது கிடைக்கவில்லை.",
   inviteExpired: "இந்த அழைப்பு காலாவதியாகிவிட்டது. நிர்வாகியிடம் புதிதாகக் கேளுங்கள்.",
+  emailPassword: "மின்னஞ்சலில் உள்ள பெயரை கடவுச்சொல்லில் பயன்படுத்த வேண்டாம்.",
   invalid: "குறியிட்ட பகுதியைச் சரிபார்க்கவும்.",
 };
 
 const field =
-  "mt-1.5 w-full rounded-xl border border-bark-200 bg-white px-3.5 py-2.5 " +
-  "focus:border-marigold-400 focus:outline-none focus:ring-4 focus:ring-marigold-400/25";
+  "mt-2 w-full rounded-2xl border border-bark-200 bg-paper px-4 py-3 " +
+  "focus:border-leaf-500 focus:outline-none focus:ring-4 focus:ring-leaf-400/20";
 
 export function FarmerSignInForm() {
   const [state, formAction, pending] = useActionState<PortalState, FormData>(

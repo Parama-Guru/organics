@@ -45,27 +45,44 @@ export async function SiteFooter() {
   ];
 
   const linkClass =
-    "inline-flex min-h-10 items-center text-bark-600 underline-offset-4 transition-colors hover:text-bark-900 hover:underline";
+    "inline-flex min-h-10 items-center text-bark-100/75 underline-offset-4 transition-colors hover:text-white hover:underline";
 
   return (
-    <footer className="mt-16 border-t border-white/60 bg-white/55 backdrop-blur-xl sm:mt-20">
-      {/* The link lists sit two-up on a phone. Stacked, with 44px tap targets on
-          every row, the footer alone ran to 742px. */}
-      <div className="mx-auto grid max-w-6xl grid-cols-2 gap-x-6 gap-y-8 px-4 py-10 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr_1fr] md:py-12">
-        <div className="col-span-2 md:col-span-1">
-          <p className="flex items-center gap-2 font-display text-lg">
-            <LeafMark className="text-2xl text-leaf-600" /> Organics
+    <footer className="mt-24 px-3 pb-3 sm:mt-36 sm:px-5 sm:pb-5">
+      <div className="mx-auto max-w-[90rem] overflow-hidden rounded-[2rem] bg-bark-900 px-5 pb-6 pt-9 text-white sm:rounded-[3rem] sm:px-10 sm:pb-8 sm:pt-12 lg:px-14">
+        <div className="border-b border-white/15 pb-9 sm:pb-12">
+          <p className="section-kicker !text-marigold-400 before:!bg-marigold-400">
+            {t.footer.trustHeading}
           </p>
-          <p className="mt-3 max-w-sm leading-relaxed text-bark-600">
+          <div className="mt-5 grid gap-6 lg:grid-cols-[1.5fr_0.7fr] lg:items-end">
+            <p className="font-display text-[clamp(3.8rem,11vw,10rem)] font-medium leading-[0.78] tracking-[-0.05em] text-white">
+              Organics
+            </p>
+            <p className="max-w-lg text-base leading-relaxed text-bark-100/80 lg:pb-1 lg:text-lg">
+              {showFarmerPhone() ? t.footer.blurb : t.footer.blurbSoon}
+            </p>
+          </div>
+        </div>
+
+        {/* The link lists sit two-up on a phone. */}
+        <div className="grid grid-cols-2 gap-x-6 gap-y-10 py-10 md:grid-cols-[1.4fr_1fr_1fr_1fr] md:py-12">
+          <div className="col-span-2 md:col-span-1">
+          <p className="flex items-center gap-2 font-display text-2xl text-white">
+            <span className="grid h-11 w-11 place-items-center rounded-full bg-marigold-500 text-bark-900">
+              <LeafMark className="text-2xl" />
+            </span>
+            Living farm atlas
+          </p>
+          <p className="mt-4 max-w-sm leading-relaxed text-bark-100/70">
             {showFarmerPhone() ? t.footer.blurb : t.footer.blurbSoon}
           </p>
           {app.contact_place ? (
-            <p className="mt-4 inline-flex items-center gap-1.5 text-sm text-bark-600">
+            <p className="mt-4 inline-flex items-center gap-1.5 text-sm text-bark-100/70">
               <MapPinIcon /> {app.contact_place}
             </p>
           ) : null}
 
-          <h2 className="mt-6 font-display text-sm font-semibold uppercase tracking-wide text-bark-900">
+          <h2 className="mt-7 font-mono text-xs font-medium uppercase tracking-[0.12em] text-marigold-400">
             {t.footer.followHeading}
           </h2>
           <ul className="mt-2 flex flex-wrap gap-1">
@@ -77,7 +94,7 @@ export async function SiteFooter() {
                     target="_blank"
                     rel="me noreferrer"
                     aria-label={name}
-                    className="inline-flex h-11 w-11 items-center justify-center rounded-xl text-xl text-bark-600 transition-colors hover:bg-white/70 hover:text-bark-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold-400"
+                    className="inline-flex h-11 w-11 items-center justify-center rounded-full text-xl text-bark-100/70 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold-400"
                   >
                     <Icon />
                   </a>
@@ -89,7 +106,7 @@ export async function SiteFooter() {
                     role="img"
                     aria-label={format(t.footer.soon, { network: name })}
                     title={format(t.footer.soon, { network: name })}
-                    className="inline-flex h-11 w-11 cursor-default items-center justify-center rounded-xl text-xl text-bark-600/35"
+                    className="inline-flex h-11 w-11 cursor-default items-center justify-center rounded-full text-xl text-bark-100/25"
                   >
                     <Icon />
                   </span>
@@ -100,7 +117,7 @@ export async function SiteFooter() {
         </div>
 
         <nav aria-label={t.footer.browseHeading}>
-          <h2 className="font-display text-sm font-semibold uppercase tracking-wide text-bark-900">
+          <h2 className="font-mono text-xs font-medium uppercase tracking-[0.12em] text-marigold-400">
             {t.footer.browseHeading}
           </h2>
           <ul className="mt-3 space-y-1 text-sm">
@@ -115,7 +132,7 @@ export async function SiteFooter() {
         </nav>
 
         <nav aria-label={t.footer.companyHeading}>
-          <h2 className="font-display text-sm font-semibold uppercase tracking-wide text-bark-900">
+          <h2 className="font-mono text-xs font-medium uppercase tracking-[0.12em] text-marigold-400">
             {t.footer.companyHeading}
           </h2>
           <ul className="mt-3 space-y-1 text-sm">
@@ -130,7 +147,7 @@ export async function SiteFooter() {
         </nav>
 
         <div>
-          <h2 className="font-display text-sm font-semibold uppercase tracking-wide text-bark-900">
+          <h2 className="font-mono text-xs font-medium uppercase tracking-[0.12em] text-marigold-400">
             {t.footer.trustHeading}
           </h2>
           <ul className="mt-3 space-y-1 text-sm">
@@ -142,6 +159,16 @@ export async function SiteFooter() {
             <li>
               <Link href={localePath(locale, "/privacy")} className={linkClass}>
                 {t.footer.privacy}
+              </Link>
+            </li>
+            <li>
+              <Link href={localePath(locale, "/terms")} className={linkClass}>
+                {t.footer.terms}
+              </Link>
+            </li>
+            <li>
+              <Link href={localePath(locale, "/refunds")} className={linkClass}>
+                {t.footer.refunds}
               </Link>
             </li>
             {app.contact_email ? (
@@ -160,10 +187,12 @@ export async function SiteFooter() {
             ) : null}
           </ul>
         </div>
-      </div>
+        </div>
 
-      <div className="mx-auto max-w-6xl border-t border-bark-200/50 px-4 py-5 text-sm text-bark-600 sm:px-6">
-        {format(t.footer.copyright, { year: new Date().getFullYear() })}
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/15 pt-6 text-sm text-bark-100/55">
+          <span>{format(t.footer.copyright, { year: new Date().getFullYear() })}</span>
+          <span className="font-mono text-xs uppercase tracking-[0.12em]">Tamil Nadu · India</span>
+        </div>
       </div>
     </footer>
   );

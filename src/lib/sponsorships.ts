@@ -1,6 +1,10 @@
 import "server-only";
 
 import { prisma } from "./prisma";
+import type { ActiveSponsorship } from "./sponsorship-ranking";
+import { publicStoreWhere } from "./stores";
+
+export { sponsoredFirst } from "./sponsorship-ranking";
 
 export async function updateSponsoredPlacementStatus(
   id: string,
@@ -25,44 +29,43 @@ export async function updateSponsoredPlacementStatus(
 export async function activeSponsoredIds() {
   const now = new Date();
   const placements = await prisma.sponsoredPlacement.findMany({
-    where: { status: "ACTIVE", startsAt: { lte: now }, endsAt: { gt: now } },
-    select: { farmerId: true, storeId: true, priority: true },
+    where: {
+      status: "ACTIVE",
+      startsAt: { lte: now },
+      endsAt: { gt: now },
+      OR: [
+        { farmer: { status: "VERIFIED", certifiedUntil: { gte: now } } },
+        { store: publicStoreWhere(now) },
+      ],
+    },
+    select: { id: true, farmerId: true, storeId: true, priority: true },
     orderBy: [{ priority: "desc" }, { startsAt: "asc" }],
   });
 
-  const farmer = new Map<string, number>();
-  const store = new Map<string, number>();
+  const farmer = new Map<string, ActiveSponsorship>();
+  const store = new Map<string, ActiveSponsorship>();
   for (const placement of placements) {
-    if (placement.farmerId) {
-      farmer.set(
-        placement.farmerId,
-        Math.max(farmer.get(placement.farmerId) ?? -1, placement.priority),
-      );
+    if (
+      placement.farmerId &&
+      placement.priority > (farmer.get(placement.farmerId)?.priority ?? -1)
+    ) {
+      farmer.set(placement.farmerId, {
+        placementId: placement.id,
+        priority: placement.priority,
+      });
     }
-    if (placement.storeId) {
-      store.set(
-        placement.storeId,
-        Math.max(store.get(placement.storeId) ?? -1, placement.priority),
-      );
+    if (
+      placement.storeId &&
+      placement.priority > (store.get(placement.storeId)?.priority ?? -1)
+    ) {
+      store.set(placement.storeId, {
+        placementId: placement.id,
+        priority: placement.priority,
+      });
     }
   }
 
   return { farmer, store };
-}
-
-export function sponsoredFirst<T extends { id: string }>(
-  rows: T[],
-  priorities: Map<string, number>,
-): Array<T & { sponsored: boolean }> {
-  return rows
-    .map((row, position) => ({
-      row,
-      sponsored: priorities.has(row.id),
-      priority: priorities.get(row.id) ?? -1,
-      position,
-    }))
-    .sort((a, b) => b.priority - a.priority || a.position - b.position)
-    .map((entry) => ({ ...entry.row, sponsored: entry.sponsored }));
 }
 
 export function isFarmerSponsored(farmerId: string): Promise<boolean> {
@@ -89,7 +92,7 @@ export function isStoreSponsored(storeId: string): Promise<boolean> {
         status: "ACTIVE",
         startsAt: { lte: now },
         endsAt: { gt: now },
-        store: { status: "VERIFIED" },
+        store: publicStoreWhere(now),
       },
     })
     .then((count) => count > 0);

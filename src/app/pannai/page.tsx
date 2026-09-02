@@ -6,6 +6,7 @@ import { DeleteProductButton, ToggleActiveButton } from "@/app/pannai/row-button
 import { FARMER_PORTAL, getFarmer } from "@/lib/farmer-auth";
 import { listFarmerProducts } from "@/lib/farmer-products";
 import { formatMoney } from "@/lib/money";
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +20,11 @@ export default async function FarmerHomePage({ searchParams }: PageProps<"/panna
   const farmer = await getFarmer();
   if (!farmer) redirect(`${FARMER_PORTAL}/sign-in`);
 
-  const [params, products] = await Promise.all([searchParams, listFarmerProducts(farmer.id)]);
+  const [params, products, unreadEnquiries] = await Promise.all([
+    searchParams,
+    listFarmerProducts(farmer.id),
+    prisma.privateEnquiry.count({ where: { farmerId: farmer.id, sellerReadAt: null } }),
+  ]);
   const notice = Object.keys(NOTICES).find((key) => params[key] === "1");
 
   const live = products.filter((product) => product.isActive).length;
@@ -28,17 +33,26 @@ export default async function FarmerHomePage({ searchParams }: PageProps<"/panna
     <div>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-3xl text-bark-900">{farmer.farmName}</h1>
-          <p className="mt-1 text-bark-600">
-            {products.length} பொருட்கள் · {live} கடையில்
+          <p className="section-kicker">பண்ணை workspace</p>
+          <h1 className="mt-5 font-display text-5xl font-medium leading-none text-bark-900 sm:text-6xl">{farmer.farmName}</h1>
+          <p className="mt-4 text-bark-600">
+            {products.length} பொருட்கள் · {live} கடையில் · {unreadEnquiries} படிக்காத விசாரணைகள்
           </p>
         </div>
-        <Link
-          href={`${FARMER_PORTAL}/products/new`}
-          className="flex min-h-12 items-center rounded-full bg-marigold-500 px-6 font-medium text-bark-900"
-        >
-          புதிது சேர்க்க
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href={`${FARMER_PORTAL}/enquiries`}
+            className="flex min-h-12 items-center rounded-full border border-bark-200 bg-white px-5 font-medium text-bark-900"
+          >
+            விசாரணைகள்
+          </Link>
+          <Link
+            href={`${FARMER_PORTAL}/products/new`}
+            className="flex min-h-12 items-center rounded-full bg-marigold-500 px-6 font-medium text-bark-900"
+          >
+            புதிது சேர்க்க
+          </Link>
+        </div>
       </div>
 
       {notice ? (
@@ -51,18 +65,18 @@ export default async function FarmerHomePage({ searchParams }: PageProps<"/panna
       ) : null}
 
       {products.length === 0 ? (
-        <div className="mt-8 rounded-3xl border border-dashed border-bark-200 bg-white p-10 text-center">
+        <div className="editorial-panel mt-10 rounded-[2rem] border-dashed p-10 text-center">
           <p className="font-display text-xl text-bark-900">இன்னும் பொருள் எதுவும் இல்லை</p>
           <p className="mx-auto mt-2 max-w-sm text-bark-600">
             நீங்கள் விளைவிப்பதைச் சேர்த்தால் அது கடையில் தெரியும்.
           </p>
         </div>
       ) : (
-        <ul className="mt-6 grid gap-3">
+        <ul className="mt-10 grid gap-4">
           {products.map((product) => (
             <li
               key={product.id}
-              className="rounded-2xl border border-bark-200 bg-white p-4"
+              className="editorial-panel rounded-[1.5rem] p-5 sm:p-6"
             >
               {/* On a 360px phone the thumbnail, the name and the status badge
                   cannot share one line: the name column collapsed to 88px and

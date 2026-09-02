@@ -2,7 +2,14 @@
 
 import { useState, useTransition } from "react";
 
-import { cancelInvite, grantPortalAccess, revokePortalAccess } from "@/app/tj/actions";
+import {
+  cancelInvite,
+  cancelStorePortalInvite,
+  grantPortalAccess,
+  grantStorePortalAccess,
+  revokePortalAccess,
+  revokeStorePortalAccess,
+} from "@/app/tj/actions";
 import { Button } from "@/components/ui/button";
 
 type Access = {
@@ -29,7 +36,7 @@ function describe(access: Access): string {
 }
 
 /**
- * Grant, reset, cancel or revoke a farm's portal login.
+ * Grant, reset, cancel or revoke a seller's portal login.
  *
  * The link is rendered into the page rather than mailed, because SMTP is
  * optional on this deployment. It is shown once per click and never stored, so
@@ -37,11 +44,13 @@ function describe(access: Access): string {
  * is live at a time, and the state above the buttons says which.
  */
 export function PortalAccess({
-  farmerId,
+  sellerId,
+  kind = "farmer",
   access,
   disabled,
 }: {
-  farmerId: string;
+  sellerId: string;
+  kind?: "farmer" | "store";
   access: Access;
   disabled?: boolean;
 }) {
@@ -52,9 +61,11 @@ export function PortalAccess({
 
   function form(): FormData {
     const data = new FormData();
-    data.set("farmerId", farmerId);
+    data.set(kind === "store" ? "storeId" : "farmerId", sellerId);
     return data;
   }
+
+  const noun = kind === "store" ? "shop" : "farm";
 
   function invite() {
     // Named consequence: for a farm that is already signed up this button
@@ -70,7 +81,9 @@ export function PortalAccess({
     startTransition(async () => {
       setError(null);
       setCopied(false);
-      const result = await grantPortalAccess(form());
+      const result = kind === "store"
+        ? await grantStorePortalAccess(form())
+        : await grantPortalAccess(form());
       if (result.ok) setLink(result.url);
       else setError(result.message);
     });
@@ -80,7 +93,9 @@ export function PortalAccess({
     startTransition(async () => {
       setError(null);
       setLink(null);
-      const result = await cancelInvite(form());
+      const result = kind === "store"
+        ? await cancelStorePortalInvite(form())
+        : await cancelInvite(form());
       if (!result.ok) setError(result.message);
     });
   }
@@ -88,7 +103,7 @@ export function PortalAccess({
   function revoke() {
     if (
       !window.confirm(
-        "Remove this farm's login? Their listings stay up, but they are signed out at once.",
+        `Remove this ${noun}'s login? Its public entry stays up, but it is signed out at once.`,
       )
     ) {
       return;
@@ -96,7 +111,9 @@ export function PortalAccess({
     startTransition(async () => {
       setError(null);
       setLink(null);
-      const result = await revokePortalAccess(form());
+      const result = kind === "store"
+        ? await revokeStorePortalAccess(form())
+        : await revokePortalAccess(form());
       if (!result.ok) setError(result.message);
     });
   }
@@ -117,7 +134,9 @@ export function PortalAccess({
     <div className="mt-4 rounded-xl border border-bark-200 bg-bark-50 p-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-sm font-medium text-bark-900">Farmer portal</p>
+          <p className="text-sm font-medium text-bark-900">
+            {kind === "store" ? "Store portal" : "Farmer portal"}
+          </p>
           <p className="text-sm text-bark-600">{describe(access)}</p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -142,13 +161,15 @@ export function PortalAccess({
       </div>
 
       {disabled ? (
-        <p className="mt-2 text-sm text-bark-600">Approve this farm first, then invite it.</p>
+        <p className="mt-2 text-sm text-bark-600">
+          Approve this {noun} first, then invite it.
+        </p>
       ) : null}
 
       {link ? (
         <div className="mt-3">
           <p className="text-sm text-bark-600">
-            Send this to the farm. It works once, expires in 7 days, and replaces any link sent
+            Send this to the {noun}. It works once, expires in 7 days, and replaces any link sent
             before it.
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-2">

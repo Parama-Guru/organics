@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export function SignOutButton() {
+export function SignOutButton({ dark = false }: { dark?: boolean }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
 
@@ -17,7 +17,11 @@ export function SignOutButton() {
         router.replace("/tj/login");
         router.refresh();
       }}
-      className="rounded-full border border-bark-200 px-3 py-1.5 text-sm font-medium text-bark-600 transition-colors hover:text-bark-900 disabled:opacity-55"
+      className={`min-h-11 rounded-full border px-4 py-2 text-sm font-medium transition-colors disabled:opacity-55 ${
+        dark
+          ? "border-white/20 text-bark-100 hover:border-white/40 hover:bg-white/10 hover:text-white"
+          : "border-bark-200 text-bark-600 hover:text-bark-900"
+      }`}
     >
       {busy ? "Signing out…" : "Sign out"}
     </button>

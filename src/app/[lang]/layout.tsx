@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Fraunces, Manrope, Noto_Sans_Tamil, Noto_Serif_Tamil } from "next/font/google";
+import { DM_Mono, DM_Sans, Newsreader, Noto_Sans_Tamil, Noto_Serif_Tamil } from "next/font/google";
 
 import { loadConfig } from "@conf/config";
 import { SiteFooter } from "@/components/site-footer";
@@ -12,17 +12,23 @@ import { getDictionary, getLocale } from "@/lib/i18n/server";
 import "../globals.css";
 
 // next/font self-hosts these at build time, so the CSP stays `font-src 'self'`.
-const display = Fraunces({
+const display = Newsreader({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-display-family",
-  axes: ["SOFT", "WONK"],
 });
 
-const body = Manrope({
+const body = DM_Sans({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-body-family",
+});
+
+const mono = DM_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  display: "swap",
+  variable: "--font-mono-family",
 });
 
 // Fraunces and Manrope carry no Tamil glyphs. These sit next in the stack, so the
@@ -81,7 +87,7 @@ export default async function RootLayout({ children }: LayoutProps<"/[lang]">) {
   return (
     <html
       lang={HTML_LANG[locale]}
-      className={`${display.variable} ${body.variable} ${displayTamil.variable} ${bodyTamil.variable} h-full antialiased`}
+      className={`${display.variable} ${body.variable} ${mono.variable} ${displayTamil.variable} ${bodyTamil.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
         <I18nProvider locale={locale} t={t}>

@@ -1,9 +1,9 @@
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 import { loadConfig } from "@conf/config";
 import { cancelBillingAction, startBillingAction } from "@/app/[lang]/account/billing-actions";
 import { AccessCard } from "@/components/access-card";
-import { GlassPanel } from "@/components/glass-panel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CheckIcon, LeafMark } from "@/components/ui/icons";
@@ -75,11 +75,14 @@ export default async function PlansPage({ searchParams }: PageProps<"/[lang]/acc
   ];
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
-      <h1 className="font-display text-4xl sm:text-5xl">{t.account.plansTitle}</h1>
-      <p className="mt-3 max-w-2xl text-lg leading-relaxed text-bark-600">
+    <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-20">
+      <header className="border-b border-bark-200 pb-10 sm:pb-14">
+      <p className="section-kicker">Membership access</p>
+      <h1 className="editorial-heading mt-6">{t.account.plansTitle}</h1>
+      <p className="mt-6 max-w-2xl text-lg leading-relaxed text-bark-600 sm:text-xl">
         {t.account.plansIntro}
       </p>
+      </header>
 
       <div className="mt-8">
         <AccessCard access={access} locale={locale} t={t} compact />
@@ -105,21 +108,26 @@ export default async function PlansPage({ searchParams }: PageProps<"/[lang]/acc
 
       <div className="mt-8 grid gap-5 sm:grid-cols-2">
         {plans.map((plan, index) => (
-          <GlassPanel
+          <article
             key={plan.name}
-            as="article"
-            surface="card"
-            className={`flex flex-col rounded-3xl p-6 sm:p-8 ${index === 1 ? "ring-2 ring-leaf-300" : ""}`}
+            className={`flex flex-col overflow-hidden rounded-[2rem] border p-6 shadow-soft sm:p-9 ${
+              index === 1
+                ? "border-bark-900 bg-bark-900 text-white"
+                : "border-bark-200 bg-paper text-bark-900"
+            }`}
           >
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h2 className="font-display text-2xl">{plan.name}</h2>
-                <p className="mt-2 font-display text-3xl text-brand">{plan.price}</p>
+                <p className={`font-mono text-xs uppercase tracking-[0.12em] ${index === 1 ? "text-marigold-400" : "text-leaf-700"}`}>
+                  0{index + 1}
+                </p>
+                <h2 className={`mt-4 font-display text-4xl ${index === 1 ? "text-white" : "text-bark-900"}`}>{plan.name}</h2>
+                <p className={`mt-4 font-display text-4xl font-medium ${index === 1 ? "text-white" : "text-brand"}`}>{plan.price}</p>
               </div>
               {plan.saving ? <Badge tone="leaf">{plan.saving}</Badge> : null}
             </div>
-            <p className="mt-4 leading-relaxed text-bark-600">{plan.note}</p>
-            <ul className="mt-5 space-y-2 text-sm text-bark-600">
+            <p className={`mt-5 leading-relaxed ${index === 1 ? "text-bark-100" : "text-bark-600"}`}>{plan.note}</p>
+            <ul className={`mt-7 space-y-3 border-t pt-6 text-sm ${index === 1 ? "border-white/15 text-bark-100" : "border-bark-200 text-bark-600"}`}>
               <li className="flex gap-2">
                 <CheckIcon className="mt-1 text-leaf-700" /> {t.account.detailGateBody}
               </li>
@@ -127,12 +135,12 @@ export default async function PlansPage({ searchParams }: PageProps<"/[lang]/acc
                 <LeafMark className="mt-1 text-leaf-700" /> {t.account.signInIntro}
               </li>
             </ul>
-            <form action={startBillingAction.bind(null, locale, plan.code)} className="mt-7">
-              <Button type="submit" size="lg" disabled={!billingReady} className="w-full">
+            <form action={startBillingAction.bind(null, locale, plan.code)} className="mt-auto pt-8">
+              <Button type="submit" size="lg" variant={index === 1 ? "primary" : "dark"} disabled={!billingReady} className="w-full">
                 {billingReady ? t.account.continuePayment : t.account.billingSoon}
               </Button>
             </form>
-          </GlassPanel>
+          </article>
         ))}
       </div>
 
@@ -141,6 +149,17 @@ export default async function PlansPage({ searchParams }: PageProps<"/[lang]/acc
           {t.account.billingSoonBody}
         </p>
       ) : null}
+
+      <p className="mt-6 text-sm leading-relaxed text-bark-600">
+        {t.legal.billingAgreement}{" "}
+        <Link href={localePath(locale, "/terms")} className="font-semibold text-brand underline underline-offset-4">
+          {t.footer.terms}
+        </Link>
+        {" · "}
+        <Link href={localePath(locale, "/refunds")} className="font-semibold text-brand underline underline-offset-4">
+          {t.footer.refunds}
+        </Link>
+      </p>
 
       {subscription?.providerSubscriptionId &&
       !subscription.cancelAtPeriodEnd &&

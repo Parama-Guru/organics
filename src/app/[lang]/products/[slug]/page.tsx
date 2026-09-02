@@ -61,7 +61,7 @@ export default async function ProductPage({ params }: PageProps<"/[lang]/product
   const sellerUnlocked = Boolean(customer && access?.allowed);
 
   return (
-    <div className="mx-auto max-w-5xl px-4 pb-24 pt-8 sm:px-6 sm:pb-10">
+    <div className="mx-auto max-w-7xl px-4 pb-24 pt-8 sm:px-6 sm:pb-14 sm:pt-14">
       <Link
         href={localePath(locale, "/products")}
         className="-ml-2 inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-sm font-medium text-bark-600 transition-colors hover:text-bark-900"
@@ -69,11 +69,11 @@ export default async function ProductPage({ params }: PageProps<"/[lang]/product
         <ArrowLeftIcon /> {t.product.backToShop}
       </Link>
 
-      <div className="mt-6 grid animate-rise gap-8 md:grid-cols-2 md:gap-10">
+      <div className="mt-6 grid animate-rise gap-8 lg:grid-cols-[1.12fr_0.88fr] lg:items-start lg:gap-10">
         <ProductGallery images={product.images} name={name} emoji={product.emoji} />
 
-        <div className="flex flex-col">
-          <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-medium text-leaf-700">
+        <div className="editorial-panel flex flex-col rounded-[2rem] p-6 sm:p-9 lg:sticky lg:top-28">
+          <p className="section-kicker flex-wrap">
             <span>{localised(locale, product.category.name, product.category.nameTa)}</span>
             {product.region ? (
               <span className="inline-flex items-center gap-1 text-bark-600">
@@ -83,7 +83,7 @@ export default async function ProductPage({ params }: PageProps<"/[lang]/product
             ) : null}
           </p>
 
-          <h1 className="mt-2 font-display text-[2rem] leading-tight break-words sm:text-[2.75rem]">
+          <h1 className="mt-6 font-display text-[2.75rem] font-medium leading-[0.98] break-words sm:text-[4rem]">
             {name}
           </h1>
 
@@ -100,12 +100,12 @@ export default async function ProductPage({ params }: PageProps<"/[lang]/product
             </Link>
           </p>
 
-          <p className="mt-4 leading-relaxed text-ink">
+          <p className="mt-6 text-lg leading-relaxed text-bark-600">
             {localised(locale, product.description, product.descriptionTa)}
           </p>
 
-          <div className="mt-6 flex flex-wrap items-end gap-x-3 gap-y-1">
-            <p className="whitespace-nowrap font-display text-4xl leading-tight">
+          <div className="mt-8 flex flex-wrap items-end gap-x-3 gap-y-1 border-t border-bark-200 pt-6">
+            <p className="whitespace-nowrap font-display text-5xl font-medium leading-tight text-bark-900">
               {formatMoney(product.priceCents)}
             </p>
             <p className="pb-1 text-bark-600">
@@ -189,12 +189,12 @@ export default async function ProductPage({ params }: PageProps<"/[lang]/product
       )}
 
       {more.length > 0 ? (
-        <section className="mt-14">
-          <h2 className="font-display text-2xl sm:text-3xl">
+        <section className="mt-20 border-t border-bark-200 pt-10 sm:mt-28 sm:pt-14">
+          <p className="section-kicker">{product.farmer.farmName}</p>
+          <h2 className="mt-5 font-display text-4xl font-medium leading-none sm:text-5xl">
             {format(t.product.moreFromFarm, { farm: product.farmer.farmName })}
-            <span aria-hidden className="ml-3 inline-block h-1 w-12 rounded-full bg-leaf-500" />
           </h2>
-          <div className="mt-5 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
+          <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {more.map((item) => (
               <ProductCard key={item.id} product={item} />
             ))}

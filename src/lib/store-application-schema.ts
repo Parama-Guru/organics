@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { endOfIndiaDate } from "./india-date";
+
 // Shared by the form and the route so the two cannot drift.
 export const storeApplicationSchema = z.object({
   storeName: z.string().trim().min(2).max(120),
@@ -33,7 +35,31 @@ export const storeApplicationSchema = z.object({
   // as what it stocks is certified. Where one is given it is published.
   certifier: z.union([z.string().trim().min(3).max(160), z.literal("")]).optional(),
   certificateNo: z.union([z.string().trim().min(3).max(80), z.literal("")]).optional(),
+  certifiedUntil: z
+    .union([
+      z.iso.date().refine((value) => {
+        const expiry = endOfIndiaDate(value);
+        return Boolean(expiry && expiry > new Date());
+      }, "certificate expiry must be in the future"),
+      z.literal(""),
+    ])
+    .optional(),
   certificateUrl: z.union([z.url().max(500), z.literal("")]).optional(),
+}).superRefine((value, ctx) => {
+  const anyCertificate = Boolean(
+    value.certifier || value.certificateNo || value.certifiedUntil || value.certificateUrl,
+  );
+  if (!anyCertificate) return;
+
+  if (!value.certifier) {
+    ctx.addIssue({ code: "custom", path: ["certifier"], message: "required with a certificate" });
+  }
+  if (!value.certificateNo) {
+    ctx.addIssue({ code: "custom", path: ["certificateNo"], message: "required with a certificate" });
+  }
+  if (!value.certifiedUntil) {
+    ctx.addIssue({ code: "custom", path: ["certifiedUntil"], message: "required with a certificate" });
+  }
 });
 
 export type StoreApplicationInput = z.infer<typeof storeApplicationSchema>;

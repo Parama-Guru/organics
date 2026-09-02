@@ -13,6 +13,7 @@ export function hashPassphrase(passphrase: string): string {
 }
 
 export function verifyPassphrase(passphrase: string, stored: string): boolean {
+  if (!/^scrypt:[0-9a-f]{32}:[0-9a-f]{128}$/.test(stored)) return false;
   const [scheme, saltHex, keyHex] = stored.split(":");
   if (scheme !== "scrypt" || !saltHex || !keyHex) return false;
 

@@ -83,8 +83,10 @@ of a Tamil Nadu farm at first light — otherwise leave it.
 | --- | --- |
 | `public/farms/<slug>.svg` | `Farmer.photoUrl`, set in `prisma/seed.ts` |
 | `public/products/<slug>.svg` | `Product.imageUrl` and `ProductImage.url` |
+| `public/stores/<slug>.<ext>` | `OrganicStore.photoUrl`; rendered on store cards, detail pages, the staff review page and the store portal |
 | `public/hero.svg` | home page hero |
 
-Organic stores have no image field yet. If you start photographing shopfronts,
-add `photoUrl` to the store card select in `src/lib/stores.ts` — the column
-already exists on the model.
+For a shopfront, use a wide, current photograph that clearly shows the entrance
+and business name without exposing bystanders or vehicle numbers. Put it under
+`public/stores/`, then set `OrganicStore.photoUrl` to `/stores/<file>`. The code
+already renders it; do not use a stock photograph as verification evidence.

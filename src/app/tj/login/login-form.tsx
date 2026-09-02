@@ -49,6 +49,7 @@ export function AdminLoginForm() {
   return (
     <form
       onSubmit={handleSubmit}
+      method="post"
       className="mx-auto mt-16 max-w-sm rounded-3xl border border-bark-200 bg-white p-6 shadow-soft"
     >
       <h1 className="font-display text-2xl text-bark-900">Sign in</h1>

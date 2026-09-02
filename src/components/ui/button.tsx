@@ -8,7 +8,7 @@ const base =
   // secondary button is not 3px taller than the primary it sits beside.
   // `transition` (not `transition-[transform]`) because Tailwind v4 emits the
   // independent `translate` property, which a transform-only list never animates.
-  "inline-flex items-center justify-center gap-2 rounded-full border-2 border-transparent font-medium " +
+  "inline-flex items-center justify-center gap-2 rounded-full border-2 border-transparent font-semibold tracking-[-0.01em] " +
   "transition duration-200 " +
   "will-change-transform active:translate-y-0 active:scale-[0.98] " +
   "disabled:pointer-events-none disabled:opacity-55";
@@ -16,9 +16,9 @@ const base =
 const variants: Record<Variant, string> = {
   // Hover goes lighter, not darker: indigo-on-darker-marigold drops below AA.
   primary:
-    "bg-marigold-500 text-bark-900 shadow-soft hover:-translate-y-0.5 hover:bg-marigold-400 hover:shadow-lift",
+    "bg-marigold-500 text-ink shadow-soft hover:-translate-y-0.5 hover:bg-marigold-400 hover:shadow-lift",
   secondary:
-    "border-bark-900/15 bg-white/70 text-bark-900 backdrop-blur hover:-translate-y-0.5 hover:border-bark-900/30 hover:bg-white hover:shadow-soft",
+    "border-leaf-200 bg-leaf-50 text-bark-900 hover:-translate-y-0.5 hover:border-leaf-400 hover:bg-leaf-100 hover:shadow-soft",
   ghost: "text-bark-600 hover:bg-bark-900/5 hover:text-bark-900",
   dark: "bg-bark-900 text-bark-50 shadow-soft hover:-translate-y-0.5 hover:bg-bark-800 hover:shadow-lift",
   // For the indigo hero. `secondary` here would composite to pale grey under

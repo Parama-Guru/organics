@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 
 import { DecisionButtons } from "@/app/tj/decision-buttons";
 import { PortalAccess } from "@/app/tj/portal-access";
+import { SellerFlagButton } from "@/app/tj/seller-review-controls";
 import { Badge } from "@/components/ui/badge";
 import { isSignedIn } from "@/lib/admin-auth";
 import { farmerPortalEnabled, inviteStates } from "@/lib/farmer-auth";
@@ -40,6 +41,8 @@ function FarmerRow({
     certifiedUntil: Date | null;
     certificateUrl: string | null;
     status: keyof typeof TONE;
+    flaggedAt: Date | null;
+    flagReason: string | null;
     createdAt: Date;
     portalEnabledAt: Date | null;
     passwordHash: string | null;
@@ -51,15 +54,22 @@ function FarmerRow({
   portal: boolean;
 }) {
   return (
-    <li className="rounded-2xl border border-bark-200 bg-white p-5">
+    <li className="editorial-panel rounded-[1.5rem] p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="font-display text-lg text-bark-900">{farmer.farmName}</h3>
+          <h3 className="font-display text-lg text-bark-900">
+            <Link href={`/tj/farmers/${farmer.id}`} className="hover:underline">
+              {farmer.farmName}
+            </Link>
+          </h3>
           <p className="text-sm text-bark-600">
             {farmer.contactName} · {farmer.region.name}
           </p>
         </div>
-        <Badge tone={TONE[farmer.status]}>{farmer.status}</Badge>
+        <div className="flex flex-wrap gap-2">
+          {farmer.flaggedAt ? <Badge tone="marigold">REVIEW FLAG</Badge> : null}
+          <Badge tone={TONE[farmer.status]}>{farmer.status}</Badge>
+        </div>
       </div>
 
       <dl className="mt-4 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
@@ -124,6 +134,12 @@ function FarmerRow({
 
       {farmer.about ? <p className="mt-3 text-sm text-bark-600">{farmer.about}</p> : null}
 
+      {farmer.flagReason ? (
+        <p className="mt-3 rounded-xl border border-marigold-200 bg-marigold-50 p-3 text-sm text-bark-900">
+          Review flag: {farmer.flagReason}
+        </p>
+      ) : null}
+
       {farmer.status === "VERIFIED" ? (
         <p className="mt-3 text-sm text-bark-600">
           <Link href={`/tj/farmers/${farmer.id}`} className="font-medium hover:underline">
@@ -138,9 +154,17 @@ function FarmerRow({
 
       <DecisionButtons farmerId={farmer.id} actions={actions} />
 
+      <div className="mt-3">
+        <SellerFlagButton
+          kind="farmer"
+          sellerId={farmer.id}
+          flagged={farmer.flaggedAt !== null}
+        />
+      </div>
+
       {portal ? (
         <PortalAccess
-          farmerId={farmer.id}
+          sellerId={farmer.id}
           access={{
             invitedAt: farmer.portalEnabledAt,
             // The hash itself never reaches the client; only whether one exists.
@@ -160,6 +184,7 @@ export default async function AdminHome({ searchParams }: PageProps<"/tj">) {
 
   const params = await searchParams;
   const query = (Array.isArray(params.q) ? params.q[0] : params.q)?.trim() ?? "";
+  const flaggedOnly = (Array.isArray(params.flagged) ? params.flagged[0] : params.flagged) === "1";
 
   const select = {
     id: true,
@@ -176,6 +201,8 @@ export default async function AdminHome({ searchParams }: PageProps<"/tj">) {
     certifiedUntil: true,
     certificateUrl: true,
     status: true,
+    flaggedAt: true,
+    flagReason: true,
     createdAt: true,
     portalEnabledAt: true,
     passwordHash: true,
@@ -187,8 +214,10 @@ export default async function AdminHome({ searchParams }: PageProps<"/tj">) {
 
   // Search covers the columns an admin actually has to hand when a farm rings
   // up: the farm name, the person, the email and the phone.
-  const matching: Prisma.FarmerWhereInput = query
-    ? {
+  const matching: Prisma.FarmerWhereInput = {
+    ...(flaggedOnly ? { flaggedAt: { not: null } } : {}),
+    ...(query
+      ? {
         OR: [
           { farmName: { contains: query, mode: "insensitive" } },
           { contactName: { contains: query, mode: "insensitive" } },
@@ -196,7 +225,8 @@ export default async function AdminHome({ searchParams }: PageProps<"/tj">) {
           { phone: { contains: query } },
         ],
       }
-    : {};
+      : {}),
+  };
 
   const [pendingFarms, verified, closed, verifiedTotal, closedTotal] = await Promise.all([
     prisma.farmer.findMany({
@@ -242,8 +272,9 @@ export default async function AdminHome({ searchParams }: PageProps<"/tj">) {
     <>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl text-bark-900">Farm applications</h1>
-          <p className="mt-1 text-sm text-bark-600">
+          <p className="section-kicker">Seller verification</p>
+          <h1 className="mt-5 font-display text-5xl font-medium leading-none text-bark-900 sm:text-6xl">Farm reviews</h1>
+          <p className="mt-4 max-w-2xl text-base text-bark-600">
             Nothing a farm submits is public until it is approved here.
           </p>
         </div>
@@ -268,6 +299,7 @@ export default async function AdminHome({ searchParams }: PageProps<"/tj">) {
             className="min-h-11 w-full rounded-xl border border-bark-200 bg-white px-3.5 focus:border-marigold-400 focus:outline-none focus:ring-4 focus:ring-marigold-400/25"
           />
         </label>
+        {flaggedOnly ? <input type="hidden" name="flagged" value="1" /> : null}
         <button
           type="submit"
           className="min-h-11 rounded-xl bg-bark-900 px-5 text-sm font-medium text-white"
@@ -276,7 +308,7 @@ export default async function AdminHome({ searchParams }: PageProps<"/tj">) {
         </button>
         {query ? (
           <Link
-            href="/tj"
+            href={flaggedOnly ? "/tj?flagged=1" : "/tj"}
             className="inline-flex min-h-11 items-center rounded-xl border border-bark-200 bg-white px-5 text-sm text-bark-600"
           >
             Clear
@@ -284,8 +316,29 @@ export default async function AdminHome({ searchParams }: PageProps<"/tj">) {
         ) : null}
       </form>
 
+      <div className="mt-3 flex flex-wrap gap-2 text-sm">
+        <Link
+          href={query ? `/tj?q=${encodeURIComponent(query)}` : "/tj"}
+          aria-current={!flaggedOnly ? "page" : undefined}
+          className={`inline-flex min-h-10 items-center rounded-xl border px-4 ${
+            !flaggedOnly ? "border-bark-900 bg-bark-900 text-white" : "border-bark-200 bg-white text-bark-600"
+          }`}
+        >
+          All farms
+        </Link>
+        <Link
+          href={`/tj?flagged=1${query ? `&q=${encodeURIComponent(query)}` : ""}`}
+          aria-current={flaggedOnly ? "page" : undefined}
+          className={`inline-flex min-h-10 items-center rounded-xl border px-4 ${
+            flaggedOnly ? "border-marigold-500 bg-marigold-50 text-bark-900" : "border-bark-200 bg-white text-bark-600"
+          }`}
+        >
+          Flagged for review
+        </Link>
+      </div>
+
       <section className="mt-8">
-        <h2 className="font-display text-lg text-bark-900">
+        <h2 className="font-display text-3xl text-bark-900">
           Waiting for review <span className="text-bark-600">({pending.length})</span>
         </h2>
         {pending.length === 0 ? (
@@ -310,7 +363,7 @@ export default async function AdminHome({ searchParams }: PageProps<"/tj">) {
       </section>
 
       <section className="mt-10">
-        <h2 className="font-display text-lg text-bark-900">
+        <h2 className="font-display text-3xl text-bark-900">
           Live on the site <span className="text-bark-600">({verifiedTotal})</span>
         </h2>
         {live.length === 0 ? (
@@ -341,7 +394,7 @@ export default async function AdminHome({ searchParams }: PageProps<"/tj">) {
 
       {shut.length > 0 ? (
         <section className="mt-10">
-          <h2 className="font-display text-lg text-bark-900">
+          <h2 className="font-display text-3xl text-bark-900">
             Rejected and suspended <span className="text-bark-600">({closedTotal})</span>
           </h2>
           <ul className="mt-3 grid gap-3">

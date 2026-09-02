@@ -73,48 +73,49 @@ export default async function AccountPage({ searchParams }: PageProps<"/[lang]/a
   ]);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-      <GlassPanel as="section" className="rounded-3xl p-6 sm:p-8">
+    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-20">
+      <section className="overflow-hidden rounded-[2rem] bg-bark-900 p-6 text-white shadow-lift sm:rounded-[3rem] sm:p-10 lg:p-12">
+        <p className="section-kicker !text-marigold-400 before:!bg-marigold-400">Personal field notebook</p>
         <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="flex min-w-0 items-center gap-4">
+          <div className="mt-6 flex min-w-0 items-center gap-4">
             <span
               aria-hidden
-              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-leaf-100 text-2xl text-leaf-800"
+              className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-marigold-500 text-3xl text-bark-900"
             >
               <UserIcon />
             </span>
             <div className="min-w-0">
-              <h1 className="font-display text-3xl break-words sm:text-4xl">
+              <h1 className="font-display text-4xl font-medium leading-none break-words text-white sm:text-6xl">
                 {format(t.account.greeting, { name: customer.name })}
               </h1>
               {/* An email address is one long token; without break-all it pushes
                   the whole page sideways on a 320px screen. */}
-              <p className="mt-1 break-all text-bark-600">{customer.email}</p>
+              <p className="mt-2 break-all text-bark-100">{customer.email}</p>
             </div>
           </div>
           <SignOutButton />
         </div>
 
-        <dl className="mt-6 flex flex-wrap gap-x-10 gap-y-4 border-t border-bark-200/60 pt-5">
+        <dl className="mt-8 grid max-w-lg grid-cols-2 border-t border-white/15 pt-5">
           <div>
-            <dt className="text-sm text-bark-600">{t.account.savedProduce}</dt>
-            <dd className="font-display text-3xl text-brand">{products.length}</dd>
+            <dt className="text-sm text-bark-100">{t.account.savedProduce}</dt>
+            <dd className="mt-1 font-display text-4xl text-white">{products.length}</dd>
           </div>
-          <div>
-            <dt className="text-sm text-bark-600">{t.account.savedFarms}</dt>
-            <dd className="font-display text-3xl text-brand">{farmers.length}</dd>
+          <div className="border-l border-white/15 pl-6">
+            <dt className="text-sm text-bark-100">{t.account.savedFarms}</dt>
+            <dd className="mt-1 font-display text-4xl text-white">{farmers.length}</dd>
           </div>
         </dl>
-      </GlassPanel>
+      </section>
 
       <div className="mt-6">
         <AccessCard access={access} locale={locale} t={t} compact />
       </div>
 
-      <section className="mt-12">
-        <h2 className="font-display text-2xl sm:text-3xl">
+      <section className="mt-16 sm:mt-24">
+        <p className="section-kicker">Collection 01</p>
+        <h2 className="mt-5 font-display text-4xl font-medium sm:text-5xl">
           {t.account.savedProduce}
-          <span aria-hidden className="ml-3 inline-block h-1 w-12 rounded-full bg-leaf-500" />
         </h2>
 
         {products.length === 0 ? (
@@ -126,7 +127,7 @@ export default async function AccountPage({ searchParams }: PageProps<"/[lang]/a
             </Button>
           </GlassPanel>
         ) : (
-          <div className="mt-5 grid grid-cols-1 gap-3 min-[400px]:grid-cols-2 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
+          <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {products.map((product) => (
               <div key={product.id} className="flex flex-col gap-2">
                 <ProductCard product={product} />
@@ -137,10 +138,10 @@ export default async function AccountPage({ searchParams }: PageProps<"/[lang]/a
         )}
       </section>
 
-      <section className="mt-12">
-        <h2 className="font-display text-2xl sm:text-3xl">
+      <section className="mt-16 sm:mt-24">
+        <p className="section-kicker">Collection 02</p>
+        <h2 className="mt-5 font-display text-4xl font-medium sm:text-5xl">
           {t.account.savedFarms}
-          <span aria-hidden className="ml-3 inline-block h-1 w-12 rounded-full bg-marigold-500" />
         </h2>
 
         {farmers.length === 0 ? (
@@ -198,8 +199,9 @@ export default async function AccountPage({ searchParams }: PageProps<"/[lang]/a
         )}
       </section>
 
-      <GlassPanel as="section" className="mt-12 rounded-3xl p-6 sm:p-8">
-        <h2 className="font-display text-2xl sm:text-3xl">{t.account.profile}</h2>
+      <GlassPanel as="section" className="mt-20 rounded-[2rem] p-6 sm:p-10">
+        <p className="section-kicker">Notebook settings</p>
+        <h2 className="mt-5 font-display text-4xl font-medium sm:text-5xl">{t.account.profile}</h2>
         <p className="mt-2 text-ink">{t.account.profileIntro}</p>
         <div className="mt-5 rounded-2xl border border-bark-200 bg-white/70 p-4">
           <p className={customer.emailVerifiedAt ? "font-medium text-leaf-700" : "font-medium text-bark-900"}>
@@ -225,7 +227,7 @@ export default async function AccountPage({ searchParams }: PageProps<"/[lang]/a
         </p>
       </GlassPanel>
 
-      <GlassPanel as="section" className="mt-8 rounded-3xl p-6 sm:p-8">
+      <GlassPanel as="section" className="mt-8 rounded-[2rem] p-6 sm:p-10">
         <h2 className="font-display text-2xl sm:text-3xl">{t.account.security}</h2>
         {params.passwordAdded === "1" ? (
           <p role="status" className="mt-3 text-sm font-medium text-leaf-700">
@@ -239,7 +241,7 @@ export default async function AccountPage({ searchParams }: PageProps<"/[lang]/a
         />
       </GlassPanel>
 
-      <GlassPanel as="section" className="mt-8 rounded-3xl p-6 sm:p-8">
+      <GlassPanel as="section" className="mt-8 rounded-[2rem] p-6 sm:p-10">
         <h2 className="font-display text-2xl sm:text-3xl">{t.account.googleSecurity}</h2>
         {oauthMessage ? (
           <p role="alert" className="mt-3 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">

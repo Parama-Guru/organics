@@ -83,6 +83,11 @@ model Farmer {
   certifiedUntil DateTime?
   verifiedAt     DateTime?
   reviewNote     String?
+  // A flag is an internal triage marker, separate from publication status. It
+  // lets staff investigate a live or closed record without changing what the
+  // public can see until a decision is made.
+  flaggedAt      DateTime?
+  flagReason     String?
   // Portal access is granted separately from verification: an admin can approve
   // a farm's listings without handing over a login, and can revoke the login
   // without unpublishing the farm.
@@ -94,6 +99,7 @@ model Farmer {
   savedBy        SavedFarmer[]
   enquiries      PrivateEnquiry[]
   sponsoredPlacements SponsoredPlacement[]
+  reviewEvents   SellerReviewEvent[]
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
@@ -192,8 +198,17 @@ model OrganicStore {
   certifiedUntil DateTime?
   verifiedAt     DateTime?
   reviewNote     String?
+  flaggedAt      DateTime?
+  flagReason     String?
+  // Store owners receive a one-time invite and choose their own password. The
+  // version is carried by every session so revocation takes effect at once.
+  passwordHash   String?
+  portalSessionVersion Int     @default(0)
+  portalEnabledAt DateTime?
+  lastSignInAt   DateTime?
   enquiries      PrivateEnquiry[]
   sponsoredPlacements SponsoredPlacement[]
+  reviewEvents   SellerReviewEvent[]
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
 
@@ -303,12 +318,53 @@ model SponsoredPlacement {
   priority     Int             @default(0)
   status       PromotionStatus @default(ACTIVE)
   internalNote String?
+  metrics      SponsoredMetric[]
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
 
   @@index([status, startsAt, endsAt])
   @@index([farmerId])
   @@index([storeId])
+}
+
+// Daily totals only: no visitor id, account id, IP address or user-agent is
+// retained. Rate limiting happens in the short-lived session store before an
+// aggregate is incremented.
+model SponsoredMetric {
+  placementId String
+  placement   SponsoredPlacement @relation(fields: [placementId], references: [id], onDelete: Cascade)
+  date        DateTime
+  impressions Int                @default(0)
+  clicks      Int                @default(0)
+
+  @@id([placementId, date])
+  @@index([date])
+}
+
+enum SellerReviewAction {
+  STATUS_CHANGED
+  FLAGGED
+  FLAG_CLEARED
+  EVIDENCE_UPDATED
+}
+
+// The admin area intentionally remains one-passphrase-only. This still gives a
+// durable timeline of what changed and when, without pretending we can name an
+// individual staff member when the authentication model cannot.
+model SellerReviewEvent {
+  id         String             @id @default(cuid())
+  farmerId   String?
+  farmer     Farmer?            @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  storeId    String?
+  store      OrganicStore?      @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  action     SellerReviewAction
+  fromStatus String?
+  toStatus   String?
+  note       String?
+  createdAt  DateTime           @default(now())
+
+  @@index([farmerId, createdAt])
+  @@index([storeId, createdAt])
 }
 
 // Stored before SMTP is attempted. The recipient address is resolved from a
@@ -332,6 +388,9 @@ model PrivateEnquiry {
   lastDeliveryError  String?
   sentAt             DateTime?
   handledAt          DateTime?
+  // Independent of the staff resolution marker: a seller reading the message
+  // in their own portal must not silently close it in the staff queue.
+  sellerReadAt       DateTime?
   createdAt          DateTime              @default(now())
   updatedAt          DateTime              @updatedAt
 

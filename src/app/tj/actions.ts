@@ -16,10 +16,17 @@ import { regionIdForName } from "@/lib/regions";
 import { loadConfig } from "@conf/config";
 import { updateSponsoredPlacementStatus } from "@/lib/sponsorships";
 import { endOfIndiaDate, startOfIndiaDate } from "@/lib/india-date";
+import { publicStoreWhere } from "@/lib/stores";
+import {
+  STORE_PORTAL,
+  cancelStoreInvite,
+  issueStoreInvite,
+  storePortalEnabled,
+} from "@/lib/store-auth";
 
 const decisionSchema = z.object({
   farmerId: z.string().min(1).max(60),
-  note: z.string().max(500).optional(),
+  note: z.string().trim().max(500).optional(),
 });
 
 function slugify(farmName: string): string {
@@ -54,13 +61,17 @@ export async function decideFarmer(
     note: formData.get("note") || undefined,
   });
   if (!parsed.success) return { ok: false, message: "That request was malformed." };
+  if (["REJECTED", "SUSPENDED"].includes(status) && !parsed.data.note) {
+    return { ok: false, message: "Record a reason before closing or suspending a farm." };
+  }
 
+  const current = await prisma.farmer.findUnique({
+    where: { id: parsed.data.farmerId },
+    select: { status: true, certifiedUntil: true },
+  });
+  if (!current) return { ok: false, message: "That farm no longer exists." };
   if (status === "VERIFIED") {
-    const certificate = await prisma.farmer.findUnique({
-      where: { id: parsed.data.farmerId },
-      select: { certifiedUntil: true },
-    });
-    if (!certificate?.certifiedUntil || certificate.certifiedUntil <= new Date()) {
+    if (!current.certifiedUntil || current.certifiedUntil <= new Date()) {
       return {
         ok: false,
         message: "Record a future certificate expiry before approving this farm.",
@@ -68,23 +79,38 @@ export async function decideFarmer(
     }
   }
 
-  await prisma.farmer.update({
-    where: { id: parsed.data.farmerId },
-    data: {
-      status,
-      // Clearing verifiedAt on the way out matters: the public queries gate on
-      // status, but the "verified" badge reads verifiedAt.
-      verifiedAt: status === "VERIFIED" ? new Date() : null,
-      ...(status === "VERIFIED"
-        ? {}
-        : { portalSessionVersion: { increment: 1 } }),
-      // Only written when a note was actually supplied, so a decision without
-      // one does not wipe the note left by a previous reviewer.
-      ...(parsed.data.note ? { reviewNote: parsed.data.note } : {}),
-    },
-  });
+  if (current.status !== status) {
+    await prisma.$transaction([
+      prisma.farmer.update({
+        where: { id: parsed.data.farmerId },
+        data: {
+          status,
+          verifiedAt: status === "VERIFIED" ? new Date() : null,
+          ...(status === "VERIFIED"
+            ? {}
+            : { portalSessionVersion: { increment: 1 } }),
+          ...(parsed.data.note ? { reviewNote: parsed.data.note } : {}),
+        },
+      }),
+      prisma.sellerReviewEvent.create({
+        data: {
+          farmerId: parsed.data.farmerId,
+          action: "STATUS_CHANGED",
+          fromStatus: current.status,
+          toStatus: status,
+          note: parsed.data.note || null,
+        },
+      }),
+    ]);
+  }
+
+  if (status !== "VERIFIED") {
+    await cancelFarmerInvite(parsed.data.farmerId).catch(() => undefined);
+  }
 
   revalidatePath("/tj");
+  revalidatePath(`/tj/farmers/${parsed.data.farmerId}`);
+  revalidateProductViews();
   return { ok: true };
 }
 
@@ -104,7 +130,7 @@ export async function createFarmer(formData: FormData): Promise<ActionResult> {
   });
   if (clash) return { ok: false, message: "A farm with that email already exists." };
 
-  await prisma.farmer.create({
+  const farmer = await prisma.farmer.create({
     data: {
       slug: slugify(input.farmName),
       farmName: input.farmName,
@@ -125,6 +151,16 @@ export async function createFarmer(formData: FormData): Promise<ActionResult> {
       status: "VERIFIED",
       verifiedAt: new Date(),
       reviewNote: "Added directly by an admin.",
+    },
+  });
+
+  await prisma.sellerReviewEvent.create({
+    data: {
+      farmerId: farmer.id,
+      action: "STATUS_CHANGED",
+      fromStatus: "PENDING",
+      toStatus: "VERIFIED",
+      note: "Added directly by an admin.",
     },
   });
 
@@ -246,6 +282,85 @@ export async function revokePortalAccess(formData: FormData): Promise<ActionResu
   return { ok: true };
 }
 
+// ------------------------------------------------------------- store access
+
+export async function grantStorePortalAccess(formData: FormData): Promise<LinkResult> {
+  if (!(await isSignedIn())) return { ok: false, message: NOT_SIGNED_IN_MESSAGE };
+  if (!storePortalEnabled()) {
+    return { ok: false, message: "The store portal is not configured on this server." };
+  }
+
+  const parsed = idSchema.safeParse({ id: formData.get("storeId") });
+  if (!parsed.success) return { ok: false, message: "That request was malformed." };
+
+  const store = await prisma.organicStore.findUnique({
+    where: { id: parsed.data.id },
+    select: { id: true, status: true },
+  });
+  if (!store) return { ok: false, message: "That shop no longer exists." };
+  if (store.status !== "VERIFIED") {
+    return { ok: false, message: "Approve the shop first, then invite it." };
+  }
+
+  const token = await issueStoreInvite(store.id);
+  await prisma.organicStore.update({
+    where: { id: store.id },
+    data: { portalEnabledAt: new Date() },
+  });
+
+  const base = loadConfig().app.site_url.replace(/\/$/, "");
+  revalidatePath("/tj/stores");
+  revalidatePath(`/tj/stores/${store.id}`);
+  return {
+    ok: true,
+    url: `${base}${STORE_PORTAL}/invite?store=${store.id}&token=${token}`,
+  };
+}
+
+export async function cancelStorePortalInvite(formData: FormData): Promise<ActionResult> {
+  if (!(await isSignedIn())) return NOT_SIGNED_IN;
+  const parsed = idSchema.safeParse({ id: formData.get("storeId") });
+  if (!parsed.success) return { ok: false, message: "That request was malformed." };
+
+  try {
+    await cancelStoreInvite(parsed.data.id);
+  } catch {
+    return { ok: false, message: "The invite store is unavailable; nothing was changed." };
+  }
+  await prisma.organicStore.updateMany({
+    where: { id: parsed.data.id, passwordHash: null },
+    data: { portalEnabledAt: null },
+  });
+  revalidatePath("/tj/stores");
+  revalidatePath(`/tj/stores/${parsed.data.id}`);
+  return { ok: true };
+}
+
+export async function revokeStorePortalAccess(formData: FormData): Promise<ActionResult> {
+  if (!(await isSignedIn())) return NOT_SIGNED_IN;
+  const parsed = idSchema.safeParse({ id: formData.get("storeId") });
+  if (!parsed.success) return { ok: false, message: "That request was malformed." };
+
+  try {
+    await cancelStoreInvite(parsed.data.id);
+  } catch {
+    return { ok: false, message: "The invite store is unavailable; access was not changed." };
+  }
+  const { count } = await prisma.organicStore.updateMany({
+    where: { id: parsed.data.id },
+    data: {
+      passwordHash: null,
+      portalEnabledAt: null,
+      portalSessionVersion: { increment: 1 },
+    },
+  });
+  if (count === 0) return { ok: false, message: "That shop no longer exists." };
+
+  revalidatePath("/tj/stores");
+  revalidatePath(`/tj/stores/${parsed.data.id}`);
+  return { ok: true };
+}
+
 // -------------------------------------------------------------------- listings
 
 export async function setProductActive(
@@ -312,7 +427,7 @@ export async function setCustomerStatus(
     where: { id: parsed.data.id },
     data: {
       status,
-      ...(status === "SUSPENDED" ? { sessionVersion: { increment: 1 } } : {}),
+      sessionVersion: { increment: 1 },
     },
   });
   if (count === 0) return { ok: false, message: "That account no longer exists." };
@@ -387,7 +502,7 @@ function revalidateProductViews(): void {
 
 const storeDecisionSchema = z.object({
   storeId: z.string().min(1).max(60),
-  note: z.string().max(500).optional(),
+  note: z.string().trim().max(500).optional(),
 });
 
 export async function decideStore(
@@ -403,20 +518,73 @@ export async function decideStore(
     note: formData.get("note") || undefined,
   });
   if (!parsed.success) return { ok: false, message: "That request was malformed." };
+  if (["REJECTED", "SUSPENDED"].includes(status) && !parsed.data.note) {
+    return { ok: false, message: "Record a reason before closing or suspending a shop." };
+  }
 
-  const { count } = await prisma.organicStore.updateMany({
+  const current = await prisma.organicStore.findUnique({
     where: { id: parsed.data.storeId },
-    data: {
-      status,
-      // Cleared on the way out for the same reason it is on a farm: the public
-      // query gates on status, but the "checked" badge reads verifiedAt.
-      verifiedAt: status === "VERIFIED" ? new Date() : null,
-      ...(parsed.data.note ? { reviewNote: parsed.data.note } : {}),
+    select: {
+      status: true,
+      fssaiNumber: true,
+      certifier: true,
+      certificateNo: true,
+      certifiedUntil: true,
     },
   });
-  if (count === 0) return { ok: false, message: "That shop no longer exists." };
+  if (!current) return { ok: false, message: "That shop no longer exists." };
+  if (status === "VERIFIED") {
+    if (!current.fssaiNumber || !/^\d{14}$/.test(current.fssaiNumber)) {
+      return { ok: false, message: "Record a valid 14-digit FSSAI licence before approval." };
+    }
+    const hasCertificate = Boolean(
+      current.certifier || current.certificateNo || current.certifiedUntil,
+    );
+    if (
+      hasCertificate &&
+      (!current.certifier ||
+        !current.certificateNo ||
+        !current.certifiedUntil ||
+        current.certifiedUntil <= new Date())
+    ) {
+      return {
+        ok: false,
+        message: "Complete the optional certificate record with a future expiry, or clear it.",
+      };
+    }
+  }
+
+  if (current.status !== status) {
+    await prisma.$transaction([
+      prisma.organicStore.update({
+        where: { id: parsed.data.storeId },
+        data: {
+          status,
+          verifiedAt: status === "VERIFIED" ? new Date() : null,
+          ...(status === "VERIFIED"
+            ? {}
+            : { portalSessionVersion: { increment: 1 } }),
+          ...(parsed.data.note ? { reviewNote: parsed.data.note } : {}),
+        },
+      }),
+      prisma.sellerReviewEvent.create({
+        data: {
+          storeId: parsed.data.storeId,
+          action: "STATUS_CHANGED",
+          fromStatus: current.status,
+          toStatus: status,
+          note: parsed.data.note || null,
+        },
+      }),
+    ]);
+  }
+
+  if (status !== "VERIFIED") {
+    await cancelStoreInvite(parsed.data.storeId).catch(() => undefined);
+  }
 
   revalidateStoreViews();
+  revalidatePath(`/tj/stores/${parsed.data.storeId}`);
   return { ok: true };
 }
 
@@ -434,9 +602,240 @@ export async function deleteStore(formData: FormData): Promise<ActionResult> {
 }
 
 function revalidateStoreViews(): void {
+  revalidatePath("/tj");
+  revalidatePath("/tj/overview");
   revalidatePath("/tj/stores");
   revalidatePath("/ta/stores");
+  revalidatePath("/en/stores");
   revalidatePath("/ta");
+  revalidatePath("/en");
+}
+
+// --------------------------------------------------------------- review data
+
+const flagSchema = z.object({
+  id: z.string().min(1).max(60),
+  reason: z.string().trim().min(3).max(500),
+});
+
+export async function setFarmerFlag(flagged: boolean, formData: FormData): Promise<ActionResult> {
+  if (!(await isSignedIn())) return NOT_SIGNED_IN;
+
+  const parsed = flagSchema.safeParse({
+    id: formData.get("farmerId"),
+    reason: flagged ? formData.get("reason") : "cleared",
+  });
+  if (!parsed.success) return { ok: false, message: "Record a short reason for the flag." };
+
+  const current = await prisma.farmer.findUnique({
+    where: { id: parsed.data.id },
+    select: { flagReason: true },
+  });
+  if (!current) return { ok: false, message: "That farm no longer exists." };
+
+  await prisma.$transaction([
+    prisma.farmer.update({
+      where: { id: parsed.data.id },
+      data: {
+        flaggedAt: flagged ? new Date() : null,
+        flagReason: flagged ? parsed.data.reason : null,
+      },
+    }),
+    prisma.sellerReviewEvent.create({
+      data: {
+        farmerId: parsed.data.id,
+        action: flagged ? "FLAGGED" : "FLAG_CLEARED",
+        note: flagged ? parsed.data.reason : current.flagReason,
+      },
+    }),
+  ]);
+  revalidatePath("/tj");
+  revalidatePath(`/tj/farmers/${parsed.data.id}`);
+  revalidatePath("/tj/overview");
+  return { ok: true };
+}
+
+export async function setStoreFlag(flagged: boolean, formData: FormData): Promise<ActionResult> {
+  if (!(await isSignedIn())) return NOT_SIGNED_IN;
+
+  const parsed = flagSchema.safeParse({
+    id: formData.get("storeId"),
+    reason: flagged ? formData.get("reason") : "cleared",
+  });
+  if (!parsed.success) return { ok: false, message: "Record a short reason for the flag." };
+
+  const current = await prisma.organicStore.findUnique({
+    where: { id: parsed.data.id },
+    select: { flagReason: true },
+  });
+  if (!current) return { ok: false, message: "That shop no longer exists." };
+
+  await prisma.$transaction([
+    prisma.organicStore.update({
+      where: { id: parsed.data.id },
+      data: {
+        flaggedAt: flagged ? new Date() : null,
+        flagReason: flagged ? parsed.data.reason : null,
+      },
+    }),
+    prisma.sellerReviewEvent.create({
+      data: {
+        storeId: parsed.data.id,
+        action: flagged ? "FLAGGED" : "FLAG_CLEARED",
+        note: flagged ? parsed.data.reason : current.flagReason,
+      },
+    }),
+  ]);
+  revalidatePath("/tj/stores");
+  revalidatePath(`/tj/stores/${parsed.data.id}`);
+  revalidatePath("/tj/overview");
+  return { ok: true };
+}
+
+const farmerEvidenceSchema = z.object({
+  farmerId: z.string().min(1).max(60),
+  govtIdLast4: z.string().trim().regex(/^\d{4}$/),
+  certifier: z.string().trim().min(3).max(160),
+  certificateNo: z.string().trim().min(3).max(80),
+  certifiedUntil: z.string().transform((value, ctx) => {
+    const date = endOfIndiaDate(value);
+    if (!date || date <= new Date()) {
+      ctx.addIssue({ code: "custom", message: "future date required" });
+      return z.NEVER;
+    }
+    return date;
+  }),
+  certificateUrl: z.union([z.url().max(500), z.literal("")]),
+  note: z.string().trim().max(500).optional(),
+});
+
+export async function updateFarmerEvidence(formData: FormData): Promise<ActionResult> {
+  if (!(await isSignedIn())) return NOT_SIGNED_IN;
+  const parsed = farmerEvidenceSchema.safeParse({
+    farmerId: formData.get("farmerId"),
+    govtIdLast4: formData.get("govtIdLast4"),
+    certifier: formData.get("certifier"),
+    certificateNo: formData.get("certificateNo"),
+    certifiedUntil: formData.get("certifiedUntil"),
+    certificateUrl: formData.get("certificateUrl") ?? "",
+    note: formData.get("note") || undefined,
+  });
+  if (!parsed.success) {
+    return { ok: false, message: "Check the ID digits, certificate, future expiry and URL." };
+  }
+
+  const input = parsed.data;
+  const exists = await prisma.farmer.count({ where: { id: input.farmerId } });
+  if (!exists) return { ok: false, message: "That farm no longer exists." };
+  await prisma.$transaction([
+    prisma.farmer.update({
+      where: { id: input.farmerId },
+      data: {
+        govtIdLast4: input.govtIdLast4,
+        certifier: input.certifier,
+        certificateNo: input.certificateNo,
+        certifiedUntil: input.certifiedUntil,
+        certificateUrl: input.certificateUrl || null,
+        ...(input.note ? { reviewNote: input.note } : {}),
+      },
+    }),
+    prisma.sellerReviewEvent.create({
+      data: {
+        farmerId: input.farmerId,
+        action: "EVIDENCE_UPDATED",
+        note: input.note || "Verification evidence updated.",
+      },
+    }),
+  ]);
+  revalidatePath("/tj");
+  revalidatePath(`/tj/farmers/${input.farmerId}`);
+  return { ok: true };
+}
+
+const optionalCertificateDate = z.string().transform((value, ctx) => {
+  if (!value) return null;
+  const date = endOfIndiaDate(value);
+  if (!date || date <= new Date()) {
+    ctx.addIssue({ code: "custom", message: "future date required" });
+    return z.NEVER;
+  }
+  return date;
+});
+
+const storeEvidenceSchema = z
+  .object({
+    storeId: z.string().min(1).max(60),
+    govtIdLast4: z.string().trim().regex(/^\d{4}$/),
+    fssaiNumber: z
+      .string()
+      .trim()
+      .transform((value) => value.replace(/\s+/g, ""))
+      .pipe(z.string().regex(/^\d{14}$/)),
+    certifier: z.string().trim().max(160),
+    certificateNo: z.string().trim().max(80),
+    certifiedUntil: optionalCertificateDate,
+    certificateUrl: z.union([z.url().max(500), z.literal("")]),
+    note: z.string().trim().max(500).optional(),
+  })
+  .superRefine((value, ctx) => {
+    const any = Boolean(
+      value.certifier || value.certificateNo || value.certifiedUntil || value.certificateUrl,
+    );
+    if (!any) return;
+    if (value.certifier.length < 3) {
+      ctx.addIssue({ code: "custom", path: ["certifier"], message: "required" });
+    }
+    if (value.certificateNo.length < 3) {
+      ctx.addIssue({ code: "custom", path: ["certificateNo"], message: "required" });
+    }
+    if (!value.certifiedUntil) {
+      ctx.addIssue({ code: "custom", path: ["certifiedUntil"], message: "required" });
+    }
+  });
+
+export async function updateStoreEvidence(formData: FormData): Promise<ActionResult> {
+  if (!(await isSignedIn())) return NOT_SIGNED_IN;
+  const parsed = storeEvidenceSchema.safeParse({
+    storeId: formData.get("storeId"),
+    govtIdLast4: formData.get("govtIdLast4"),
+    fssaiNumber: formData.get("fssaiNumber"),
+    certifier: formData.get("certifier") ?? "",
+    certificateNo: formData.get("certificateNo") ?? "",
+    certifiedUntil: formData.get("certifiedUntil") ?? "",
+    certificateUrl: formData.get("certificateUrl") ?? "",
+    note: formData.get("note") || undefined,
+  });
+  if (!parsed.success) {
+    return { ok: false, message: "Check the ID, FSSAI licence and optional certificate set." };
+  }
+
+  const input = parsed.data;
+  const exists = await prisma.organicStore.count({ where: { id: input.storeId } });
+  if (!exists) return { ok: false, message: "That shop no longer exists." };
+  await prisma.$transaction([
+    prisma.organicStore.update({
+      where: { id: input.storeId },
+      data: {
+        govtIdLast4: input.govtIdLast4,
+        fssaiNumber: input.fssaiNumber,
+        certifier: input.certifier || null,
+        certificateNo: input.certificateNo || null,
+        certifiedUntil: input.certifiedUntil,
+        certificateUrl: input.certificateUrl || null,
+        ...(input.note ? { reviewNote: input.note } : {}),
+      },
+    }),
+    prisma.sellerReviewEvent.create({
+      data: {
+        storeId: input.storeId,
+        action: "EVIDENCE_UPDATED",
+        note: input.note || "Verification evidence updated.",
+      },
+    }),
+  ]);
+  revalidatePath("/tj/stores");
+  revalidatePath(`/tj/stores/${input.storeId}`);
+  return { ok: true };
 }
 
 // ------------------------------------------------------------------- messages
@@ -504,7 +903,12 @@ export async function retryEnquiryDelivery(formData: FormData): Promise<ActionRe
   const recipientStillValid = enquiry.farmer
     ? enquiry.farmer.status === "VERIFIED" &&
       Boolean(enquiry.farmer.certifiedUntil && enquiry.farmer.certifiedUntil > new Date())
-    : enquiry.store?.status === "VERIFIED";
+    : Boolean(
+        enquiry.store &&
+          (await prisma.organicStore.count({
+            where: { id: enquiry.storeId ?? "", ...publicStoreWhere() },
+          })),
+      );
   if (!recipientStillValid) {
     return { ok: false, message: "The seller is no longer verified; delivery was not retried." };
   }
@@ -582,7 +986,7 @@ export async function createSponsoredPlacement(formData: FormData): Promise<Acti
           certifiedUntil: { gte: new Date() },
         },
       })
-    : await prisma.organicStore.count({ where: { id: input.targetId, status: "VERIFIED" } });
+    : await prisma.organicStore.count({ where: { id: input.targetId, ...publicStoreWhere() } });
   if (!exists) return { ok: false, message: "Only a verified farmer or store can be sponsored." };
 
   await prisma.sponsoredPlacement.create({

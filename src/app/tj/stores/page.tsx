@@ -1,11 +1,14 @@
 import type { Prisma } from "@prisma/client";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { AdminSearch, Pager } from "@/app/tj/table-controls";
 import { DeleteStoreButton, StoreDecisionButtons } from "@/app/tj/store-buttons";
+import { SellerFlagButton } from "@/app/tj/seller-review-controls";
 import { Badge } from "@/components/ui/badge";
 import { isSignedIn } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
+import { storeEvidenceAllowsPublication } from "@/lib/stores";
 
 export const dynamic = "force-dynamic";
 
@@ -43,11 +46,13 @@ export default async function AdminStoresPage({ searchParams }: PageProps<"/tj/s
   const query = (Array.isArray(params.q) ? params.q[0] : params.q)?.trim() ?? "";
   const rawStatus = Array.isArray(params.status) ? params.status[0] : params.status;
   const status = STATUSES.find((value) => value === rawStatus);
+  const flaggedOnly = (Array.isArray(params.flagged) ? params.flagged[0] : params.flagged) === "1";
   const rawPage = Array.isArray(params.page) ? params.page[0] : params.page;
   const page = Math.max(1, Number(rawPage ?? 1) || 1);
 
   const where: Prisma.OrganicStoreWhereInput = {
     ...(status ? { status } : {}),
+    ...(flaggedOnly ? { flaggedAt: { not: null } } : {}),
     ...(query
       ? {
           OR: [
@@ -80,11 +85,14 @@ export default async function AdminStoresPage({ searchParams }: PageProps<"/tj/s
         govtIdLast4: true,
         certifier: true,
         certificateNo: true,
+        certifiedUntil: true,
         certificateUrl: true,
         about: true,
         reviewNote: true,
         createdAt: true,
         verifiedAt: true,
+        flaggedAt: true,
+        flagReason: true,
         region: { select: { name: true } },
       },
     }),
@@ -102,8 +110,9 @@ export default async function AdminStoresPage({ searchParams }: PageProps<"/tj/s
 
   return (
     <>
-      <h1 className="font-display text-2xl text-bark-900">Organic stores</h1>
-      <p className="mt-1 text-sm text-bark-600">
+      <p className="section-kicker">Seller verification</p>
+      <h1 className="mt-5 font-display text-5xl font-medium leading-none text-bark-900 sm:text-6xl">Store reviews</h1>
+      <p className="mt-4 max-w-3xl text-base leading-relaxed text-bark-600">
         Shops that resell certified produce. Checked the same way a farm is, but they stock rather
         than grow, so they carry an address and an FSSAI licence and own no listings. {total} shown,
         {" "}
@@ -114,8 +123,8 @@ export default async function AdminStoresPage({ searchParams }: PageProps<"/tj/s
         {filters.map((filter) => {
           const active = (status ?? "") === filter.value;
           const href = filter.value
-            ? `/tj/stores?status=${filter.value}${query ? `&q=${encodeURIComponent(query)}` : ""}`
-            : `/tj/stores${query ? `?q=${encodeURIComponent(query)}` : ""}`;
+            ? `/tj/stores?status=${filter.value}${query ? `&q=${encodeURIComponent(query)}` : ""}${flaggedOnly ? "&flagged=1" : ""}`
+            : `/tj/stores${query || flaggedOnly ? `?${[query ? `q=${encodeURIComponent(query)}` : "", flaggedOnly ? "flagged=1" : ""].filter(Boolean).join("&")}` : ""}`;
           return (
             <a
               key={filter.label}
@@ -137,8 +146,32 @@ export default async function AdminStoresPage({ searchParams }: PageProps<"/tj/s
         action="/tj/stores"
         query={query}
         placeholder="Shop, contact, email or phone"
-        hidden={status ? { status } : {}}
+        hidden={{
+          ...(status ? { status } : {}),
+          ...(flaggedOnly ? { flagged: "1" } : {}),
+        }}
       />
+
+      <div className="mt-3 flex flex-wrap gap-2 text-sm">
+        <Link
+          href={`/tj/stores${status || query ? `?${[status ? `status=${status}` : "", query ? `q=${encodeURIComponent(query)}` : ""].filter(Boolean).join("&")}` : ""}`}
+          aria-current={!flaggedOnly ? "page" : undefined}
+          className={`inline-flex min-h-10 items-center rounded-xl border px-4 ${
+            !flaggedOnly ? "border-bark-900 bg-bark-900 text-white" : "border-bark-200 bg-white text-bark-600"
+          }`}
+        >
+          All shops
+        </Link>
+        <Link
+          href={`/tj/stores?${[status ? `status=${status}` : "", query ? `q=${encodeURIComponent(query)}` : "", "flagged=1"].filter(Boolean).join("&")}`}
+          aria-current={flaggedOnly ? "page" : undefined}
+          className={`inline-flex min-h-10 items-center rounded-xl border px-4 ${
+            flaggedOnly ? "border-marigold-500 bg-marigold-50 text-bark-900" : "border-bark-200 bg-white text-bark-600"
+          }`}
+        >
+          Flagged for review
+        </Link>
+      </div>
 
       {stores.length === 0 ? (
         <p className="mt-6 rounded-2xl border border-dashed border-bark-200 bg-white p-8 text-center text-sm text-bark-600">
@@ -147,12 +180,20 @@ export default async function AdminStoresPage({ searchParams }: PageProps<"/tj/s
       ) : (
         <ul className="mt-6 grid gap-3">
           {stores.map((store) => (
-            <li key={store.id} className="rounded-2xl border border-bark-200 bg-white p-4">
+            <li key={store.id} className="editorial-panel rounded-[1.5rem] p-6">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="font-medium break-words text-bark-900">{store.storeName}</p>
+                    <p className="font-medium break-words text-bark-900">
+                      <Link href={`/tj/stores/${store.id}`} className="hover:underline">
+                        {store.storeName}
+                      </Link>
+                    </p>
+                    {store.flaggedAt ? <Badge tone="marigold">REVIEW FLAG</Badge> : null}
                     <Badge tone={TONE[store.status] ?? "neutral"}>{store.status}</Badge>
+                    {store.status === "VERIFIED" && !storeEvidenceAllowsPublication(store) ? (
+                      <Badge tone="marigold">PUBLIC HOLD</Badge>
+                    ) : null}
                   </div>
                   <p className="mt-1 text-sm text-bark-600">
                     {store.contactName} · {store.region.name} ·{" "}
@@ -171,6 +212,9 @@ export default async function AdminStoresPage({ searchParams }: PageProps<"/tj/s
                       <>
                         Certified: {store.certifier}
                         {store.certificateNo ? ` · ${store.certificateNo}` : ""}
+                        {store.certifiedUntil
+                          ? ` · valid until ${store.certifiedUntil.toISOString().slice(0, 10)}`
+                          : ""}
                         {store.certificateUrl ? (
                           <>
                             {" · "}
@@ -199,6 +243,11 @@ export default async function AdminStoresPage({ searchParams }: PageProps<"/tj/s
                       Note: {store.reviewNote}
                     </p>
                   ) : null}
+                  {store.flagReason ? (
+                    <p className="mt-2 rounded-xl border border-marigold-200 bg-marigold-50 p-2.5 text-sm text-bark-900">
+                      Review flag: {store.flagReason}
+                    </p>
+                  ) : null}
                 </div>
                 <DeleteStoreButton storeId={store.id} storeName={store.storeName} />
               </div>
@@ -207,6 +256,13 @@ export default async function AdminStoresPage({ searchParams }: PageProps<"/tj/s
                 storeId={store.id}
                 actions={ACTIONS[store.status]}
               />
+              <div className="mt-3">
+                <SellerFlagButton
+                  kind="store"
+                  sellerId={store.id}
+                  flagged={store.flaggedAt !== null}
+                />
+              </div>
             </li>
           ))}
         </ul>
@@ -217,7 +273,11 @@ export default async function AdminStoresPage({ searchParams }: PageProps<"/tj/s
         page={page}
         pageSize={PAGE_SIZE}
         total={total}
-        extra={{ ...(query ? { q: query } : {}), ...(status ? { status } : {}) }}
+        extra={{
+          ...(query ? { q: query } : {}),
+          ...(status ? { status } : {}),
+          ...(flaggedOnly ? { flagged: "1" } : {}),
+        }}
       />
     </>
   );

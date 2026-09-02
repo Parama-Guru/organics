@@ -2,7 +2,6 @@ import Link from "next/link";
 
 import { loadConfig } from "@conf/config";
 import { ContactForm } from "@/components/contact-form";
-import { Badge } from "@/components/ui/badge";
 import { ArrowRightIcon, MapPinIcon, PhoneIcon } from "@/components/ui/icons";
 import { localePath } from "@/lib/i18n/config";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
@@ -34,24 +33,29 @@ export default async function ContactPage({ searchParams }: PageProps<"/[lang]/c
   ];
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-      <Badge tone="marigold">{t.contactPage.badge}</Badge>
-      <h1 className="mt-4 font-display text-4xl sm:text-5xl">{t.contactPage.heading}</h1>
-      <p className="mt-3 max-w-2xl text-lg leading-relaxed text-ink">{t.contactPage.intro}</p>
+    <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-20">
+      <header className="grid grid-cols-[minmax(0,1fr)] gap-6 border-b border-bark-200 pb-10 lg:grid-cols-[minmax(0,0.65fr)_minmax(0,1.35fr)] lg:items-end lg:pb-14">
+        <p className="section-kicker">{t.contactPage.badge}</p>
+        <div>
+          <h1 className="editorial-heading">{t.contactPage.heading}</h1>
+          <p className="mt-6 max-w-2xl text-lg leading-relaxed text-bark-600 sm:text-xl">{t.contactPage.intro}</p>
+        </div>
+      </header>
 
-      <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_20rem] lg:items-start">
+      <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_21rem] lg:items-start">
         <ContactForm initialRole={initialRole} />
 
-        <aside className="rounded-3xl border border-leaf-200 bg-leaf-50/70 p-6 lg:mt-8">
-          <h2 className="font-display text-lg">{t.contactPage.reachHeading}</h2>
+        <aside className="rounded-[2rem] bg-bark-900 p-7 text-white lg:sticky lg:top-28">
+          <p className="font-mono text-xs uppercase tracking-[0.12em] text-marigold-400">Contact ledger</p>
+          <h2 className="mt-4 font-display text-3xl text-white">{t.contactPage.reachHeading}</h2>
           <dl className="mt-4 space-y-4 text-sm">
             {app.contact_email ? (
               <div>
-                <dt className="font-semibold text-bark-900">{t.contactPage.emailLabel}</dt>
+                <dt className="font-semibold text-white">{t.contactPage.emailLabel}</dt>
                 <dd className="mt-0.5">
                   <a
                     href={`mailto:${app.contact_email}`}
-                    className="break-all text-bark-600 underline-offset-4 hover:text-bark-900 hover:underline"
+                    className="break-all text-bark-100 underline-offset-4 hover:text-white hover:underline"
                   >
                     {app.contact_email}
                   </a>
@@ -60,11 +64,11 @@ export default async function ContactPage({ searchParams }: PageProps<"/[lang]/c
             ) : null}
             {app.contact_phone ? (
               <div>
-                <dt className="font-semibold text-bark-900">{t.contactPage.phoneLabel}</dt>
+                <dt className="font-semibold text-white">{t.contactPage.phoneLabel}</dt>
                 <dd className="mt-0.5">
                   <a
                     href={`tel:${app.contact_phone.replace(/[^+0-9]/g, "")}`}
-                    className="inline-flex items-center gap-1.5 text-bark-600 underline-offset-4 hover:text-bark-900 hover:underline"
+                    className="inline-flex items-center gap-1.5 text-bark-100 underline-offset-4 hover:text-white hover:underline"
                   >
                     <PhoneIcon /> {app.contact_phone}
                   </a>
@@ -73,8 +77,8 @@ export default async function ContactPage({ searchParams }: PageProps<"/[lang]/c
             ) : null}
             {app.contact_address || app.contact_place ? (
               <div>
-                <dt className="font-semibold text-bark-900">{t.contactPage.addressLabel}</dt>
-                <dd className="mt-0.5 inline-flex items-start gap-1.5 leading-relaxed text-bark-600">
+                <dt className="font-semibold text-white">{t.contactPage.addressLabel}</dt>
+                <dd className="mt-0.5 inline-flex items-start gap-1.5 leading-relaxed text-bark-100">
                   <MapPinIcon className="mt-1 shrink-0" />
                   <span>{app.contact_address || app.contact_place}</span>
                 </dd>
@@ -82,19 +86,19 @@ export default async function ContactPage({ searchParams }: PageProps<"/[lang]/c
             ) : null}
             {app.contact_hours ? (
               <div>
-                <dt className="font-semibold text-bark-900">{t.contactPage.hoursLabel}</dt>
-                <dd className="mt-0.5 text-bark-600">{app.contact_hours}</dd>
+                <dt className="font-semibold text-white">{t.contactPage.hoursLabel}</dt>
+                <dd className="mt-0.5 text-bark-100">{app.contact_hours}</dd>
               </div>
             ) : null}
           </dl>
 
-          <ul className="mt-6 space-y-3 border-t border-leaf-200 pt-5 text-sm">
+          <ul className="mt-6 space-y-4 border-t border-white/15 pt-5 text-sm">
             {shortcuts.map((shortcut) => (
               <li key={shortcut.href}>
-                <p className="text-bark-600">{shortcut.label}</p>
+                <p className="text-bark-100">{shortcut.label}</p>
                 <Link
                   href={localePath(locale, shortcut.href)}
-                  className="mt-0.5 inline-flex items-center gap-1.5 font-semibold text-brand underline-offset-4 hover:underline"
+                  className="mt-0.5 inline-flex items-center gap-1.5 font-semibold text-white underline-offset-4 hover:underline"
                 >
                   {shortcut.link} <ArrowRightIcon />
                 </Link>

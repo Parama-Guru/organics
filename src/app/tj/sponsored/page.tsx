@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { isSignedIn } from "@/lib/admin-auth";
 import { indiaDateInputValue, indiaDateKey } from "@/lib/india-date";
 import { prisma } from "@/lib/prisma";
+import { publicStoreWhere } from "@/lib/stores";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +23,7 @@ export default async function SponsoredAdminPage() {
       orderBy: { farmName: "asc" },
     }),
     prisma.organicStore.findMany({
-      where: { status: "VERIFIED" },
+      where: publicStoreWhere(now),
       select: { id: true, storeName: true },
       orderBy: { storeName: "asc" },
     }),
@@ -30,6 +31,7 @@ export default async function SponsoredAdminPage() {
       include: {
         farmer: { select: { farmName: true, status: true } },
         store: { select: { storeName: true, status: true } },
+        metrics: { select: { impressions: true, clicks: true } },
       },
       orderBy: [{ status: "asc" }, { endsAt: "desc" }],
     }),
@@ -66,6 +68,16 @@ export default async function SponsoredAdminPage() {
                 : placement.status === "ACTIVE" && placement.endsAt <= now
                   ? "EXPIRED"
                   : placement.status;
+            const totals = placement.metrics.reduce(
+              (sum, metric) => ({
+                impressions: sum.impressions + metric.impressions,
+                clicks: sum.clicks + metric.clicks,
+              }),
+              { impressions: 0, clicks: 0 },
+            );
+            const clickThrough = totals.impressions
+              ? `${((totals.clicks / totals.impressions) * 100).toFixed(1)}%`
+              : "—";
             return (
               <li key={placement.id} className="flex flex-wrap items-start justify-between gap-4 rounded-2xl border border-bark-200 bg-white p-4">
                 <div>
@@ -76,6 +88,9 @@ export default async function SponsoredAdminPage() {
                   </div>
                   <p className="mt-1 text-sm text-bark-600">
                     {indiaDateKey(placement.startsAt)} → {indiaDateKey(placement.endsAt)} · priority {placement.priority}
+                  </p>
+                  <p className="mt-1 text-sm text-bark-600">
+                    {totals.impressions.toLocaleString("en-IN")} impressions · {totals.clicks.toLocaleString("en-IN")} clicks · {clickThrough} CTR
                   </p>
                   {placement.internalNote ? <p className="mt-1 text-sm text-bark-600">{placement.internalNote}</p> : null}
                 </div>

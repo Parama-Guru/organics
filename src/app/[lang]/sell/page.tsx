@@ -1,7 +1,6 @@
 import { FarmerApplicationForm } from "@/components/farmer-application-form";
 import { showFarmerPhone } from "@/components/farmer-contact";
 import { PhoneSoonNotice } from "@/components/phone-soon-notice";
-import { Badge } from "@/components/ui/badge";
 import { getDictionary } from "@/lib/i18n/server";
 
 export async function generateMetadata() {
@@ -23,43 +22,53 @@ export default async function SellPage() {
   ];
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
-      <Badge tone="marigold">{t.sell.badge}</Badge>
-      <h1 className="mt-4 font-display text-4xl leading-tight sm:text-5xl">
+    <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-20">
+      <header className="border-b border-bark-200 pb-10 sm:pb-14">
+      <p className="section-kicker">{t.sell.badge}</p>
+      <h1 className="editorial-heading mt-6 max-w-5xl">
         {t.sell.titleLead}
         <span className="text-marigold-600">{t.sell.titleAccent}</span>
         {t.sell.titleTail}
       </h1>
-      <p className="mt-4 max-w-2xl text-lg text-bark-600">
+      <p className="mt-6 max-w-2xl text-lg leading-relaxed text-bark-600 sm:text-xl">
         {phoneShown ? t.sell.intro : t.sell.introSoon}
       </p>
 
       <PhoneSoonNotice className="mt-4 max-w-2xl" />
+      </header>
 
-      <ol className="mt-10 grid gap-4 sm:grid-cols-3">
+      <div className="mt-12 grid grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[20rem_minmax(0,1fr)] lg:items-start">
+      <aside className="rounded-[2rem] bg-bark-900 p-6 text-white lg:sticky lg:top-28 lg:p-8">
+        <p className="font-mono text-xs uppercase tracking-[0.12em] text-marigold-400">Application field guide</p>
+      <ol className="mt-5 border-t border-white/15">
         {steps.map((step, index) => (
           <li
             key={step.title}
-            style={{ animationDelay: `${index * 80}ms` }}
-            className="glass animate-rise rounded-2xl p-5"
+            className="grid grid-cols-[2.25rem_minmax(0,1fr)] gap-3 border-b border-white/15 py-5"
           >
             <span
               aria-hidden
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-bark-900 font-display text-sm text-marigold-50"
+              className="font-mono text-xs text-marigold-400"
             >
-              {index + 1}
+              0{index + 1}
             </span>
-            <h2 className="mt-3 font-display text-lg">{step.title}</h2>
-            <p className="mt-1 text-sm text-bark-600">{step.body}</p>
+            <span>
+              <h2 className="font-display text-xl text-white">{step.title}</h2>
+              <p className="mt-2 text-sm leading-relaxed text-bark-100">{step.body}</p>
+            </span>
           </li>
         ))}
       </ol>
+      </aside>
 
-      <h2 className="mt-14 font-display text-2xl sm:text-3xl">
+      <section>
+      <p className="section-kicker">Your farm record</p>
+      <h2 className="mt-5 font-display text-4xl font-medium sm:text-5xl">
         {t.sell.applyHeading}
-        <span aria-hidden className="ml-3 inline-block h-1 w-12 rounded-full bg-marigold-500" />
       </h2>
       <FarmerApplicationForm />
+      </section>
+      </div>
     </div>
   );
 }

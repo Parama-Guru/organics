@@ -1,11 +1,11 @@
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 
 const control =
-  "mt-1.5 w-full rounded-xl border border-bark-200 bg-white/80 px-3.5 py-2.5 " +
-  "shadow-inner transition-[border-color,box-shadow] duration-200 " +
+  "mt-2 w-full rounded-2xl border border-bark-200 bg-bark-50 px-4 py-3 " +
+  "transition-[border-color,box-shadow,background-color] duration-200 " +
   "placeholder:text-bark-600/55 hover:border-bark-200 " +
-  "focus:border-marigold-400 focus:bg-white focus:outline-none " +
-  "focus:ring-4 focus:ring-marigold-400/25";
+  "focus:border-leaf-500 focus:bg-white focus:outline-none " +
+  "focus:ring-4 focus:ring-leaf-400/20";
 
 // Colour alone would not carry for a colour-blind user; aria-invalid on the
 // control is what the message is actually tied to.
@@ -14,7 +14,7 @@ const invalidRing = "border-red-400 bg-red-50/60";
 function Label({ children, hint }: { children: ReactNode; hint?: string }) {
   return (
     <span className="flex items-baseline justify-between gap-2">
-      <span className="text-sm font-semibold text-bark-900">{children}</span>
+      <span className="text-sm font-semibold text-bark-900 sm:text-[0.9375rem]">{children}</span>
       {hint ? <span className="text-sm text-bark-600">{hint}</span> : null}
     </span>
   );

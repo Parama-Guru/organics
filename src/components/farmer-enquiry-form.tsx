@@ -83,7 +83,11 @@ export function FarmerEnquiryForm({
         {format(t.enquiry.heading, { seller: recipientName })}
       </h2>
       <p className="mt-2 max-w-2xl leading-relaxed text-bark-600">{t.enquiry.intro}</p>
-      <form onSubmit={submit} className="glass mt-5 grid gap-4 rounded-3xl p-6 sm:p-8">
+      <form
+        onSubmit={submit}
+        method="post"
+        className="glass mt-5 grid gap-4 rounded-3xl p-6 sm:p-8"
+      >
         <Field
           label={t.enquiry.subject}
           name="subject"

@@ -93,6 +93,8 @@ export function DeleteFarmButton({
 }) {
   const { pending, run, message } = useAction();
   const [typo, setTypo] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+  const [typed, setTyped] = useState("");
 
   return (
     <div>
@@ -101,28 +103,55 @@ export function DeleteFarmButton({
         size="sm"
         variant="danger"
         disabled={pending}
-        onClick={() => {
-          const listings =
-            productCount === 0
-              ? ""
-              : ` and its ${productCount} listing${productCount === 1 ? "" : "s"}`;
-          // Typed rather than tapped. A buyer deleting their own account has to
-          // type a word; destroying a farm's whole catalogue should not be
-          // easier than that.
-          const typed = window.prompt(
-            `This deletes ${farmName}${listings} for good. Type the farm name to confirm.`,
-          );
-          if (typed === null) return;
-          if (typed.trim().toLowerCase() !== farmName.trim().toLowerCase()) {
-            setTypo(true);
-            return;
-          }
-          setTypo(false);
-          run(() => deleteFarmer(idForm("farmerId", farmerId)));
-        }}
+        onClick={() => setConfirming(true)}
       >
         Delete farm
       </Button>
+      {confirming ? (
+        <div className="mt-3 rounded-xl border border-red-200 bg-white p-4">
+          <label className="block text-sm font-medium text-bark-900">
+            Type <strong>{farmName}</strong> to permanently delete this farm
+            {productCount > 0
+              ? ` and its ${productCount} listing${productCount === 1 ? "" : "s"}`
+              : ""}.
+            <input
+              value={typed}
+              onChange={(event) => {
+                setTyped(event.target.value);
+                setTypo(false);
+              }}
+              className="mt-2 min-h-11 w-full rounded-xl border border-bark-200 bg-white px-3"
+            />
+          </label>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button
+              type="button"
+              size="sm"
+              variant="danger"
+              disabled={pending || !typed}
+              onClick={() => {
+                if (typed.trim().toLowerCase() !== farmName.trim().toLowerCase()) {
+                  setTypo(true);
+                  return;
+                }
+                setTypo(false);
+                run(() => deleteFarmer(idForm("farmerId", farmerId)));
+              }}
+            >
+              Delete permanently
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              disabled={pending}
+              onClick={() => setConfirming(false)}
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      ) : null}
       {typo ? (
         <p role="alert" className="mt-1 text-sm text-red-700">
           That did not match the farm name. Nothing was deleted.

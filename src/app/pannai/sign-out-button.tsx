@@ -2,12 +2,14 @@
 
 import { farmerSignOutAction } from "@/app/pannai/actions";
 
-export function SignOutButton() {
+export function SignOutButton({ dark = false }: { dark?: boolean }) {
   return (
     <form action={farmerSignOutAction}>
       <button
         type="submit"
-        className="flex min-h-11 items-center rounded-lg px-2 text-bark-600 hover:text-bark-900"
+        className={`flex min-h-11 items-center rounded-xl px-3 transition-colors ${
+          dark ? "text-bark-100 hover:bg-white/10 hover:text-white" : "text-bark-600 hover:bg-bark-100 hover:text-bark-900"
+        }`}
       >
         வெளியேற
       </button>

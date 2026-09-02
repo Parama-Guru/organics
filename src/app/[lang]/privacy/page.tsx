@@ -23,24 +23,29 @@ export default async function PrivacyPage() {
     { title: t.privacy.s2Title, body: t.privacy.s2Body },
     { title: t.privacy.s3Title, body: t.privacy.s3Body },
     { title: t.privacy.s4Title, body: t.privacy.s4Body },
+    { title: t.privacy.s5Title, body: t.privacy.s5Body },
   ];
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
-      <h1 className="font-display text-3xl sm:text-4xl">{t.privacy.heading}</h1>
-      <p className="mt-3 text-lg leading-relaxed text-bark-600">{t.privacy.intro}</p>
+    <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-20">
+      <header className="border-b border-bark-200 pb-10 sm:pb-14">
+      <p className="section-kicker">Legal field note</p>
+      <h1 className="editorial-heading mt-6">{t.privacy.heading}</h1>
+      <p className="mt-6 max-w-2xl text-lg leading-relaxed text-bark-600 sm:text-xl">{t.privacy.intro}</p>
+      </header>
 
-      <div className="mt-10 space-y-8">
-        {sections.map((section) => (
-          <section key={section.title}>
-            <h2 className="font-display text-xl">{section.title}</h2>
-            <p className="mt-2 leading-relaxed text-ink">{section.body}</p>
+      <div className="mt-10 border-t border-bark-200">
+        {sections.map((section, index) => (
+          <section key={section.title} className="grid gap-4 border-b border-bark-200 py-8 sm:grid-cols-[4rem_0.8fr_1.2fr] sm:py-10">
+            <span className="font-mono text-xs text-leaf-700">0{index + 1}</span>
+            <h2 className="font-display text-2xl font-medium leading-none">{section.title}</h2>
+            <p className="leading-relaxed text-bark-600">{section.body}</p>
           </section>
         ))}
 
         {/* The rights section promises an address; print it, or do not promise. */}
         {contactEmail ? (
-          <p className="leading-relaxed text-ink">
+          <p className="py-8 leading-relaxed text-ink">
             {t.privacy.s4Contact}{" "}
             <a
               href={`mailto:${contactEmail}`}

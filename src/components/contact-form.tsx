@@ -58,7 +58,7 @@ export function ContactForm({ initialRole }: { initialRole?: string }) {
 
   if (done) {
     return (
-      <div role="status" className="glass mt-8 animate-pop rounded-3xl p-10 text-center">
+      <div role="status" className="editorial-panel animate-pop rounded-[2rem] p-10 text-center">
         <span aria-hidden className="text-5xl">
           {"\u{2709}\u{FE0F}"}
         </span>
@@ -71,7 +71,8 @@ export function ContactForm({ initialRole }: { initialRole?: string }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="glass mt-8 grid animate-rise gap-4 rounded-3xl p-6 sm:grid-cols-2"
+      method="post"
+      className="editorial-panel grid grid-cols-[minmax(0,1fr)] gap-5 rounded-[2rem] p-6 sm:grid-cols-2 sm:p-8"
     >
       {/* A real radio group, not a select: the four answers are the first thing
           the page asks and they each need a line of explanation, which an
@@ -84,7 +85,7 @@ export function ContactForm({ initialRole }: { initialRole?: string }) {
           {roles.map((option) => (
             <label
               key={option.value}
-              className="flex cursor-pointer items-start gap-3 rounded-2xl border border-bark-200 bg-white/80 p-3.5 transition-colors has-[:checked]:border-marigold-400 has-[:checked]:bg-marigold-50 has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-marigold-400/25"
+              className="flex cursor-pointer items-start gap-3 rounded-2xl border border-bark-200 bg-bark-50 p-4 transition-colors has-[:checked]:border-leaf-500 has-[:checked]:bg-leaf-50 has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-leaf-400/20"
             >
               <input
                 type="radio"
@@ -96,7 +97,7 @@ export function ContactForm({ initialRole }: { initialRole?: string }) {
               />
               <span className="min-w-0">
                 <span className="block text-sm font-medium text-bark-900">{option.label}</span>
-                <span className="mt-0.5 block text-sm text-bark-600">{option.hint}</span>
+                <span className="mt-0.5 block text-sm text-ink">{option.hint}</span>
               </span>
             </label>
           ))}

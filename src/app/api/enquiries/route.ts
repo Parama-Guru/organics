@@ -11,6 +11,7 @@ import { readBoundedJson } from "@/lib/request-body";
 import { clientKeyFromHeaders, rateLimit } from "@/lib/rate-limit";
 import { isSameOrigin } from "@/lib/same-origin";
 import { consumeRateLimit } from "@/lib/session-store";
+import { publicStoreWhere } from "@/lib/stores";
 
 export const dynamic = "force-dynamic";
 
@@ -86,7 +87,7 @@ export async function POST(request: NextRequest) {
           select: { id: true, email: true, farmName: true },
         })
       : await prisma.organicStore.findFirst({
-          where: { id: input.recipientId, status: "VERIFIED" },
+          where: { id: input.recipientId, ...publicStoreWhere() },
           select: { id: true, email: true, storeName: true },
         });
 

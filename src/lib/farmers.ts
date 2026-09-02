@@ -30,10 +30,24 @@ const publicFarmerWhere = (now = new Date()): Prisma.FarmerWhereInput => ({
   certifiedUntil: { gte: now },
 });
 
-// Only VERIFIED farms with a current certificate are ever listed.
-export function getVerifiedFarmers() {
+// Only VERIFIED farms with a current certificate are ever listed. Search is
+// deliberately limited to public fields; private email and phone data never
+// become a discovery API while contact details are gated.
+export function getVerifiedFarmers(query = "") {
+  const term = query.trim();
   return prisma.farmer.findMany({
-    where: publicFarmerWhere(),
+    where: {
+      ...publicFarmerWhere(),
+      ...(term
+        ? {
+            OR: [
+              { farmName: { contains: term, mode: "insensitive" } },
+              { region: { name: { contains: term, mode: "insensitive" } } },
+              { region: { nameTa: { contains: term, mode: "insensitive" } } },
+            ],
+          }
+        : {}),
+    },
     select: farmerCardSelect(),
     orderBy: { farmName: "asc" },
   });

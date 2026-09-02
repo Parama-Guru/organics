@@ -57,7 +57,16 @@ const nextConfig: NextConfig = {
     "/**": ["./conf/*.yaml"],
   },
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    const privateWorkspaceHeaders = [
+      { key: "Cache-Control", value: "private, no-store, max-age=0" },
+      { key: "Pragma", value: "no-cache" },
+    ];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      { source: "/pannai/:path*", headers: privateWorkspaceHeaders },
+      { source: "/kadai/:path*", headers: privateWorkspaceHeaders },
+      { source: "/tj/:path*", headers: privateWorkspaceHeaders },
+    ];
   },
 };
 

@@ -43,6 +43,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     entry("/careers", { changeFrequency: "monthly", priority: 0.4 }),
     entry("/how-we-check", { changeFrequency: "monthly", priority: 0.6 }),
     entry("/privacy", { changeFrequency: "yearly", priority: 0.3 }),
+    entry("/terms", { changeFrequency: "yearly", priority: 0.3 }),
+    entry("/refunds", { changeFrequency: "yearly", priority: 0.3 }),
     ...products.map((p) =>
       entry(`/products/${p.slug}`, {
         lastModified: p.updatedAt,

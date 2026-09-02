@@ -54,7 +54,7 @@ export default async function FarmerPage({ params }: PageProps<"/[lang]/farmers/
   ]);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 pb-24 pt-8 sm:px-6 sm:pb-10">
+    <div className="mx-auto max-w-7xl px-4 pb-24 pt-8 sm:px-6 sm:pb-14 sm:pt-14">
       {/* Says what this page is to a crawler: a real farm in a named district,
           not an article about one. The phone is included only once it is
           public, so the markup never carries what the page itself withholds. */}
@@ -81,10 +81,10 @@ export default async function FarmerPage({ params }: PageProps<"/[lang]/farmers/
         <ArrowLeftIcon /> {t.farmers.backToAll}
       </Link>
 
-      <header className="glass mt-6 animate-rise overflow-hidden rounded-3xl">
+      <header className="editorial-panel mt-6 animate-rise overflow-hidden rounded-[2rem] sm:rounded-[3rem]">
         {/* Full-width banner rather than a side column: the scene is 8:5, and a
             narrow portrait column cropped the herd in half. */}
-        <div className="relative aspect-[16/6] bg-leaf-50 sm:aspect-[16/5]">
+        <div className="relative min-h-72 bg-leaf-50 sm:aspect-[16/7]">
           {farmer.photoUrl ? (
             <Image
               src={farmer.photoUrl}
@@ -97,7 +97,8 @@ export default async function FarmerPage({ params }: PageProps<"/[lang]/farmers/
           ) : null}
         </div>
 
-        <div className="p-6 sm:p-8">
+        <div className="grid gap-8 p-6 sm:p-10 lg:grid-cols-[1fr_0.9fr] lg:p-12">
+          <div>
             <div className="flex flex-wrap items-center gap-2">
               {sponsored ? <Badge tone="marigold">{t.farmers.sponsored}</Badge> : null}
               <Badge tone="leaf">
@@ -108,7 +109,7 @@ export default async function FarmerPage({ params }: PageProps<"/[lang]/farmers/
               </Badge>
             </div>
 
-            <h1 className="mt-4 font-display text-3xl break-words sm:text-4xl">
+            <h1 className="mt-6 font-display text-5xl font-medium leading-[0.95] break-words sm:text-7xl">
               {farmer.farmName}
             </h1>
             <p className="mt-1 text-bark-600">{farmer.contactName}</p>
@@ -127,15 +128,48 @@ export default async function FarmerPage({ params }: PageProps<"/[lang]/farmers/
             ) : null}
 
             {farmer.about ? (
-              <p className="mt-4 max-w-2xl leading-relaxed text-ink">
+              <p className="mt-6 max-w-2xl text-lg leading-relaxed text-bark-600">
                 {localisedOrNull(locale, farmer.about, farmer.aboutTa)}
               </p>
             ) : null}
 
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              {showFarmerPhone() ? (
+                <>
+                  <Button as="a" href={`tel:${dialNumber(farmer.phone)}`} size="lg">
+                    <PhoneIcon /> {farmer.phone}
+                  </Button>
+                  <Button
+                    as="a"
+                    href={`https://wa.me/${whatsappNumber(farmer.phone)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    variant="secondary"
+                    size="lg"
+                  >
+                    <WhatsAppIcon /> {t.contact.whatsapp}
+                  </Button>
+                  <Badge tone="neutral">{t.contact.callWindow}</Badge>
+                </>
+              ) : null}
+              <SaveButton kind="farmer" id={farmer.id} initialSaved={saved} size="lg" />
+            </div>
+
+            {showFarmerPhone() ? null : (
+              <div className="mt-6 max-w-2xl rounded-2xl border border-bark-200 bg-bark-50 p-5">
+                <p className="font-semibold text-ink">{t.contact.phoneSoon}</p>
+                <p className="mt-1 leading-relaxed text-bark-600">{t.contact.phoneSoonNote}</p>
+              </div>
+            )}
+          </div>
+
             {/* "Certified organic" is a regulated claim, so the scheme, the number
                 and the expiry are printed rather than implied by a green tick. */}
             {farmer.certifier ? (
-              <dl className="mt-5 grid max-w-2xl gap-x-8 gap-y-3 rounded-2xl border border-leaf-200 bg-leaf-50/60 p-5 sm:grid-cols-2">
+              <dl className="h-fit grid gap-x-8 gap-y-5 rounded-[1.75rem] border border-leaf-200 bg-leaf-50 p-6 sm:grid-cols-2 lg:p-8">
+                <div className="sm:col-span-2">
+                  <p className="section-kicker">Verification dossier</p>
+                </div>
                 <div className="sm:col-span-2">
                   <dt className="text-sm text-bark-600">{t.contact.certifier}</dt>
                   <dd className="font-medium text-ink">{farmer.certifier}</dd>
@@ -173,34 +207,6 @@ export default async function FarmerPage({ params }: PageProps<"/[lang]/farmers/
               </dl>
             ) : null}
 
-            <div className="mt-6 flex flex-wrap items-center gap-3">
-              {showFarmerPhone() ? (
-                <>
-                  <Button as="a" href={`tel:${dialNumber(farmer.phone)}`} size="lg">
-                    <PhoneIcon /> {farmer.phone}
-                  </Button>
-                  <Button
-                    as="a"
-                    href={`https://wa.me/${whatsappNumber(farmer.phone)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    variant="secondary"
-                    size="lg"
-                  >
-                    <WhatsAppIcon /> {t.contact.whatsapp}
-                  </Button>
-                  <Badge tone="neutral">{t.contact.callWindow}</Badge>
-                </>
-              ) : null}
-              <SaveButton kind="farmer" id={farmer.id} initialSaved={saved} size="lg" />
-            </div>
-
-            {showFarmerPhone() ? null : (
-              <div className="mt-5 max-w-2xl rounded-2xl border border-bark-200 bg-bark-50/70 p-5">
-                <p className="font-semibold text-ink">{t.contact.phoneSoon}</p>
-                <p className="mt-1 leading-relaxed text-bark-600">{t.contact.phoneSoonNote}</p>
-              </div>
-            )}
         </div>
       </header>
 
@@ -211,9 +217,9 @@ export default async function FarmerPage({ params }: PageProps<"/[lang]/farmers/
         canShareEmail={customer.emailVerifiedAt !== null}
       />
 
-      <h2 className="mt-12 font-display text-2xl sm:text-3xl">
+      <p className="section-kicker mt-20">{farmer.farmName}</p>
+      <h2 className="mt-5 font-display text-4xl font-medium leading-none sm:text-5xl">
         {t.farmers.fromThisFarm}
-        <span aria-hidden className="ml-3 inline-block h-1 w-12 rounded-full bg-leaf-500" />
       </h2>
 
       {products.length === 0 ? (
@@ -221,7 +227,7 @@ export default async function FarmerPage({ params }: PageProps<"/[lang]/farmers/
           {t.farmers.nothingListed}
         </p>
       ) : (
-        <div className="mt-5 grid grid-cols-1 gap-3 min-[400px]:grid-cols-2 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
+        <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {products.map((product, index) => (
             <div
               key={product.id}

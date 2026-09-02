@@ -50,7 +50,7 @@ function withPrivateCache(response: NextResponse, pathname: string): NextRespons
 }
 
 export const config = {
-  // Skip API routes, the staff-only /tj tree and the farmer portal at /pannai
-  // (neither is localised), Next internals, and anything with a file extension.
-  matcher: ["/((?!api|tj|pannai|_next|.*\\.).*)"],
+  // Skip API routes, staff and seller tools (none is localised), Next
+  // internals, and anything with a file extension.
+  matcher: ["/((?!api|tj|pannai|kadai|_next|.*\\.).*)"],
 };

@@ -3,9 +3,9 @@
 Updated as work lands. `[x]` = done and verified, `[ ]` = not done, `[~]` = done
 but blocked on something outside the code.
 
-**Score: 89 done · 8 blocked · 32 open**
+**Score: 145 done · 10 blocked · 15 open**
 
-Last updated: 2026-09-01 · full customer, seller, billing-safe and sponsorship phase verified
+Last updated: 2026-09-02 · Living Farm Atlas rebuild and full operational release verified
 
 ---
 
@@ -28,6 +28,10 @@ dashboard.
       characters, one line, lower case. A malformed one no longer takes the site
       down (see below), but it does leave `/tj` unreachable, and the reason is
       printed in the Render logs starting `[config]`.
+      The passphrase posted in chat must not be used for production: chat is not
+      a secret store. Run `npm run admin:hash`, type a new passphrase into the
+      hidden terminal prompt, and store only its hash. The portal intentionally
+      asks for that one passphrase and nothing else.
 - [ ] **Confirm the `organics-kv` Key Value instance actually got created.**
       `REDIS_URL` now comes from `fromService`, which only resolves once the
       blueprint has synced. If it did not, `redis.url` is empty and the config
@@ -51,6 +55,13 @@ dashboard.
       before paid access can charge anyone.** The dormant integration is coded,
       but keys, plan IDs and a signed webhook test do not exist yet. Billing
       remains disabled, so customers retain free access instead of being trapped.
+- [ ] **Rotate the Supabase password, Redis URL and admin passphrase.** They were
+      pasted into chat earlier, so this must be done in the provider dashboards.
+      Update local/Render secrets after rotation; never send the replacements
+      through chat.
+- [ ] **Obtain recorded seller consent before exposing phone numbers.** After
+      consent, set `SHOW_FARMER_PHONE=true` in local/Render configuration. The
+      code path is complete but it must not be enabled on a developer's guess.
 
 ## Open — decisions needed from you
 
@@ -80,20 +91,119 @@ dashboard.
 
 ## Open — work I can do on request
 
-- [ ] Store portal, the shop equivalent of `/pannai`, so shops edit their own
-      entry instead of emailing an admin.
-- [ ] Notify an admin when an application or message arrives. Today `/tj` has to
-      be checked by hand.
-- [ ] Search on the farmers page. Shops have it, farms do not.
-- [ ] Add a permanent automated test suite. This phase used disposable runtime,
-      migration, security and ownership harnesses; CI still lacks committed tests.
-- [ ] Rotate the Supabase password, Redis URL and admin passphrase — they were
-      pasted into chat earlier.
-- [ ] Flip `SHOW_FARMER_PHONE` to `true` once farms consent. The whole value of
-      the directory is gated behind it.
+- [x] Store portal at `/kadai`, the shop equivalent of `/pannai`: one-time
+      staff invite, password sign-in, immediate session revocation, permitted
+      profile edits and an ownership-checked buyer-enquiry inbox.
+- [x] Notify an admin when a farmer/store application or contact message
+      arrives. Messages now link directly to the correct `/tj` queue once SMTP
+      and a monitored `CONTACT_EMAIL` are configured.
+- [x] Search on the farmers page by public farm name or district, in both
+      languages, without turning private email/phone data into a search API.
+- [x] Add a permanent automated test suite and run it in CI. It now covers
+      passwords, India dates, schemas, request security, sponsored ordering and
+      database-backed public seller boundaries.
 - [x] Password change signs out every session and the sign-in page explains why.
-- [ ] Shop `photoUrl` column exists but is unused — wire it up when shopfront
-      photos exist.
+- [x] Shop `photoUrl` now renders on directory cards, store detail pages, the
+      staff review page and the store portal. Real photographs remain a media task.
+
+---
+
+## UI/UX rebuild — Living Farm Atlas
+
+This is a full structural redesign, not a colour or glass pass. The direction is
+an original animated field atlas: editorial storytelling, layered farm depth,
+clear proof, and different information density for buyers, sellers and staff.
+
+### Foundation and motion
+- [x] Replace the current Latin display/body pairing with open-licensed
+      Newsreader + DM Sans, retain dedicated Noto Tamil display/body faces, and
+      add DM Mono for dates, evidence and operational labels.
+- [x] Rebuild the colour system around warm paper, near-black ink, deep indigo,
+      leaf green and one marigold action colour; remove saturated navy from long copy.
+- [x] Replace repeated translucent glass cards with solid editorial paper,
+      framed image fields, ruled ledger rows and intentional dark sections.
+- [x] Add a shared type scale, section kicker, editorial headline, page-shell,
+      feature-frame and operational-panel primitives.
+- [x] Add viewport-triggered reveal choreography with staggered children,
+      reduced-motion fallbacks and no layout shift.
+- [x] Add slow ambient motion for decorative layers only; never animate essential
+      controls or make content wait for animation.
+- [x] Build an original CSS/SVG layered 3D farm world with pointer parallax,
+      depth planes, crops, hills, sun, farmhouse and floating verification cards.
+- [x] Keep the 3D scene static under reduced motion and on coarse pointers;
+      maintain a fast first render without WebGL or third-party scripts.
+
+### Public frame and home
+- [x] Replace the full-width utility header with a floating capsule navigation,
+      stronger wordmark, active-page pills and a compact mobile navigation rail.
+- [x] Rebuild the footer as a dark editorial closing chapter with a large
+      bilingual wordmark, clearer columns, legal links and restrained social states.
+- [x] Replace the home hero with the living farm atlas, oversized bilingual
+      promise, direct discovery actions and floating trust/provenance signals.
+- [x] Replace the dense eight-card featured grid with alternating cinematic
+      product stories using large images, farm provenance, price and one clear action.
+- [x] Rebuild the verification explanation as a numbered horizontal field guide,
+      not three equal generic cards.
+- [x] Rebuild category discovery as a visual crop index with varied spans and imagery.
+- [x] Rebuild farm discovery as large story cards with landscape photography and
+      visible district/listing metadata.
+- [x] Rebuild community counts as one compositional ledger band rather than three boxes.
+
+### Browse and detail journeys
+- [x] Rebuild the produce directory with an editorial page intro, anchored search,
+      grouped filter studio, active-filter summary and calmer responsive grid.
+- [x] Redesign product cards with larger 4:3 imagery, clearer name/provenance hierarchy,
+      paper surfaces and less repeated microcopy.
+- [x] Rebuild product detail as an image-led split story with a sticky buying/contact
+      summary, trust ledger and related-produce chapter.
+- [x] Rebuild farmer discovery with a large intro, integrated search and alternating
+      landscape farm profiles instead of equal small cards.
+- [x] Rebuild farmer detail as an immersive farm cover, verification dossier,
+      direct-enquiry chapter and produce collection.
+- [x] Rebuild store discovery with visible shopfront photography, integrated search
+      and address-first local-business cards.
+- [x] Rebuild store detail with a shopfront cover, location panel, licence dossier,
+      contact chapter and clear sponsored/verification separation.
+- [x] Add polished no-results and empty states that preserve context and provide one exit.
+
+### Trust, forms and accounts
+- [x] Rebuild “How we check” as a scrollable verification timeline with a strong
+      limitation/caveat ending instead of repeated glass cards.
+- [x] Rebuild farmer and store application pages as split editorial journeys with
+      a sticky numbered guide beside a grouped, legible form.
+- [x] Rebuild contact as a role-first conversation flow with a compact contact ledger.
+- [x] Rebuild sign-in/sign-up around a two-panel editorial identity, clear Google/password
+      separation and visible privacy/terms context.
+- [x] Rebuild account home as a personal field notebook with navigation, access state,
+      saved produce/farms, profile and security chapters.
+- [x] Rebuild plans as a transparent two-option comparison with renewal/cancellation
+      facts visually adjacent to every payment action.
+
+### Seller and staff workspaces
+- [x] Replace farmer `/pannai` top navigation with a responsive workspace shell,
+      dashboard summary, clearer listing rows and prominent enquiry state.
+- [x] Apply the same workspace language to store `/kadai` while preserving its
+      profile/enquiry-specific information architecture.
+- [x] Replace the crowded `/tj` top navigation with a desktop side rail and mobile
+      scroll rail, keeping every operation keyboard reachable.
+- [x] Rebuild `/tj/overview` into a scannable command centre with grouped urgency,
+      proof health, seller access and support metrics.
+- [x] Rebuild staff farmer/store review cards and detail pages around evidence,
+      decision history, flags and portal controls rather than a flat data dump.
+- [x] Standardize admin filters, pagination, empty states, dangerous actions and
+      inline confirmation panels across every queue.
+
+### Verification and release
+- [x] Capture desktop and mobile screenshots for every redesigned page family and
+      compare hierarchy, density, clipping and visual continuity.
+- [x] Verify Tamil and English at 320, 375, 768, 1280 and 1920 widths with zero overflow.
+- [x] Run WCAG 2 A/AA checks on public, account, seller and staff page families.
+- [x] Verify keyboard navigation, focus order, reduced motion and coarse-pointer behavior.
+- [x] Verify animation causes no horizontal overflow, content obstruction or cumulative
+      layout shift and remains usable with JavaScript disabled where supported.
+- [x] Re-run permanent tests, ownership checks, lint, typecheck, config validation,
+      migration status, schema drift, production build and Docker CI.
+- [x] Perform an independent visual, accessibility and regression review before commit.
 
 ---
 
@@ -165,7 +275,9 @@ dashboard.
       stored server entitlement, not a client callback.
 - [x] Add plan selection, hosted authorization result, localized billing history,
       exact access dates, persisted cancellation state and cancel-renewal UI.
-- [ ] Update privacy/terms/refund copy before enabling real charges.
+- [x] Add bilingual privacy, terms, cancellation and refund copy, link it from
+      sign-up/plans/footer, and describe disabled billing honestly. Legal review
+      is still recommended before real charges are enabled.
 
 ---
 
@@ -203,7 +315,9 @@ dashboard.
       page; verification badges remain visually separate.
 - [x] Do not accept third-party ad scripts initially. First-party sponsored cards
       avoid tracking, layout shift, inappropriate ads and consent-banner work.
-- [ ] Add impression/click counters without cross-site tracking; aggregate only.
+- [x] Add first-party daily impression/click aggregates with no visitor, account,
+      IP or user-agent stored alongside the totals; show lifetime totals and CTR
+      in `/tj/sponsored`.
 - [ ] Add paid self-service promotion later, after customer subscriptions and
       webhook handling are stable.
 
@@ -239,6 +353,23 @@ dashboard.
 ---
 
 ## Done
+
+### Seller portals and staff review
+- [x] Store-owner portal at `/kadai` with invite/reset links, versioned sessions,
+      profile management, sign-out/sign-in and immediate suspension/revocation.
+- [x] Farmer and store portal inboxes expose only enquiries owned by that seller;
+      buyer email remains hidden unless the verified buyer opted in.
+- [x] Full staff detail pages for farmers and stores show application data,
+      verification evidence, approval dates, portal state, related work and
+      typed-confirmation deletion.
+- [x] Staff can flag any farmer or store for review without changing public
+      status, filter each queue to flagged records, and clear a resolved flag.
+- [x] Status decisions, evidence edits and flag changes create a durable review
+      timeline. Rejection/suspension requires a reason; approval re-validates
+      current certificate/FSSAI evidence.
+- [x] Store applications now collect a certificate expiry whenever optional
+      organic certificate details are supplied, so incomplete evidence cannot
+      be approved accidentally.
 
 ### Organic stores
 - [x] `OrganicStore` model + `StoreStatus` enum, migration and schema in step

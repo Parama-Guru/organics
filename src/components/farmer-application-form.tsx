@@ -46,7 +46,7 @@ export function FarmerApplicationForm() {
 
   if (done) {
     return (
-      <div role="status" className="glass mt-8 animate-pop rounded-3xl p-10 text-center">
+      <div role="status" className="editorial-panel mt-8 animate-pop rounded-[2rem] p-10 text-center">
         <span aria-hidden className="text-5xl">
           {"\u{1F33E}"}
         </span>
@@ -59,7 +59,8 @@ export function FarmerApplicationForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="glass mt-8 grid animate-rise gap-4 rounded-3xl p-6 sm:grid-cols-2"
+      method="post"
+      className="editorial-panel mt-8 grid grid-cols-[minmax(0,1fr)] gap-5 rounded-[2rem] p-6 sm:grid-cols-2 sm:p-8"
     >
       <Field
         label={t.application.farmName}

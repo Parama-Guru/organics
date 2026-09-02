@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Manrope } from "next/font/google";
+import { DM_Mono, DM_Sans, Newsreader } from "next/font/google";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -8,7 +8,9 @@ import { isAdminEnabled, isSignedIn } from "@/lib/admin-auth";
 
 import "../globals.css";
 
-const body = Manrope({ subsets: ["latin"], display: "swap", variable: "--font-body-family" });
+const body = DM_Sans({ subsets: ["latin"], display: "swap", variable: "--font-body-family" });
+const display = Newsreader({ subsets: ["latin"], display: "swap", variable: "--font-display-family" });
+const mono = DM_Mono({ subsets: ["latin"], weight: ["400", "500"], display: "swap", variable: "--font-mono-family" });
 
 // Staff-only: keep it out of search results and out of any share preview. The
 // title is deliberately bland — "Admin" in a shared browser's history advertises
@@ -25,86 +27,60 @@ export default async function AdminLayout({ children }: LayoutProps<"/tj">) {
   if (!isAdminEnabled()) notFound();
 
   const signedIn = await isSignedIn();
+  const navigation = [
+    ["/tj/overview", "Overview"],
+    ["/tj", "Farm reviews"],
+    ["/tj/listings", "Listings"],
+    ["/tj/stores", "Store reviews"],
+    ["/tj/buyers", "Buyers"],
+    ["/tj/messages", "Messages"],
+    ["/tj/enquiries", "Enquiries"],
+    ["/tj/sponsored", "Sponsored"],
+    ["/tj/export", "Export"],
+    ["/tj/farmers/new", "Add a farm"],
+  ] as const;
 
   return (
-    <html lang="en" className={`${body.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col bg-bark-50">
-        <header className="border-b border-bark-200 bg-white">
-          <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 sm:px-6">
-            <Link href="/tj" className="font-display text-lg text-bark-900">
-              Organics <span className="text-bark-600">admin</span>
-            </Link>
+    <html lang="en" className={`${body.variable} ${display.variable} ${mono.variable} h-full antialiased`}>
+      <body className="portal-shell min-h-full bg-bark-50">
+        <div className="flex min-h-screen">
+          <aside className="sticky top-0 hidden h-screen w-72 shrink-0 flex-col bg-bark-900 p-7 text-white lg:flex">
+            <Link href="/tj" className="font-display text-3xl font-medium text-white">Organics</Link>
+            <p className="mt-2 font-mono text-xs uppercase tracking-[0.12em] text-marigold-400">Staff command centre</p>
             {signedIn ? (
-              <nav
-                aria-label="Admin"
-                className="ml-auto flex flex-wrap items-center gap-x-1 gap-y-1 text-sm"
-              >
-                <Link
-                  href="/tj/overview"
-                  className="inline-flex min-h-11 items-center rounded-lg px-2 text-bark-600 hover:bg-bark-50 hover:text-bark-900"
-                >
-                  Overview
-                </Link>
-                <Link
-                  href="/tj"
-                  className="inline-flex min-h-11 items-center rounded-lg px-2 text-bark-600 hover:bg-bark-50 hover:text-bark-900"
-                >
-                  Applications
-                </Link>
-                <Link
-                  href="/tj/listings"
-                  className="inline-flex min-h-11 items-center rounded-lg px-2 text-bark-600 hover:bg-bark-50 hover:text-bark-900"
-                >
-                  Listings
-                </Link>
-                <Link
-                  href="/tj/stores"
-                  className="inline-flex min-h-11 items-center rounded-lg px-2 text-bark-600 hover:bg-bark-50 hover:text-bark-900"
-                >
-                  Stores
-                </Link>
-                <Link
-                  href="/tj/buyers"
-                  className="inline-flex min-h-11 items-center rounded-lg px-2 text-bark-600 hover:bg-bark-50 hover:text-bark-900"
-                >
-                  Buyers
-                </Link>
-                <Link
-                  href="/tj/messages"
-                  className="inline-flex min-h-11 items-center rounded-lg px-2 text-bark-600 hover:bg-bark-50 hover:text-bark-900"
-                >
-                  Messages
-                </Link>
-                <Link
-                  href="/tj/enquiries"
-                  className="inline-flex min-h-11 items-center rounded-lg px-2 text-bark-600 hover:bg-bark-50 hover:text-bark-900"
-                >
-                  Enquiries
-                </Link>
-                <Link
-                  href="/tj/export"
-                  className="inline-flex min-h-11 items-center rounded-lg px-2 text-bark-600 hover:bg-bark-50 hover:text-bark-900"
-                >
-                  Export
-                </Link>
-                <Link
-                  href="/tj/sponsored"
-                  className="inline-flex min-h-11 items-center rounded-lg px-2 text-bark-600 hover:bg-bark-50 hover:text-bark-900"
-                >
-                  Sponsored
-                </Link>
-                <Link
-                  href="/tj/farmers/new"
-                  className="inline-flex min-h-11 items-center rounded-lg px-2 text-bark-600 hover:bg-bark-50 hover:text-bark-900"
-                >
-                  Add a farm
-                </Link>
-                <SignOutButton />
-              </nav>
-            ) : null}
+              <>
+                <nav aria-label="Admin" className="mt-9 grid gap-1 text-sm">
+                  {navigation.map(([href, label], index) => (
+                    <Link key={href} href={href} className="group flex min-h-11 items-center gap-3 rounded-xl px-3 text-bark-100 transition-colors hover:bg-white/10 hover:text-white">
+                      <span className="font-mono text-[0.65rem] text-marigold-400/70">{String(index + 1).padStart(2, "0")}</span>
+                      {label}
+                    </Link>
+                  ))}
+                </nav>
+                <div className="mt-auto border-t border-white/15 pt-5"><SignOutButton dark /></div>
+              </>
+            ) : (
+              <p className="mt-auto text-sm leading-relaxed text-bark-100">Private verification and operations workspace.</p>
+            )}
+          </aside>
+
+          <div className="flex min-w-0 flex-1 flex-col">
+            <header className="border-b border-bark-200 bg-paper lg:hidden">
+              <div className="flex items-center gap-3 px-4 py-3">
+                <Link href="/tj" className="shrink-0 font-display text-xl text-bark-900">Organics <span className="text-bark-600">staff</span></Link>
+                {signedIn ? <SignOutButton /> : null}
+              </div>
+              {signedIn ? (
+                <nav aria-label="Admin" className="no-scrollbar flex overflow-x-auto border-t border-bark-200 px-2 text-sm">
+                  {navigation.map(([href, label]) => (
+                    <Link key={href} href={href} className="flex min-h-11 shrink-0 items-center rounded-xl px-3 text-bark-600">{label}</Link>
+                  ))}
+                </nav>
+              ) : null}
+            </header>
+            <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-7 lg:px-10 lg:py-12">{children}</main>
           </div>
-        </header>
-        <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 sm:px-6">{children}</main>
+        </div>
       </body>
     </html>
   );

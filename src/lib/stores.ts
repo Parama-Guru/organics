@@ -24,6 +24,46 @@ const storeCardSelect = {
 
 export type StoreCard = Prisma.OrganicStoreGetPayload<{ select: typeof storeCardSelect }>;
 
+export function storeEvidenceAllowsPublication(
+  store: {
+    fssaiNumber: string | null;
+    certifier: string | null;
+    certificateNo: string | null;
+    certifiedUntil: Date | null;
+  },
+  now = new Date(),
+): boolean {
+  if (!store.fssaiNumber || !/^\d{14}$/.test(store.fssaiNumber)) return false;
+  const hasCertificate = Boolean(
+    store.certifier || store.certificateNo || store.certifiedUntil,
+  );
+  if (!hasCertificate) return true;
+  return Boolean(
+    store.certifier &&
+      store.certificateNo &&
+      store.certifiedUntil &&
+      store.certifiedUntil >= now,
+  );
+}
+
+/**
+ * A reseller may legitimately hold no organic certificate of its own. If one
+ * is recorded, however, it must be complete and current or the store is hidden
+ * until staff review it; an expired badge must never remain public evidence.
+ */
+export const publicStoreWhere = (now = new Date()): Prisma.OrganicStoreWhereInput => ({
+  status: "VERIFIED",
+  fssaiNumber: { not: null },
+  OR: [
+    { certifier: null, certificateNo: null, certifiedUntil: null },
+    {
+      certifier: { not: null },
+      certificateNo: { not: null },
+      certifiedUntil: { gte: now },
+    },
+  ],
+});
+
 /**
  * Only VERIFIED shops are ever listed. PENDING, REJECTED and SUSPENDED stay
  * invisible to the public, exactly as farms do — the status check lives here so
@@ -34,13 +74,17 @@ export function getVerifiedStores(query = "") {
 
   return prisma.organicStore.findMany({
     where: {
-      status: "VERIFIED",
+      ...publicStoreWhere(),
       ...(term
         ? {
-            OR: [
-              { storeName: { contains: term, mode: "insensitive" } },
-              { region: { name: { contains: term, mode: "insensitive" } } },
-              { region: { nameTa: { contains: term, mode: "insensitive" } } },
+            AND: [
+              {
+                OR: [
+                  { storeName: { contains: term, mode: "insensitive" } },
+                  { region: { name: { contains: term, mode: "insensitive" } } },
+                  { region: { nameTa: { contains: term, mode: "insensitive" } } },
+                ],
+              },
             ],
           }
         : {}),
@@ -53,7 +97,7 @@ export function getVerifiedStores(query = "") {
 export async function getStoreBySlug(rawSlug: string) {
   // Route params arrive percent-encoded; see decodeSlug.
   return prisma.organicStore.findFirst({
-    where: { slug: decodeSlug(rawSlug), status: "VERIFIED" },
+    where: { slug: decodeSlug(rawSlug), ...publicStoreWhere() },
     select: storeCardSelect,
   });
 }
@@ -71,7 +115,7 @@ export async function getRegisteredCounts() {
       where: { status: "VERIFIED", certifiedUntil: { gte: new Date() } },
     }),
     prisma.customer.count({ where: { status: "ACTIVE" } }),
-    prisma.organicStore.count({ where: { status: "VERIFIED" } }),
+    prisma.organicStore.count({ where: publicStoreWhere() }),
   ]);
 
   return { farmers, customers, stores };

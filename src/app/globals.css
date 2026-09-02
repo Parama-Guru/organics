@@ -22,17 +22,18 @@
   --color-marigold-500: #ec9346;
   --color-marigold-600: #cf6f1c;
 
-  /* Warm neutrals with India-flag navy ink. `bark` is the surface/text ramp.
-     900 is the Ashoka Chakra navy (#000080) and carries the brand: the hero, the
-     dark buttons, the headings. Body copy uses `ink`, the same hue desaturated,
-     because a whole page set in saturated navy reads like a system dialog. */
-  --color-bark-50: #faf7f2;
-  --color-bark-100: #f1ece3;
-  --color-bark-200: #ded6ca;
-  --color-bark-600: #4a54a8;
-  --color-bark-800: #141d8f;
-  --color-bark-900: #000080;
-  --color-ink: #1b2450;
+    /* Warm editorial neutrals. Navy remains the authority colour, but muted ink
+      carries long copy so the directory reads like a field guide, not a system
+      dialog. */
+    --color-bark-50: #f8f5ef;
+    --color-bark-100: #efe9de;
+    --color-bark-200: #d7cdbf;
+    --color-bark-600: #615e73;
+    --color-bark-800: #171b5a;
+    --color-bark-900: #09094b;
+    --color-ink: #20202b;
+    --color-brand: #09094b;
+    --color-paper: #fffdf8;
 
   /* Latin resolves from Fraunces/Manrope; Tamil glyphs are absent there, so the
      browser falls through to the Noto Tamil faces per glyph. */
@@ -42,11 +43,13 @@
   --font-display:
     var(--font-display-family), var(--font-display-tamil), ui-serif, Georgia,
     "Times New Roman", serif;
+  --font-mono:
+    var(--font-mono-family), ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
 
   /* Layered, warm-tinted shadows read as depth; flat grey ones look cheap. */
-  --shadow-soft: 0 1px 2px rgb(0 0 128 / 0.05), 0 4px 12px rgb(0 0 128 / 0.07);
-  --shadow-lift: 0 4px 8px rgb(0 0 128 / 0.08), 0 16px 34px rgb(0 0 128 / 0.20);
-  --shadow-glass: 0 1px 0 rgb(255 255 255 / 0.5) inset, 0 8px 32px rgb(0 0 128 / 0.10);
+  --shadow-soft: 0 1px 2px rgb(9 9 75 / 0.04), 0 8px 24px rgb(9 9 75 / 0.06);
+  --shadow-lift: 0 8px 18px rgb(9 9 75 / 0.09), 0 28px 64px rgb(9 9 75 / 0.16);
+  --shadow-glass: 0 1px 0 rgb(255 255 255 / 0.75) inset, 0 14px 48px rgb(9 9 75 / 0.08);
 
   /* Tailwind's smallest default is 40rem. 24rem is where the header has real
      slack with the wordmark shown (measured: negative slack at 23rem). */
@@ -99,9 +102,8 @@ body {
   -webkit-font-smoothing: antialiased;
   /* Warm light behind the whole page so flat sections still feel lit. */
   background-image:
-    radial-gradient(38rem 38rem at 12% -8%, rgb(236 147 70 / 0.10), transparent 60%),
-    radial-gradient(34rem 34rem at 92% 4%, rgb(75 143 94 / 0.10), transparent 62%);
-  background-attachment: fixed;
+    radial-gradient(44rem 26rem at 8% -6%, rgb(236 147 70 / 0.11), transparent 62%),
+    radial-gradient(42rem 24rem at 92% 0%, rgb(75 143 94 / 0.09), transparent 64%);
 }
 
 h1,
@@ -109,7 +111,12 @@ h2,
 h3 {
   font-family: var(--font-display);
   font-optical-sizing: auto;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
 }
 
 /* Tamil script needs different typographic defaults from Latin, so these override
@@ -132,6 +139,7 @@ html:lang(ta) h1,
 html:lang(ta) h2,
 html:lang(ta) h3 {
   line-height: 1.3;
+  text-wrap: pretty;
 }
 
 /* Keep keyboard focus clearly visible for accessibility. */
@@ -157,7 +165,7 @@ html:lang(ta) h3 {
 }
 
 .card-lift:hover {
-  transform: translateY(-6px);
+  transform: translateY(-4px);
   box-shadow: var(--shadow-lift);
   border-color: color-mix(in oklab, var(--color-marigold-400) 70%, transparent);
 }
@@ -203,26 +211,68 @@ html:lang(ta) h3 {
    browser targets need. */
 @layer components {
   .glass {
-    background-color: rgb(255 255 255 / 0.62);
-    backdrop-filter: blur(16px) saturate(150%);
-    border: 1px solid rgb(255 255 255 / 0.65);
-    box-shadow: var(--shadow-glass);
+    background-color: var(--color-paper);
+    border: 1px solid var(--color-bark-200);
+    box-shadow: var(--shadow-soft);
   }
 
-  /* Grid surface. Deliberately a lighter blur than `glass`: backdrop-filter is
-     the expensive part, and a shop page paints 31 of these at once. */
+  /* Dense lists use an opaque paper surface. This removes dozens of expensive
+     backdrop-filter layers and makes photography and typography lead. */
   .glass-card {
-    background-color: rgb(255 255 255 / 0.74);
-    backdrop-filter: blur(7px) saturate(140%);
-    border: 1px solid rgb(255 255 255 / 0.7);
+    background-color: var(--color-paper);
+    border: 1px solid var(--color-bark-200);
     box-shadow: var(--shadow-soft);
   }
 
   /* For glass sitting on the dark navy hero. */
   .glass-dark {
-    background-color: rgb(255 255 255 / 0.1);
-    backdrop-filter: blur(14px) saturate(140%);
-    border: 1px solid rgb(255 255 255 / 0.22);
+    background-color: rgb(255 255 255 / 0.09);
+    backdrop-filter: blur(18px) saturate(125%);
+    border: 1px solid rgb(255 255 255 / 0.20);
+  }
+
+  .editorial-panel {
+    background: var(--color-paper);
+    border: 1px solid var(--color-bark-200);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .section-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: var(--color-leaf-700);
+    font-size: 0.72rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+  }
+
+  .section-kicker::before {
+    content: "";
+    width: 1.8rem;
+    height: 1px;
+    background: currentColor;
+  }
+
+  .editorial-heading {
+    color: var(--color-bark-900);
+    font-size: clamp(2rem, 5vw, 4.5rem);
+    line-height: 0.98;
+    font-weight: 450;
+  }
+
+  .ledger-row {
+    border-top: 1px solid var(--color-bark-200);
+  }
+
+  .portal-shell {
+    background-color: var(--color-bark-50);
+    background-image:
+      linear-gradient(rgb(9 9 75 / 0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(9 9 75 / 0.025) 1px, transparent 1px);
+    background-size: 32px 32px;
   }
 }
 
@@ -344,4 +394,620 @@ html:lang(ta) h3 {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* -------------------------------------------------------------------------
+   Living Farm Atlas. The landscape is built from local CSS/SVG geometry: no
+   WebGL, tracking script, remote asset, or delayed canvas. Each depth plane
+   moves by a different amount under a fine pointer and becomes still under
+   reduced motion. */
+
+.farm-world {
+  --farm-x: 0;
+  --farm-y: 0;
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 30rem;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 0.45);
+  border-radius: 2.5rem;
+  background: #c9e6d9;
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.65) inset,
+    0 30px 80px rgb(9 9 75 / 0.22);
+  perspective: 900px;
+  transform-style: preserve-3d;
+}
+
+.farm-world__sky {
+  position: absolute;
+  inset: 0 0 42%;
+  background:
+    linear-gradient(180deg, #dff3ed 0%, #b9ded5 62%, #e9d9ae 100%);
+  transform: translate3d(
+    calc(var(--farm-x) * -3px),
+    calc(var(--farm-y) * -2px),
+    -40px
+  ) scale(1.08);
+  transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.farm-world__sun {
+  position: absolute;
+  right: 16%;
+  top: 12%;
+  width: 5.5rem;
+  height: 5.5rem;
+  border-radius: 50%;
+  background: #f5bd58;
+  box-shadow: 0 0 0 1.6rem rgb(245 189 88 / 0.12), 0 0 5rem rgb(245 189 88 / 0.45);
+  transform: translate3d(
+    calc(var(--farm-x) * -8px),
+    calc(var(--farm-y) * -5px),
+    0
+  );
+  transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.farm-world__cloud {
+  position: absolute;
+  width: 7rem;
+  height: 1.6rem;
+  border-radius: 99rem;
+  background: rgb(255 255 255 / 0.64);
+  filter: blur(0.5px);
+  animation: cloud-drift 14s ease-in-out infinite alternate;
+}
+
+.farm-world__cloud::before,
+.farm-world__cloud::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  border-radius: 50%;
+  background: inherit;
+}
+
+.farm-world__cloud::before {
+  left: 1rem;
+  width: 2.8rem;
+  height: 2.8rem;
+}
+
+.farm-world__cloud::after {
+  right: 1.1rem;
+  width: 2.1rem;
+  height: 2.1rem;
+}
+
+.farm-world__cloud--one {
+  left: 8%;
+  top: 15%;
+}
+
+.farm-world__cloud--two {
+  right: 3%;
+  top: 34%;
+  width: 4.4rem;
+  height: 1rem;
+  opacity: 0.72;
+  animation-delay: -7s;
+}
+
+.farm-world__mountains {
+  position: absolute;
+  inset-inline: -5%;
+  width: 110%;
+  transition: transform 750ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.farm-world__mountains--far {
+  bottom: 31%;
+  height: 48%;
+  opacity: 0.72;
+  transform: translate3d(
+    calc(var(--farm-x) * -5px),
+    calc(var(--farm-y) * -3px),
+    -20px
+  ) scale(1.04);
+}
+
+.farm-world__mountains--near {
+  bottom: 25%;
+  height: 36%;
+  transform: translate3d(
+    calc(var(--farm-x) * -11px),
+    calc(var(--farm-y) * -5px),
+    18px
+  ) scale(1.04);
+}
+
+.farm-world__field {
+  position: absolute;
+  transform-origin: 50% 100%;
+  transition: transform 650ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.farm-world__field--back {
+  inset: 54% -8% -10%;
+  background:
+    repeating-linear-gradient(102deg, transparent 0 2rem, rgb(255 255 255 / 0.09) 2rem 2.2rem),
+    linear-gradient(180deg, #80a95e, #47763e);
+  clip-path: polygon(0 12%, 47% 0, 100% 16%, 100% 100%, 0 100%);
+  transform: translate3d(calc(var(--farm-x) * -6px), calc(var(--farm-y) * -2px), 24px);
+}
+
+.farm-world__field--left,
+.farm-world__field--right {
+  bottom: -3%;
+  width: 55%;
+  height: 42%;
+  overflow: hidden;
+  background: #6f9448;
+  transform: rotate(var(--field-rotate, 0deg)) rotateX(57deg) translate3d(calc(var(--farm-x) * -10px), 8%, 75px);
+}
+
+.farm-world__field--left {
+  --field-rotate: 5deg;
+  left: -8%;
+  clip-path: polygon(0 14%, 100% 0, 78% 100%, 0 100%);
+}
+
+.farm-world__field--right {
+  --field-rotate: -5deg;
+  right: -8%;
+  clip-path: polygon(0 0, 100% 14%, 100% 100%, 22% 100%);
+}
+
+.farm-world__field span {
+  position: absolute;
+  inset-inline: -20%;
+  top: calc(var(--row) * 14%);
+  height: 5%;
+  border-top: 0.28rem solid rgb(240 193 75 / 0.78);
+  box-shadow: 0 -0.18rem rgb(37 91 50 / 0.62);
+  transform: rotate(-4deg);
+}
+
+.farm-world__field--right span {
+  transform: rotate(4deg);
+}
+
+.farm-world__path {
+  position: absolute;
+  z-index: 4;
+  left: 42%;
+  bottom: -4%;
+  width: 25%;
+  height: 47%;
+  background: linear-gradient(180deg, #d9bd86, #a97d45);
+  clip-path: polygon(44% 0, 58% 0, 100% 100%, 0 100%);
+  transform: translate3d(calc(var(--farm-x) * -2px), 0, 80px);
+}
+
+.farm-world__house {
+  position: absolute;
+  z-index: 6;
+  left: 51%;
+  bottom: 31%;
+  width: 7.6rem;
+  height: 6.5rem;
+  transform: translate3d(
+    calc(var(--farm-x) * -18px),
+    calc(var(--farm-y) * -9px),
+    90px
+  );
+  transition: transform 550ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.farm-world__wall {
+  position: absolute;
+  inset: 2rem 0 0;
+  border-radius: 0.35rem;
+  background: #f4e7cf;
+  box-shadow: 0.7rem 0.8rem 1.3rem rgb(9 9 75 / 0.18);
+}
+
+.farm-world__roof {
+  position: absolute;
+  z-index: 2;
+  left: -0.7rem;
+  top: 0;
+  width: 9rem;
+  height: 3.2rem;
+  background: #a54932;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+.farm-world__door,
+.farm-world__window {
+  position: absolute;
+  z-index: 3;
+  bottom: 0;
+  background: #334c3a;
+}
+
+.farm-world__door {
+  left: 3.2rem;
+  width: 1.4rem;
+  height: 2.8rem;
+}
+
+.farm-world__window {
+  right: 1.1rem;
+  bottom: 1.8rem;
+  width: 1.25rem;
+  height: 1.1rem;
+  background: #76a8a1;
+  box-shadow: -4.8rem 0 #76a8a1;
+}
+
+.farm-world__tree {
+  position: absolute;
+  z-index: 6;
+  width: 4.4rem;
+  height: 7rem;
+  transform: translate3d(calc(var(--farm-x) * -14px), calc(var(--farm-y) * -7px), 88px) scale(var(--tree-scale, 1));
+  transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.farm-world__tree span {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 0.55rem;
+  height: 3.5rem;
+  border-radius: 1rem;
+  background: #76513c;
+}
+
+.farm-world__tree i {
+  position: absolute;
+  inset: 0 0 2rem;
+  border-radius: 54% 46% 57% 43%;
+  background: #2f6845;
+  box-shadow: inset -1rem -0.7rem rgb(25 76 48 / 0.32);
+}
+
+.farm-world__tree--one { --tree-scale: 0.78; left: 36%; bottom: 30%; }
+.farm-world__tree--two { --tree-scale: 0.62; right: 12%; bottom: 29%; }
+.farm-world__tree--three { --tree-scale: 0.52; left: 13%; bottom: 29%; }
+
+.farm-world__crop-front {
+  position: absolute;
+  z-index: 9;
+  inset: auto -2% -1% 0;
+  height: 20%;
+  display: flex;
+  align-items: end;
+  justify-content: space-around;
+  transform: translate3d(calc(var(--farm-x) * -24px), calc(var(--farm-y) * -10px), 125px);
+  transition: transform 450ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.farm-world__crop-front > span {
+  --tilt: calc((var(--stalk) - 7) * 0.55deg);
+  position: relative;
+  width: 0.24rem;
+  height: var(--stalk-height);
+  border-radius: 99rem;
+  background: #315a31;
+  transform: rotate(var(--tilt));
+  transform-origin: 50% 100%;
+  animation: stalk-sway 3.8s ease-in-out infinite alternate;
+  animation-delay: calc(var(--stalk) * -180ms);
+}
+
+.farm-world__crop-front i,
+.farm-world__crop-front b {
+  position: absolute;
+  width: 1.2rem;
+  height: 0.55rem;
+  border-radius: 100% 0 100% 0;
+  background: #739c45;
+}
+
+.farm-world__crop-front i { left: -1rem; top: 45%; transform: rotate(22deg); }
+.farm-world__crop-front b { right: -1rem; top: 64%; transform: rotate(158deg); }
+
+.farm-world__card {
+  position: absolute;
+  z-index: 12;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-width: 9.5rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid rgb(255 255 255 / 0.78);
+  border-radius: 1.1rem;
+  background: rgb(255 253 248 / 0.82);
+  color: var(--color-bark-900);
+  box-shadow: 0 18px 45px rgb(9 9 75 / 0.16);
+  backdrop-filter: blur(14px);
+  transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.farm-world__card b,
+.farm-world__card small {
+  display: block;
+}
+
+.farm-world__card b {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.farm-world__card small {
+  margin-top: 0.18rem;
+  max-width: 9rem;
+  color: var(--color-bark-600);
+  font-size: 0.62rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.farm-world__card-icon {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  flex: none;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--color-leaf-100);
+  color: var(--color-leaf-800);
+}
+
+.farm-world__card--verify {
+  left: 5%;
+  top: 15%;
+  transform: translate3d(calc(var(--farm-x) * 20px), calc(var(--farm-y) * 14px), 140px) rotate(-2deg);
+}
+
+.farm-world__card--place {
+  right: 4%;
+  bottom: 17%;
+  color: var(--color-leaf-700);
+  transform: translate3d(calc(var(--farm-x) * 28px), calc(var(--farm-y) * 17px), 160px) rotate(2deg);
+}
+
+.farm-world__seal {
+  position: absolute;
+  z-index: 14;
+  right: 7%;
+  top: 8%;
+  display: grid;
+  width: 3.2rem;
+  height: 3.2rem;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--color-bark-900);
+  color: var(--color-marigold-400);
+  font-size: 1.55rem;
+  box-shadow: 0 12px 32px rgb(9 9 75 / 0.24);
+  transform: translate3d(calc(var(--farm-x) * 32px), calc(var(--farm-y) * 20px), 180px);
+  transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+  animation: seal-float 4.5s ease-in-out infinite;
+}
+
+@keyframes cloud-drift {
+  to { transform: translateX(1.5rem); }
+}
+
+@keyframes stalk-sway {
+  from { transform: rotate(var(--tilt)); }
+  to { transform: rotate(calc(var(--tilt) + 2deg)); }
+}
+
+@keyframes seal-float {
+  50% { margin-top: -0.45rem; }
+}
+
+/* Content is visible by default. Browsers that support the scripting media
+   feature hide only while the observer is active, so a no-JS page never loses
+   its content. */
+.reveal {
+  opacity: 1;
+  transform: none;
+}
+
+@media (scripting: enabled) {
+  .reveal {
+    opacity: 0;
+    transition:
+      opacity 700ms ease var(--reveal-delay, 0ms),
+      transform 850ms cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms),
+      clip-path 850ms cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms);
+    will-change: opacity, transform, clip-path;
+  }
+
+  .reveal-up { transform: translateY(2.5rem); }
+  .reveal-left {
+    transform: translateY(2rem) scale(0.99);
+    clip-path: inset(0 5% 0 0 round 2rem);
+  }
+  .reveal-right {
+    transform: translateY(2rem) scale(0.99);
+    clip-path: inset(0 0 0 5% round 2rem);
+  }
+  .reveal-scale { transform: scale(0.96); }
+
+  .reveal[data-visible="true"] {
+    opacity: 1;
+    transform: none;
+    clip-path: inset(0);
+  }
+}
+
+@media (max-width: 40rem) {
+  .farm-world {
+    min-height: 23rem;
+    border-radius: 1.75rem;
+  }
+
+  .farm-world__card--verify {
+    left: 4%;
+    top: 5%;
+  }
+
+  .farm-world__card--place {
+    right: 3%;
+    bottom: 9%;
+  }
+
+  .farm-world__seal {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce), (hover: none), (pointer: coarse) {
+  .farm-world *,
+  .farm-world *::before,
+  .farm-world *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+.auth-landscape::before,
+.auth-landscape::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+
+.auth-landscape::before {
+  right: -12%;
+  bottom: -12%;
+  width: 88%;
+  height: 50%;
+  border-radius: 50% 0 0;
+  background:
+    repeating-linear-gradient(105deg, transparent 0 1.5rem, rgb(236 147 70 / 0.18) 1.5rem 1.65rem),
+    #2d5f42;
+  transform: skewY(-8deg);
+}
+
+.auth-landscape::after {
+  right: 8%;
+  bottom: 21%;
+  width: 8rem;
+  height: 8rem;
+  border-radius: 50%;
+  background: rgb(236 147 70 / 0.22);
+  filter: blur(1px);
+}
+
+.storefront-illustration {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: linear-gradient(180deg, #dff0e8 0 58%, #afca93 58% 100%);
+}
+
+.storefront-illustration__sun {
+  position: absolute;
+  right: 12%;
+  top: 12%;
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 50%;
+  background: #f4bc57;
+  box-shadow: 0 0 0 1.1rem rgb(244 188 87 / 0.14);
+}
+
+.storefront-illustration__ground {
+  position: absolute;
+  inset: 66% -10% -20%;
+  border-radius: 50% 50% 0 0;
+  background: #5f8d58;
+  transform: rotate(-4deg);
+}
+
+.storefront-illustration__shop {
+  position: absolute;
+  left: 50%;
+  bottom: 15%;
+  width: 48%;
+  height: 48%;
+  border-radius: 0.45rem;
+  background: #fff6e7;
+  box-shadow: 1rem 1.1rem 2.2rem rgb(9 9 75 / 0.18);
+  transform: translateX(-50%);
+}
+
+.storefront-illustration__awning {
+  position: absolute;
+  z-index: 2;
+  inset: -13% -6% auto;
+  height: 26%;
+  border-radius: 0.4rem 0.4rem 1rem 1rem;
+  background: repeating-linear-gradient(90deg, #a84935 0 14%, #f1d9b0 14% 28%);
+  box-shadow: 0 0.45rem 0 rgb(9 9 75 / 0.10);
+}
+
+.storefront-illustration__door,
+.storefront-illustration__window {
+  position: absolute;
+  bottom: 0;
+  background: #376253;
+}
+
+.storefront-illustration__door {
+  left: 14%;
+  width: 23%;
+  height: 54%;
+}
+
+.storefront-illustration__window {
+  right: 11%;
+  bottom: 18%;
+  width: 38%;
+  height: 30%;
+  border: 0.25rem solid #4c7368;
+  background: #b9ded7;
+}
+
+.storefront-illustration__sign {
+  position: absolute;
+  left: 50%;
+  top: 20%;
+  display: grid;
+  width: 1.8rem;
+  height: 1.8rem;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--color-bark-900);
+  color: var(--color-marigold-400);
+  font-family: var(--font-display);
+  font-style: normal;
+  transform: translateX(-50%);
+}
+
+.storefront-illustration__plant {
+  position: absolute;
+  bottom: 11%;
+  width: 1.1rem;
+  height: 4.6rem;
+  border-radius: 80% 20% 80% 20%;
+  background: #2f6845;
+  transform-origin: 50% 100%;
+  box-shadow: 1rem 0 #477f55, -0.8rem 0.3rem #3a744c;
+}
+
+.storefront-illustration__plant--one { left: 14%; transform: rotate(-10deg); }
+.storefront-illustration__plant--two { right: 12%; transform: rotate(10deg) scale(0.8); }
+
+.storefront-illustration--compact .storefront-illustration__shop {
+  width: 58%;
+  height: 52%;
 }

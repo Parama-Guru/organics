@@ -10,6 +10,7 @@ import { clientKeyFromHeaders, rateLimit } from "@/lib/rate-limit";
 import { isSameOrigin } from "@/lib/same-origin";
 import { storeApplicationSchema } from "@/lib/store-application-schema";
 import { notifyApplication } from "@/lib/notifications";
+import { endOfIndiaDate } from "@/lib/india-date";
 
 export const dynamic = "force-dynamic";
 
@@ -91,6 +92,9 @@ export async function POST(request: NextRequest) {
         fssaiNumber: input.fssaiNumber,
         certifier: input.certifier || null,
         certificateNo: input.certificateNo || null,
+        certifiedUntil: input.certifiedUntil
+          ? endOfIndiaDate(input.certifiedUntil)
+          : null,
         certificateUrl: input.certificateUrl || null,
         // Status is never taken from the request; an admin promotes to VERIFIED.
         status: "PENDING",

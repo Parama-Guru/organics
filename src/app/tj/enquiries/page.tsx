@@ -125,6 +125,7 @@ export default async function AdminEnquiriesPage({ searchParams }: PageProps<"/t
                       {enquiry.deliveryStatus}
                     </Badge>
                     {enquiry.handledAt ? <Badge tone="neutral">RESOLVED</Badge> : null}
+                    {enquiry.sellerReadAt ? <Badge tone="leaf">SELLER READ</Badge> : null}
                   </div>
                   <p className="mt-1 text-sm text-bark-600">
                     {enquiry.customer.name} ({enquiry.senderEmail}) → {enquiry.recipientName} (
@@ -133,6 +134,7 @@ export default async function AdminEnquiriesPage({ searchParams }: PageProps<"/t
                   <p className="mt-1 text-xs text-bark-600">
                     Reference {enquiry.id} · {enquiry.createdAt.toISOString()} · {enquiry.shareEmail ? "reply email shared" : "reply email private"}
                     {enquiry.sentAt ? ` · sent ${enquiry.sentAt.toISOString()}` : ""}
+                    {enquiry.sellerReadAt ? ` · opened ${enquiry.sellerReadAt.toISOString()}` : ""}
                   </p>
                 </div>
                 <EnquiryHandledButton

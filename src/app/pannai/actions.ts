@@ -19,7 +19,7 @@ import {
   setFarmerProductActive,
   updateFarmerProduct,
 } from "@/lib/farmer-products";
-import { hashPassword, verifyPassword } from "@/lib/password";
+import { fakeVerify, hashPassword, verifyPassword } from "@/lib/password";
 import { prisma } from "@/lib/prisma";
 import { clientKeyFromHeaders } from "@/lib/rate-limit";
 import { consumeRateLimit } from "@/lib/session-store";
@@ -97,11 +97,13 @@ export async function farmerSignInAction(
 
   // One message for every failure, so the form cannot be used to work out which
   // farms exist or which are suspended.
+  const passwordMatches = farmer?.passwordHash
+    ? await verifyPassword(password, farmer.passwordHash)
+    : await fakeVerify(password).then(() => false);
   const ok =
-    farmer?.passwordHash &&
-    farmer.status === "VERIFIED" &&
-    farmer.portalEnabledAt &&
-    (await verifyPassword(password, farmer.passwordHash));
+    passwordMatches &&
+    farmer?.status === "VERIFIED" &&
+    Boolean(farmer.portalEnabledAt);
 
   if (!ok || !farmer) return { error: "badCredentials", values };
 
@@ -134,19 +136,26 @@ export async function acceptInviteAction(
   if (!perFarm.allowed || !perIp.allowed) return { error: "rateLimited" };
 
   const password = String(form.get("password") ?? "");
-  if (password.length < 10) return { error: "invalid", fields: ["password"] };
-
-  // Atomically consumed only when the supplied token exactly matches.
-  const valid = await consumeFarmerInvite(farmId, token);
-  if (!valid) return { error: "inviteExpired" };
+  if (password.length < 10 || password.trim().length < 10) {
+    return { error: "invalid", fields: ["password"] };
+  }
 
   // Re-checked here, not just on the page that drew the form: the farm may have
   // been suspended between the link being opened and the password being typed.
   const farmer = await prisma.farmer.findFirst({
     where: { id: farmId, status: "VERIFIED" },
-    select: { id: true },
+    select: { id: true, email: true },
   });
   if (!farmer) return { error: "inviteExpired" };
+  const emailName = farmer.email.split("@")[0]?.toLowerCase();
+  if (emailName && password.toLowerCase().includes(emailName)) {
+    return { error: "emailPassword", fields: ["password"] };
+  }
+
+  // Atomically consumed only when the supplied token exactly matches, after
+  // all password checks so a correct link is not burned by invalid input.
+  const valid = await consumeFarmerInvite(farmId, token);
+  if (!valid) return { error: "inviteExpired" };
 
   const updated = await prisma.farmer.update({
     where: { id: farmer.id },
@@ -229,5 +238,20 @@ export async function toggleProductActiveAction(
   if (!farmer) redirect(`${FARMER_PORTAL}/sign-in`);
 
   await setFarmerProductActive(farmer.id, productId, isActive);
+  revalidatePath(FARMER_PORTAL);
+}
+
+export async function setFarmerEnquiryReadAction(
+  enquiryId: string,
+  read: boolean,
+): Promise<void> {
+  const farmer = await getFarmer();
+  if (!farmer) redirect(`${FARMER_PORTAL}/sign-in`);
+
+  await prisma.privateEnquiry.updateMany({
+    where: { id: enquiryId, farmerId: farmer.id },
+    data: { sellerReadAt: read ? new Date() : null },
+  });
+  revalidatePath(`${FARMER_PORTAL}/enquiries`);
   revalidatePath(FARMER_PORTAL);
 }

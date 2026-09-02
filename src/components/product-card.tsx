@@ -30,12 +30,12 @@ export async function ProductCard({
     <GlassPanel
       as="article"
       surface="card"
-      className="card-lift group flex h-full flex-col overflow-hidden rounded-3xl"
+      className="card-lift group flex h-full flex-col overflow-hidden rounded-[1.75rem]"
     >
       {/* Decorative duplicate of the title link, so it is kept out of the a11y tree. */}
       <Link
         href={href}
-        className="relative block aspect-[8/5] overflow-hidden bg-leaf-50"
+        className="relative block aspect-[4/3] overflow-hidden bg-leaf-50"
         aria-hidden
         tabIndex={-1}
       >
@@ -55,9 +55,9 @@ export async function ProductCard({
         )}
       </Link>
 
-      <div className="flex flex-1 flex-col gap-1.5 p-4">
+      <div className="flex flex-1 flex-col gap-2 p-5">
         {/* Two lines: "சமையலறைப் பொருட்கள்" does not fit one at this width. */}
-        <p className="line-clamp-2 min-h-[2.1rem] text-xs font-semibold uppercase tracking-[0.06em] text-leaf-700">
+        <p className="section-kicker line-clamp-2 min-h-[1.8rem]">
           {localised(locale, product.category.name, product.category.nameTa)}
         </p>
 
@@ -65,7 +65,7 @@ export async function ProductCard({
             "மரச்செக்கு தேங்காய் எண்ணெய்" lost the word "oil". The reserved height
             matches three lines exactly, so a short name and a long one occupy
             the same box and the grid stays flush. */}
-        <h3 className="line-clamp-3 min-h-[4.35rem] font-display text-[1.0625rem] leading-snug sm:min-h-[4.6rem] sm:text-lg">
+        <h3 className="line-clamp-3 min-h-[4.8rem] font-display text-xl font-medium leading-[1.2] text-bark-900 sm:text-[1.35rem]">
           <Link
             href={href}
             className="decoration-marigold-500 decoration-2 underline-offset-4 hover:underline"
@@ -74,7 +74,7 @@ export async function ProductCard({
           </Link>
         </h3>
 
-        <p className="line-clamp-2 min-h-[2.5rem] text-sm leading-relaxed text-ink">
+        <p className="line-clamp-2 min-h-[2.8rem] text-sm leading-relaxed text-bark-600">
           {localised(locale, product.description, product.descriptionTa)}
         </p>
 
@@ -82,7 +82,7 @@ export async function ProductCard({
             than the single clamped line that hid 67% of every Tamil farm name.
             Reserved and capped at two so the grid stays uniform. */}
         {product.farmer ? (
-          <p className="mt-0.5 flex min-h-[2.5rem] items-start gap-1.5 text-[0.8125rem] leading-snug sm:text-sm">
+          <p className="mt-1 flex min-h-[2.5rem] items-start gap-1.5 text-sm leading-snug">
             <LeafMark aria-hidden className="mt-0.5 shrink-0 text-leaf-600" />
             <Link
               href={localePath(locale, `/farmers/${product.farmer.slug}`)}
@@ -118,8 +118,8 @@ export async function ProductCard({
         {/* Price and unit stack rather than share a line. Clamped to one line the
             Tamil unit lost half its text — "6 எண் பெட்டி" became "6 எண்…" — and
             the quantity is half of what a price means. */}
-        <div className="mt-auto border-t border-bark-200/60 pt-3">
-          <p className="whitespace-nowrap font-display text-2xl leading-tight">
+        <div className="mt-auto border-t border-bark-200 pt-4">
+          <p className="whitespace-nowrap font-display text-[1.75rem] font-medium leading-tight text-bark-900">
             {formatMoney(product.priceCents)}
           </p>
           <p className="min-h-[2.3rem] text-sm leading-snug text-bark-600">

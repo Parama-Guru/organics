@@ -26,8 +26,8 @@ type Existing = {
 };
 
 const control =
-  "mt-1.5 w-full rounded-xl border border-bark-200 bg-white px-3.5 py-2.5 " +
-  "focus:border-marigold-400 focus:outline-none focus:ring-4 focus:ring-marigold-400/25";
+  "mt-2 w-full rounded-2xl border border-bark-200 bg-paper px-4 py-3 " +
+  "focus:border-leaf-500 focus:outline-none focus:ring-4 focus:ring-leaf-400/20";
 
 function Field({
   label,

@@ -19,6 +19,7 @@ export async function hashPassword(password: string): Promise<string> {
 }
 
 export async function verifyPassword(password: string, stored: string): Promise<boolean> {
+  if (!/^scrypt:[0-9a-f]{32}:[0-9a-f]{128}$/.test(stored)) return false;
   const [scheme, saltHex, keyHex] = stored.split(":");
   if (scheme !== "scrypt" || !saltHex || !keyHex) return false;
 

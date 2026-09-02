@@ -62,6 +62,8 @@ jobs:
       - name: Seed the catalog
         run: npm run db:seed
 
+      - run: npm test
+
       - run: npm run lint
 
       # The example file is the only config a hosted deploy has. Checked before
