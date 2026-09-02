@@ -399,6 +399,13 @@ export const en = {
     step3BodySoon:
       "Your produce appears in the shop. We ring you to confirm before your number goes live, and buyers contact you directly after that.",
     applyHeading: "Apply to list",
+    chooseLabel: "What are you registering?",
+    chooseFarm: "I grow it",
+    chooseFarmHint: "A farm listing its own produce.",
+    chooseStore: "I sell it",
+    chooseStoreHint: "An organic shop reselling checked produce.",
+    fieldGuide: "Application field guide",
+    farmRecord: "Your farm record",
   },
 
   application: {
@@ -475,6 +482,8 @@ export const en = {
     step3Title: "Buyers find you",
     step3Body: "Your shop appears in the directory under your district, with your address.",
     applyHeading: "Apply to be listed",
+    fieldGuide: "Store review field guide",
+    storeRecord: "Your store record",
     storeName: "Shop name",
     contactName: "Your name",
     email: "Email",

@@ -3,10 +3,10 @@
 Updated as work lands. `[x]` = done and verified, `[ ]` = not done, `[~]` = done
 but blocked on something outside the code.
 
-**Score: 169 done · 10 blocked · 15 open**
+**Score: 182 done · 10 blocked · 15 open**
 
-Last updated: 2026-09-02 · Member-only price and contact; every remaining item is
-an external account action, not code
+Last updated: 2026-09-02 · Home page 28% shorter, crop-index and cursor motion,
+seller type chooser on /sell
 
 ---
 
@@ -284,6 +284,62 @@ a buyer would act on is not.
       field. Verified signed in: price, price sorting and contact all return.
 
 ---
+## Density, motion and the seller chooser
+
+Measured on the home page at 1440px before touching anything: the page was
+6866px tall and "This week's pick" alone was 2137px of it — 31% of the page for
+three items. The footer was another 703px in its own dark slab, directly below
+the dark closing chapter, so the page ended in one heavy block after another.
+
+### Density
+- [x] Rebuild the featured story from a full-width alternating band (~450px each)
+      into an upright card, and lay the three out in one row. 2137px → 704px.
+- [x] Show three picks rather than four, so the row divides evenly and no card
+      is orphaned onto a second line.
+- [x] Compact the "Who is on OSSIL" band: heading beside the counts instead of
+      above them, smaller figures, less padding. 374px → 258px.
+- [x] Merge the footer into the page background — no dark slab, no rounded
+      corners, one hairline rule — and drop the blurb that was printed twice.
+      703px → 412px.
+- [x] Home page total 6866px → 4930px, a 28% reduction, with nothing removed
+      except the duplicated blurb.
+
+### Motion
+- [x] Keep the crop index alignment and add motion to it: a light sweep across
+      the tile, a slower deeper image zoom, and the listing count rising into
+      view on hover. The count is shown outright on touch and under reduced
+      motion, because it is information rather than decoration.
+- [x] Add a cursor companion: a ring that eases toward the pointer and widens
+      over anything interactive. Position is written inside a rAF rather than
+      through React state, so it costs no re-renders. It is `pointer-events:
+      none`, is skipped entirely on coarse pointers, and is removed under
+      reduced motion.
+- [x] Take the hero index board out of the scroll-reveal wrapper. It sits above
+      the fold, so it should never wait on an observer.
+- [x] Give `Reveal` a failsafe timer. A fast flick or a restored scroll position
+      can carry an element past an IntersectionObserver without it ever
+      reporting, which would have left that content hidden for good.
+
+### Seller chooser
+- [x] `/sell` now asks whether you grow it or sell it and swaps in the farmer or
+      the organic-store form. Driven by `?type=store` rather than client state,
+      so the choice survives a reload, can be linked to, and works before the
+      page hydrates. `/stores/register` still works as its own direct entry.
+- [x] Translate the four labels that were hardcoded English on the two
+      application pages — "Application field guide", "Your farm record",
+      "Store review field guide", "Your store record" — which had been showing
+      in English on the Tamil pages.
+
+### Verification
+- [x] 240 page loads and 96 axe runs across 24 paths, five widths, both themes
+      and both languages: zero WCAG 2 A/AA violations, zero horizontal overflow,
+      zero console errors.
+- [x] Removed the ghosted footer wordmark. It was decorative text at 12% opacity
+      that failed contrast on every single page, and it repeated the wordmark
+      already directly above it.
+
+---
+
 ## Customer phase — access, Google sign-in and profile
 
 ### Access and entitlement

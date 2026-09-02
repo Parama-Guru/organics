@@ -240,6 +240,7 @@ export const getCategories = unstable_cache(
           orderBy: { name: "asc" },
           take: 1,
         },
+        _count: { select: { products: { where: publicProductWhere() } } },
       },
       orderBy: { name: "asc" },
     }),

@@ -338,6 +338,130 @@ html:lang(ta) .editorial-heading {
   }
 }
 
+/* -------------------------------------------------------------------------
+   Crop index tiles. A light sweep and a count that rises on hover, so the
+   grid reads as a set of doors rather than six static pictures.
+   ---------------------------------------------------------------------- */
+
+.crop-tile__sheen {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 38%,
+    rgb(255 255 255 / 0.16) 50%,
+    transparent 62%
+  );
+  transform: translateX(-100%);
+  transition: transform 900ms var(--ease-settle);
+  pointer-events: none;
+}
+
+.crop-tile:hover .crop-tile__sheen,
+.crop-tile:focus-visible .crop-tile__sheen {
+  transform: translateX(100%);
+}
+
+.crop-tile__count {
+  opacity: 0;
+  transform: translateY(0.4rem);
+  transition:
+    opacity 300ms var(--ease-tint),
+    transform 300ms var(--ease-settle);
+}
+
+.crop-tile:hover .crop-tile__count,
+.crop-tile:focus-visible .crop-tile__count {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crop-tile__sheen {
+    display: none;
+  }
+
+  .crop-tile__count {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* The count carries real information, so a device that cannot hover shows it. */
+@media (hover: none) {
+  .crop-tile__count {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* -------------------------------------------------------------------------
+   Cursor companion. A soft ring that trails the pointer and widens over
+   anything interactive. Decorative only: it never receives events, is drawn
+   only for fine pointers, and is removed entirely under reduced motion.
+   ---------------------------------------------------------------------- */
+
+.cursor-ring {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 60;
+  height: 2rem;
+  width: 2rem;
+  margin: -1rem 0 0 -1rem;
+  border: 1.5px solid color-mix(in oklab, var(--color-marigold-500) 70%, transparent);
+  border-radius: 9999px;
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+  transition:
+    opacity 250ms var(--ease-tint),
+    width 250ms var(--ease-settle),
+    height 250ms var(--ease-settle),
+    margin 250ms var(--ease-settle),
+    background-color 250ms var(--ease-tint),
+    border-color 250ms var(--ease-tint);
+}
+
+.cursor-ring[data-active="true"] {
+  opacity: 1;
+}
+
+.cursor-ring[data-hot="true"] {
+  height: 3.25rem;
+  width: 3.25rem;
+  margin: -1.625rem 0 0 -1.625rem;
+  background-color: color-mix(in oklab, var(--color-marigold-500) 14%, transparent);
+  border-color: color-mix(in oklab, var(--color-marigold-500) 90%, transparent);
+}
+
+.cursor-dot {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 61;
+  height: 0.3rem;
+  width: 0.3rem;
+  margin: -0.15rem 0 0 -0.15rem;
+  border-radius: 9999px;
+  background: var(--color-marigold-600);
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform;
+  transition: opacity 250ms var(--ease-tint);
+}
+
+.cursor-dot[data-active="true"] {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor-ring,
+  .cursor-dot {
+    display: none;
+  }
+}
+
 /* Horizontal chip rails on phones: the native scrollbar renders as a full desktop
    track with arrow buttons under each row, which reads as a rendering fault. */
 @utility no-scrollbar {

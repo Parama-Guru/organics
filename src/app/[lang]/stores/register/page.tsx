@@ -29,7 +29,7 @@ export default async function StoreRegisterPage() {
 
       <div className="mt-12 grid grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[20rem_minmax(0,1fr)] lg:items-start">
       <aside className="rounded-[2rem] bg-inverse p-6 text-white lg:sticky lg:top-28 lg:p-8">
-        <p className="font-mono text-xs uppercase tracking-[0.12em] text-marigold-400">Store review field guide</p>
+        <p className="font-mono text-xs uppercase tracking-[0.12em] text-marigold-400">{t.storeApplication.fieldGuide}</p>
       <ol className="mt-5 border-t border-white/15">
         {steps.map((step, index) => (
           <li
@@ -52,7 +52,7 @@ export default async function StoreRegisterPage() {
       </aside>
 
       <section>
-      <p className="section-kicker">Your store record</p>
+      <p className="section-kicker">{t.storeApplication.storeRecord}</p>
       <h2 className="mt-5 font-display text-4xl font-medium sm:text-5xl">
         {t.storeApplication.applyHeading}
       </h2>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { DM_Mono, DM_Sans, Instrument_Serif, Noto_Sans_Tamil, Noto_Serif_Tamil } from "next/font/google";
 
 import { loadConfig } from "@conf/config";
+import { CursorCompanion } from "@/components/cursor-companion";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { accountsEnabled, getCustomer } from "@/lib/customer-auth";
@@ -116,6 +117,7 @@ export default async function RootLayout({ children }: LayoutProps<"/[lang]">) {
             {children}
           </main>
           <SiteFooter />
+          <CursorCompanion />
         </I18nProvider>
       </body>
     </html>

@@ -26,7 +26,7 @@ export const dynamic = "force-dynamic";
 
 export default async function HomePage({ searchParams }: PageProps<"/[lang]">) {
   const [featured, categories, farmers, counts, locale, t, params] = await Promise.all([
-    getFeaturedProducts(4),
+    getFeaturedProducts(3),
     getCategories(),
     getVerifiedFarmers(),
     getRegisteredCounts(),
@@ -144,7 +144,8 @@ export default async function HomePage({ searchParams }: PageProps<"/[lang]">) {
           </div>
         </div>
 
-        <Reveal variant="scale" className="min-w-0">
+        {/* Above the fold, so it is not left waiting on an observer. */}
+        <div className="min-w-0">
           <IndexBoard
             records={[
               { value: `${counts.farmers}`, label: t.home.statFarms },
@@ -154,7 +155,7 @@ export default async function HomePage({ searchParams }: PageProps<"/[lang]">) {
             verifiedChip={t.home.boardVerified}
             districtChip={t.home.boardDistrict}
           />
-        </Reveal>
+        </div>
       </section>
 
       {/* ---- Live index rail. ---------------------------------------------- */}
@@ -223,14 +224,10 @@ export default async function HomePage({ searchParams }: PageProps<"/[lang]">) {
               {t.home.emptyAfter}
             </p>
           ) : (
-            <div className="mt-10 grid gap-8 sm:gap-12">
+            <div className="mt-8 grid grid-cols-[minmax(0,1fr)] gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {featured.map((product, index) => (
-                <Reveal key={product.id} variant={index % 2 ? "right" : "left"}>
-                  <FeaturedProductStory
-                    product={product}
-                    reverse={index % 2 === 1}
-                    priority={index === 0}
-                  />
+                <Reveal key={product.id} delay={index * 70} className="min-w-0">
+                  <FeaturedProductStory product={product} priority={index === 0} />
                 </Reveal>
               ))}
             </div>
@@ -282,7 +279,7 @@ export default async function HomePage({ searchParams }: PageProps<"/[lang]">) {
                 <Reveal key={category.id} delay={index * 55} className={span}>
                   <Link
                     href={localePath(locale, `/products?category=${category.slug}`)}
-                    className="card-lift group relative flex h-full overflow-hidden rounded-[1.25rem] border border-bark-900/10 bg-inverse p-5 text-white"
+                    className="crop-tile card-lift group relative flex h-full overflow-hidden rounded-[1.25rem] border border-bark-900/10 bg-inverse p-5 text-white"
                   >
                     {category.products[0]?.imageUrl ? (
                       <Image
@@ -290,18 +287,28 @@ export default async function HomePage({ searchParams }: PageProps<"/[lang]">) {
                         alt=""
                         fill
                         sizes="(max-width: 1024px) 100vw, 50vw"
-                        className="object-cover opacity-50 transition-transform duration-700 ease-settle group-hover:scale-105"
+                        className="object-cover opacity-50 transition-transform duration-[900ms] ease-settle group-hover:scale-110"
                       />
                     ) : null}
                     <span
                       aria-hidden
-                      className="absolute inset-0 bg-gradient-to-t from-bark-900 via-bark-900/35 to-transparent"
+                      className="absolute inset-0 bg-gradient-to-t from-bark-900 via-bark-900/35 to-transparent transition-opacity duration-500 ease-tint group-hover:opacity-80"
                     />
+                    {/* Light sweeps across the tile on hover. */}
+                    <span aria-hidden className="crop-tile__sheen" />
                     <span className="relative mt-auto flex w-full items-end justify-between gap-4">
                       <span className="min-w-0">
                         <span className="rule-label text-marigold-400">0{index + 1}</span>
                         <span className="mt-2 block font-display text-2xl text-white sm:text-3xl">
                           {localised(locale, category.name, category.nameTa)}
+                        </span>
+                        <span className="crop-tile__count rule-label mt-1.5 block text-bark-100/75">
+                          {format(
+                            category._count.products === 1
+                              ? t.products.resultCount
+                              : t.products.resultCountPlural,
+                            { count: category._count.products },
+                          )}
                         </span>
                       </span>
                       <ArrowRightIcon className="shrink-0 text-2xl text-marigold-400 transition-transform duration-300 ease-settle group-hover:translate-x-1" />
@@ -379,29 +386,28 @@ export default async function HomePage({ searchParams }: PageProps<"/[lang]">) {
       </div>
 
       {/* ---- Closing ink chapter. ------------------------------------------ */}
-      <Reveal className="mt-20 sm:mt-32" variant="scale">
-        <section className="chapter-dark px-4 py-14 sm:px-6 sm:py-20">
-          <div className="mx-auto grid max-w-[90rem] grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)] lg:items-end">
+      <Reveal className="mt-16 sm:mt-24" variant="scale">
+        <section className="chapter-dark px-4 py-10 sm:px-6 sm:py-12">
+          <div className="mx-auto grid max-w-[90rem] grid-cols-[minmax(0,1fr)] gap-7 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.5fr)] lg:items-center lg:gap-12">
             <div>
-              <p className="section-kicker">{t.home.communityHeading}</p>
-              <h2 className="editorial-heading mt-5">{t.home.communityHeading}</h2>
-              <p className="mt-5 max-w-lg leading-relaxed text-bark-100/80">
+              <p className="section-kicker section-kicker--dark">{t.home.communityHeading}</p>
+              <h2 className="mt-4 font-display text-3xl font-medium leading-[1.05] text-white sm:text-4xl">
+                {t.home.communityHeading}
+              </h2>
+              <p className="mt-3 max-w-md text-sm leading-relaxed text-bark-100/80">
                 {t.home.communityIntro}
               </p>
             </div>
-            <div className="grid grid-cols-[minmax(0,1fr)] border-y border-white/15 sm:grid-cols-3">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-px bg-white/15 sm:grid-cols-3">
               {members.map((member) => (
-                <div
-                  key={member.href}
-                  className="flex min-w-0 flex-col border-b border-white/15 py-6 last:border-b-0 sm:border-b-0 sm:border-r sm:px-6 sm:last:border-r-0"
-                >
-                  <p className="font-display text-5xl leading-none text-white sm:text-6xl">
+                <div key={member.href} className="chapter-dark flex min-w-0 flex-col px-0 py-4 sm:px-5">
+                  <p className="tabular font-display text-4xl leading-none text-white sm:text-5xl">
                     {member.count}
                   </p>
-                  <p className="mt-2 min-h-12 text-sm text-bark-100/80">{member.label}</p>
+                  <p className="mt-1.5 text-sm text-bark-100/80">{member.label}</p>
                   <Link
                     href={localePath(locale, member.href)}
-                    className="mt-5 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-marigold-400 hover:underline"
+                    className="mt-3 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-marigold-400 hover:underline"
                   >
                     {member.cta} <ArrowRightIcon />
                   </Link>

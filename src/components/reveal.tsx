@@ -34,7 +34,19 @@ export function Reveal({
       { rootMargin: "0px 0px -8%", threshold: 0.08 },
     );
     observer.observe(node);
-    return () => observer.disconnect();
+
+    // A fast flick or a restored scroll position can carry an element past the
+    // observer without it ever reporting an intersection, which would leave the
+    // content invisible for good. Nothing stays hidden longer than this.
+    const failsafe = window.setTimeout(() => {
+      node.dataset.visible = "true";
+      observer.disconnect();
+    }, 2500);
+
+    return () => {
+      window.clearTimeout(failsafe);
+      observer.disconnect();
+    };
   }, []);
 
   const style: RevealStyle = { "--reveal-delay": `${delay}ms` };
