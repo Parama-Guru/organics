@@ -3,9 +3,10 @@
 Updated as work lands. `[x]` = done and verified, `[ ]` = not done, `[~]` = done
 but blocked on something outside the code.
 
-**Score: 163 done · 10 blocked · 15 open**
+**Score: 169 done · 10 blocked · 15 open**
 
-Last updated: 2026-09-02 · OSSIL rebrand, Rich Heritage palette and light/dark themes verified
+Last updated: 2026-09-02 · Member-only price and contact; every remaining item is
+an external account action, not code
 
 ---
 
@@ -263,7 +264,26 @@ pages rather than invented, and adds a real theme system.
 - [x] `Customer.username` unique migration, deliberately not a sign-in credential.
 
 ---
+## Member-only price and contact
 
+Browsing stays open — names, farms, districts, categories, photographs and the
+verification date are all public, so the directory is still worth indexing. What
+a buyer would act on is not.
+
+- [x] Hide the price from signed-out visitors on the product card, the featured
+      home story and the product detail panel, replaced by a lock and a prompt.
+- [x] Unlock price on exactly the condition that already unlocked contact, so the
+      two can never disagree: accounts enabled, signed in, access allowed.
+- [x] Drop `priceCents` from the public `/api/products` JSON for signed-out
+      callers. Hiding it in the page while serving it in the API is not hiding it.
+- [x] Neutralise `sort=price-asc|price-desc` for anyone who cannot see prices,
+      since the ordering leaks what the values are, and hide the price sort chips.
+- [x] Keep the price fully visible in the farmer, store and staff portals.
+- [x] Verified signed out: zero `₹` on home, shop and detail in both locales, no
+      `priceCents` anywhere in the HTML, no `tel:` link, and the API omits the
+      field. Verified signed in: price, price sorting and contact all return.
+
+---
 ## Customer phase — access, Google sign-in and profile
 
 ### Access and entitlement

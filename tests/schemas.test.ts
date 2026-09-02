@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { signUpSchema } from "../src/lib/account-schema";
+import { allowedSort } from "../src/lib/product-query-schema";
 import { storeApplicationSchema } from "../src/lib/store-application-schema";
 import { storeProfileSchema } from "../src/lib/store-profile-schema";
 import { storeEvidenceAllowsPublication } from "../src/lib/stores";
@@ -138,4 +139,12 @@ test("sign-up refuses a weak password and a reserved handle", () => {
       .success,
     true,
   );
+});
+
+test("a viewer who cannot see prices cannot sort by them either", () => {
+  for (const sort of ["price-asc", "price-desc"] as const) {
+    assert.equal(allowedSort(sort, true), sort);
+    assert.equal(allowedSort(sort, false), "name");
+  }
+  assert.equal(allowedSort("name", false), "name");
 });

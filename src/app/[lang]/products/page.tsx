@@ -11,7 +11,8 @@ import { getDictionary, getLocale } from "@/lib/i18n/server";
 import { getCategories, getProducts, getRegions } from "@/lib/products";
 import { accountsEnabled, getCustomer } from "@/lib/customer-auth";
 import { savedProductIds } from "@/lib/saved";
-import { PRODUCT_SORTS, type ProductSort } from "@/lib/product-query-schema";
+import { sellerDetailsUnlocked } from "@/lib/seller-visibility";
+import { allowedSort, PRODUCT_SORTS, type ProductSort } from "@/lib/product-query-schema";
 
 export const dynamic = "force-dynamic";
 
@@ -43,9 +44,13 @@ function hrefWith(base: string, current: Filters, patch: Filters): string {
 export default async function ProductsPage({ searchParams }: PageProps<"/[lang]/products">) {
   const params = await searchParams;
   const requestedSort = firstValue(params.sort);
-  const sort: ProductSort = PRODUCT_SORTS.includes(requestedSort as ProductSort)
-    ? (requestedSort as ProductSort)
-    : "name";
+  const priceShown = await sellerDetailsUnlocked();
+  const sort: ProductSort = allowedSort(
+    PRODUCT_SORTS.includes(requestedSort as ProductSort)
+      ? (requestedSort as ProductSort)
+      : "name",
+    priceShown,
+  );
   const filters: Filters = {
     category: firstValue(params.category)?.slice(0, 100),
     region: firstValue(params.region)?.slice(0, 100),
@@ -231,11 +236,13 @@ export default async function ProductsPage({ searchParams }: PageProps<"/[lang]/
             {t.products.sort}
           </span>
           {(
-            [
-              ["name", t.products.sortName],
-              ["price-asc", t.products.sortPriceAsc],
-              ["price-desc", t.products.sortPriceDesc],
-            ] as const
+            priceShown
+              ? ([
+                  ["name", t.products.sortName],
+                  ["price-asc", t.products.sortPriceAsc],
+                  ["price-desc", t.products.sortPriceDesc],
+                ] as const)
+              : ([["name", t.products.sortName]] as const)
           ).map(([value, label]) => (
             <FilterChip
               key={value}

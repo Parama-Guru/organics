@@ -9,7 +9,7 @@ import { ProductGallery } from "@/components/product-gallery";
 import { SaveButton } from "@/components/save-button";
 import { StickyCallBar } from "@/components/sticky-call-bar";
 import { Button } from "@/components/ui/button";
-import { ArrowLeftIcon, BookmarkIcon, LeafMark, MapPinIcon, PhoneIcon, ShieldCheckIcon } from "@/components/ui/icons";
+import { ArrowLeftIcon, BookmarkIcon, LeafMark, LockIcon, MapPinIcon, PhoneIcon, ShieldCheckIcon } from "@/components/ui/icons";
 import { accountsEnabled, getCustomer } from "@/lib/customer-auth";
 import { getCustomerAccess } from "@/lib/customer-access";
 import { format, localePath } from "@/lib/i18n/config";
@@ -108,13 +108,30 @@ export default async function ProductPage({ params }: PageProps<"/[lang]/product
             {localised(locale, product.description, product.descriptionTa)}
           </p>
 
-          <div className="mt-8 flex flex-wrap items-end gap-x-3 gap-y-1 border-t border-bark-200 pt-6">
-            <p className="whitespace-nowrap font-display text-5xl font-medium leading-tight text-bark-900">
-              {formatMoney(product.priceCents)}
-            </p>
-            <p className="pb-1 text-bark-600">
-              {format(t.products.perUnit, { unit: unitLabel(locale, product.unit) })}
-            </p>
+          <div className="mt-8 flex min-w-0 flex-wrap items-end gap-x-3 gap-y-1 border-t border-bark-200 pt-6">
+            {sellerUnlocked ? (
+              <>
+                <p className="whitespace-nowrap font-display text-5xl font-medium leading-tight text-bark-900">
+                  {formatMoney(product.priceCents)}
+                </p>
+                <p className="pb-1 text-bark-600">
+                  {format(t.products.perUnit, { unit: unitLabel(locale, product.unit) })}
+                </p>
+              </>
+            ) : (
+              <div className="min-w-0">
+                {/* Tamil renders this as one long compound. break-words does not
+                    shrink intrinsic width, so the page grew; anywhere does. */}
+                <p className="flex min-w-0 items-start gap-2 font-display text-2xl leading-tight text-bark-600 sm:text-3xl">
+                  <LockIcon className="mt-1 h-5 w-5 shrink-0 sm:h-6 sm:w-6" />
+                  <span className="min-w-0 [overflow-wrap:anywhere]">{t.products.priceLocked}</span>
+                </p>
+                <p className="mt-2 text-bark-600 [overflow-wrap:anywhere]">
+                  {format(t.products.perUnit, { unit: unitLabel(locale, product.unit) })} ·{" "}
+                  {t.products.priceLockedHint}
+                </p>
+              </div>
+            )}
           </div>
 
           <p

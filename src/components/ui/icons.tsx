@@ -99,6 +99,38 @@ export function ShieldCheckIcon({ className = "" }: Props) {
   );
 }
 
+export function LockIcon({ className = "" }: Props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden className={`${base} ${className}`}>
+      <rect
+        x="4.2"
+        y="10.2"
+        width="15.6"
+        height="10.6"
+        rx="2.4"
+        fill="currentColor"
+        opacity="0.16"
+      />
+      <rect
+        x="4.2"
+        y="10.2"
+        width="15.6"
+        height="10.6"
+        rx="2.4"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      />
+      <path
+        d="M7.9 10.2V7.6a4.1 4.1 0 0 1 8.2 0v2.6"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+      <circle cx="12" cy="15.5" r="1.5" fill="currentColor" />
+    </svg>
+  );
+}
+
 export function MapPinIcon({ className = "" }: Props) {
   return (
     <svg viewBox="0 0 24 24" fill="none" aria-hidden className={`${base} ${className}`}>

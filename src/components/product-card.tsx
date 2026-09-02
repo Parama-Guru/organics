@@ -3,12 +3,13 @@ import Link from "next/link";
 import { ImageField } from "@/components/image-field";
 import { SaveButton } from "@/components/save-button";
 import { Button } from "@/components/ui/button";
-import { ArrowRightIcon, CheckIcon, MapPinIcon } from "@/components/ui/icons";
+import { ArrowRightIcon, CheckIcon, LockIcon, MapPinIcon } from "@/components/ui/icons";
 import { checkedOn } from "@/lib/i18n/dates";
 import { format, localePath } from "@/lib/i18n/config";
 import { localised, regionLabel, unitLabel } from "@/lib/i18n/content";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
 import { formatMoney } from "@/lib/money";
+import { sellerDetailsUnlocked } from "@/lib/seller-visibility";
 import type { ProductSummary } from "@/lib/products";
 
 /**
@@ -29,7 +30,11 @@ export async function ProductCard({
   // the people who do not have an account yet.
   saveState?: "hidden" | "saved" | "unsaved" | "signedOut";
 }) {
-  const [locale, t] = await Promise.all([getLocale(), getDictionary()]);
+  const [locale, t, priceShown] = await Promise.all([
+    getLocale(),
+    getDictionary(),
+    sellerDetailsUnlocked(),
+  ]);
   const href = localePath(locale, `/products/${product.slug}`);
   const name = localised(locale, product.name, product.nameTa);
 
@@ -101,12 +106,26 @@ export async function ProductCard({
 
         <div className="mt-auto flex items-end justify-between gap-3 border-t border-bark-200 pt-3">
           <p className="min-w-0">
-            <span className="block whitespace-nowrap font-display text-2xl leading-none text-bark-900">
-              {formatMoney(product.priceCents)}
-            </span>
-            <span className="rule-label mt-1.5 block text-bark-600">
-              {unitLabel(locale, product.unit)}
-            </span>
+            {priceShown ? (
+              <>
+                <span className="block whitespace-nowrap font-display text-2xl leading-none text-bark-900">
+                  {formatMoney(product.priceCents)}
+                </span>
+                <span className="rule-label mt-1.5 block text-bark-600">
+                  {unitLabel(locale, product.unit)}
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="flex min-w-0 items-start gap-1.5 font-display text-lg leading-tight text-bark-600">
+                  <LockIcon className="mt-0.5 h-4 w-4 shrink-0" />
+                  <span className="min-w-0 [overflow-wrap:anywhere]">{t.products.priceLocked}</span>
+                </span>
+                <span className="rule-label mt-1.5 block text-bark-600">
+                  {unitLabel(locale, product.unit)}
+                </span>
+              </>
+            )}
           </p>
 
           {saveState === "signedOut" ? (
