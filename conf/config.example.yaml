@@ -62,6 +62,13 @@ database:
     # Session-mode pooler (port 5432). Prisma Migrate needs a real session because
     # a transaction-mode pooler cannot hold advisory locks or run DDL reliably.
     direct_url: "${DIRECT_URL:-}"
+    # How many Postgres connections this instance may hold. Prisma otherwise
+    # sizes the pool from `os.cpus()`, which in a container reports the host's
+    # cores, not the container's quota — a 512MB Render instance would then ask
+    # pgbouncer for dozens of connections it will not get. Three is right for one
+    # small instance; raise it with the plan. Ignored if the URL already carries
+    # `connection_limit`.
+    pool_limit: "${DATABASE_POOL_LIMIT:-3}"
 
 # Buyer accounts: a saved list of produce and farms to call later. Sessions live
 # in Redis, so signing out takes effect immediately on every instance.

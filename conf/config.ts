@@ -87,6 +87,12 @@ const configSchema = z
             // Session-mode connection. Prisma Migrate cannot run through a
             // transaction-mode pooler; falls back to `url` when unset.
             direct_url: z.string().default(""),
+            // Prisma sizes its pool from `os.cpus()`, which inside a container
+            // reports the host's cores rather than the quota the container
+            // actually has. On a small instance behind pgbouncer that opens far
+            // more connections than the pooler will grant. Applied to `url`
+            // only when it does not already carry `connection_limit`.
+            pool_limit: z.coerce.number().int().min(1).max(50).default(3),
           })
           .prefault({}),
       })
@@ -332,6 +338,24 @@ export function loadConfig(): AppConfig {
     parsed.data.admin.password_hash = "";
   }
 
-  cached = parsed.data;
+  cached = withPoolLimit(parsed.data);
   return cached;
+}
+
+/**
+ * Pins the Prisma pool size on the pooled connection string.
+ *
+ * Left alone, Prisma sizes the pool from `os.cpus()`, which inside a container
+ * reports the host's cores rather than the quota the container has. A small
+ * instance then asks pgbouncer for far more connections than it will grant, and
+ * the failure shows up as intermittent timeouts under load rather than
+ * something obvious. Skipped when the URL already says what it wants.
+ */
+function withPoolLimit(config: AppConfig): AppConfig {
+  const { url, pool_limit } = config.database.postgres;
+  if (!url || url.includes("connection_limit=")) return config;
+
+  const separator = url.includes("?") ? "&" : "?";
+  config.database.postgres.url = `${url}${separator}connection_limit=${pool_limit}`;
+  return config;
 }

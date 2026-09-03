@@ -19,6 +19,19 @@ services:
     healthCheckPath: /api/health
     autoDeployTrigger: checksPass
     envVars:
+      # ---- free plan sizing. 512MB of RAM and a shared 0.1 CPU.
+      #
+      # V8 sizes its heap from the machine's total memory, not the container's
+      # cgroup limit, so on a large host it will happily grow past 512MB and be
+      # OOM-killed instead of collecting garbage. Capped below the limit to leave
+      # room for the Prisma query engine and Node's own non-heap allocations,
+      # which together measured about 220MB resident at idle.
+      - key: NODE_OPTIONS
+        value: "--max-old-space-size=384"
+      # One small instance behind a transaction pooler. See conf/config.example.yaml.
+      - key: DATABASE_POOL_LIMIT
+        value: "3"
+
       # ---- secrets: prompted once in the dashboard when the blueprint is created
       # Transaction pooler, port 6543, must end with ?pgbouncer=true
       - key: DATABASE_URL
