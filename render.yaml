@@ -18,6 +18,13 @@ services:
     dockerContext: .
     healthCheckPath: /api/health
     autoDeployTrigger: checksPass
+    # Render adds `www.ossil.in` on its own and redirects it here, so listing the
+    # apex alone is enough. It issues the TLS certificate only once the domain's
+    # DNS points at Render: an A record on the apex and a CNAME on `www`. The
+    # `onrender.com` subdomain deliberately keeps working as a fallback while
+    # that propagates; NEXT_PUBLIC_SITE_URL already points everything at the apex.
+    domains:
+      - ossil.in
     envVars:
       # ---- free plan sizing. 512MB of RAM and a shared 0.1 CPU.
       #
