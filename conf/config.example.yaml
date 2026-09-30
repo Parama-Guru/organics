@@ -7,7 +7,7 @@
 # Load order: $CONFIG_PATH -> conf/config.yaml -> conf/config.example.yaml
 #
 # "${VAR}" and "${VAR:-fallback}" are expanded from the process environment, so
-# hosted deployments (Render, Vercel, docker compose) keep injecting plain env
+# hosted deployments (Railway, Vercel, docker compose) keep injecting plain env
 # vars while this file stays the only place that describes the shape.
 #
 # NOT here on purpose: the listen host/port. Next.js takes those from HOSTNAME
@@ -35,8 +35,8 @@ app:
   show_farmer_phone: ${SHOW_FARMER_PHONE:-false}
   # How many proxies of ours sit in front of the app. Rate limiting reads the
   # client address this many entries in from the right of X-Forwarded-For;
-  # anything further left is client-supplied and forgeable. Render and Vercel
-  # each put exactly one hop in front. Set 0 when the app is exposed directly,
+  # anything further left is client-supplied and forgeable. Verify the hop count
+  # with the hosting provider. Set 0 when the app is exposed directly,
   # and the header is ignored entirely.
   trusted_proxy_hops: ${TRUSTED_PROXY_HOPS:-1}
 
@@ -52,6 +52,11 @@ social:
   # Full https://wa.me/91XXXXXXXXXX link, not a bare number.
   whatsapp: "${SOCIAL_WHATSAPP:-}"
 
+cloudinary:
+  cloud_name: "${CLOUDINARY_CLOUD_NAME:-}"
+  api_key: "${CLOUDINARY_API_KEY:-}"
+  api_secret: "${CLOUDINARY_API_SECRET:-}"
+
 database:
   # System of record, reached through Prisma. Everything the site reads lives
   # here: farms, catalog, categories.
@@ -64,7 +69,7 @@ database:
     direct_url: "${DIRECT_URL:-}"
     # How many Postgres connections this instance may hold. Prisma otherwise
     # sizes the pool from `os.cpus()`, which in a container reports the host's
-    # cores, not the container's quota — a 512MB Render instance would then ask
+    # cores, not the container's quota — a small hosted instance would then ask
     # pgbouncer for dozens of connections it will not get. Three is right for one
     # small instance; raise it with the plan. Ignored if the URL already carries
     # `connection_limit`.

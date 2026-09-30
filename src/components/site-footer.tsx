@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { VisitorCounters } from "@/components/visitor-counters";
 
 import { loadConfig } from "@conf/config";
 import { showFarmerPhone } from "@/components/farmer-contact";
@@ -173,6 +174,7 @@ export async function SiteFooter() {
 
         <div className="mt-10 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-t border-bark-200 pt-5 text-sm text-bark-600">
           <span>{format(t.footer.copyright, { year: new Date().getFullYear() })}</span>
+          <VisitorCounters tamil={locale === "ta"} />
           <span className="font-mono text-xs uppercase tracking-[0.12em]">Tamil Nadu · India</span>
         </div>
       </div>

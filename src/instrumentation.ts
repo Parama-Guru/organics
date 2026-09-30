@@ -1,6 +1,6 @@
 // Prisma resolves its datasource from DATABASE_URL, so the value from
 // conf/config.yaml is exported here — once, before any route module loads.
-// A real environment variable always wins, which is how Render/Vercel inject theirs.
+// A real environment variable always wins, including variables injected by hosting.
 export async function register() {
   if (process.env.NEXT_RUNTIME !== "nodejs") return;
 

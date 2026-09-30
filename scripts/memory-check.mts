@@ -1,7 +1,6 @@
 /**
  * Resident memory of the running server, and what it does under load.
- * The Render free plan gives 512MB, so this is the number that decides whether
- * the service stays up or is killed.
+ * Compares resident memory with a 512MB test budget.
  *
  *   npm start            # in one terminal
  *   npx tsx scripts/memory-check.mts

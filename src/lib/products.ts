@@ -1,5 +1,6 @@
 import type { Prisma } from "@prisma/client";
 import { unstable_cache } from "next/cache";
+import { cache } from "react";
 
 import { DEFAULT_LOCALE, type Locale } from "./i18n/config";
 import type { ProductSort } from "./product-query-schema";
@@ -75,6 +76,14 @@ export type ProductSummary = Prisma.ProductGetPayload<{
 export type ProductDetail = Prisma.ProductGetPayload<{
   select: typeof productDetailSelect;
 }>;
+
+export function productGalleryImages(product: Pick<ProductDetail, "id" | "imageUrl" | "images">) {
+  if (!product.imageUrl) return product.images;
+  const primary = product.images.find((image) => image.url === product.imageUrl) ?? {
+    id: `primary-${product.id}`, url: product.imageUrl, alt: null,
+  };
+  return [primary, ...product.images.filter((image) => image.url !== product.imageUrl)];
+}
 
 /**
  * Cached: the same rows for every visitor, and each uncached read costs a full
@@ -266,12 +275,12 @@ export function decodeSlug(raw: string): string {
   }
 }
 
-export function getProductBySlug(slug: string) {
+export const getProductBySlug = cache(async (slug: string) => {
   return prisma.product.findFirst({
     where: { ...publicProductWhere(), slug: decodeSlug(slug) },
     select: productDetailSelect,
   });
-}
+});
 
 export const getCategories = unstable_cache(
   async () =>

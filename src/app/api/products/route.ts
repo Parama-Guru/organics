@@ -9,6 +9,8 @@ import { sellerDetailsUnlocked } from "@/lib/seller-visibility";
 export const dynamic = "force-dynamic";
 
 type GuestProduct = Omit<ProductSummary, "priceCents">;
+let activeQueries = 0;
+const MAX_CONCURRENT_QUERIES = 3;
 
 // The page hides the price behind sign-in, so the JSON has to drop the field
 // rather than rely on nobody reading it.
@@ -42,17 +44,25 @@ export async function GET(request: NextRequest) {
 
   const priceVisible = await sellerDetailsUnlocked();
 
-  const products = await getProducts({
-    categorySlug: parsed.data.category,
-    region: parsed.data.region,
-    search: parsed.data.search,
-    sort: allowedSort(parsed.data.sort ?? "name", priceVisible),
-    limit: parsed.data.limit,
-  });
-
-  // The page hides the price behind sign-in, so the JSON has to drop the field
-  // rather than rely on nobody reading it.
-  return NextResponse.json({
-    products: priceVisible ? products : products.map(withoutPrice),
-  });
+  if (activeQueries >= MAX_CONCURRENT_QUERIES) {
+    return NextResponse.json(
+      { error: "Too many concurrent requests." },
+      { status: 429, headers: { "Retry-After": "1" } },
+    );
+  }
+  activeQueries += 1;
+  try {
+    const products = await getProducts({
+      categorySlug: parsed.data.category,
+      region: parsed.data.region,
+      search: parsed.data.search,
+      sort: allowedSort(parsed.data.sort ?? "name", priceVisible),
+      limit: parsed.data.limit,
+    });
+    return NextResponse.json({
+      products: priceVisible ? products : products.map(withoutPrice),
+    });
+  } finally {
+    activeQueries -= 1;
+  }
 }

@@ -4,6 +4,7 @@ import { loadConfig } from "./conf/config";
 
 const appConfig = loadConfig();
 const isDev = process.env.NODE_ENV === "development";
+const cloudinaryCloudName = appConfig.cloudinary.cloud_name;
 
 // Next injects inline bootstrap scripts, so 'unsafe-inline' is required without a
 // nonce middleware. 'unsafe-eval' is dev-only (Turbopack HMR needs it).
@@ -13,8 +14,7 @@ const contentSecurityPolicy = [
   "form-action 'self' https://accounts.google.com",
   "frame-ancestors 'none'",
   "object-src 'none'",
-  // Every image is a local asset, so no third-party origin is allowed at all.
-  "img-src 'self' data: blob:",
+  `img-src 'self' data: blob:${cloudinaryCloudName ? ` https://res.cloudinary.com/${cloudinaryCloudName}/image/upload/` : ""}`,
   "font-src 'self' data:",
   "style-src 'self' 'unsafe-inline'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
@@ -38,6 +38,17 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  images: {
+    minimumCacheTTL: 2592000,
+    remotePatterns: cloudinaryCloudName ? [{
+      protocol: "https",
+      hostname: "res.cloudinary.com",
+      port: "",
+      pathname: `/${cloudinaryCloudName}/image/upload/**`,
+      search: "",
+    }] : [],
+    maximumRedirects: 0,
+  },
   // `next dev` and `next build` otherwise share .next, and leftover production
   // assets get served in dev with no error — a stale stylesheet looks like the
   // edit simply did nothing. Separate directories make that impossible.

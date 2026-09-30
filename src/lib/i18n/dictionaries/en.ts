@@ -695,7 +695,7 @@ export const en = {
     intro: "What we collect, why, and how long we keep it.",
     s1Title: "Buyers without an account",
     s1Body:
-      "Browsing needs no account and we ask you for nothing. We store one cookie, NEXT_LOCALE, to remember the site language. There is no advertising or analytics tracking on this site.",
+      "Browsing needs no account. NEXT_LOCALE remembers the site language. An anonymous visitor-count cookie helps estimate daily and total browser visits, as explained below. We do not use advertising trackers.",
     s1bTitle: "Buyers with an account",
     s1bBody:
       "An account unlocks checked seller details, a private shortlist and private enquiries. We store your email, name, a one-way password hash, and the phone number and district if you choose to give them. Google sign-in stores Google's durable account identifier and the verified email seen when you link it, but no Google token or profile photo. An enquiry sends your name and message to the selected seller; your email becomes Reply-To only when you explicitly choose that option after verification. We store the enquiry for delivery and staff follow-up. Signing in sets an HTTP-only session cookie, which is revoked when you sign out.",

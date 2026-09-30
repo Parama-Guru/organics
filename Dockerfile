@@ -35,6 +35,7 @@ FROM base AS builder
 ARG NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ARG NEXT_PUBLIC_CURRENCY=INR
 ARG NEXT_PUBLIC_LOCALE=en-IN
+ARG CLOUDINARY_CLOUD_NAME
 
 # DATABASE_URL only has to be syntactically valid here; `prisma generate` never connects.
 ENV NODE_ENV=production \
@@ -42,6 +43,7 @@ ENV NODE_ENV=production \
     NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL \
     NEXT_PUBLIC_CURRENCY=$NEXT_PUBLIC_CURRENCY \
     NEXT_PUBLIC_LOCALE=$NEXT_PUBLIC_LOCALE \
+    CLOUDINARY_CLOUD_NAME=$CLOUDINARY_CLOUD_NAME \
     DATABASE_URL=postgresql://build:build@127.0.0.1:5432/build
 
 COPY --from=deps /app/node_modules ./node_modules

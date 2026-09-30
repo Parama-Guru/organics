@@ -59,7 +59,7 @@ const configSchema = z
         // How many proxies of ours sit in front of the app. Rate limiting reads
         // the client address this many entries in from the right of
         // X-Forwarded-For; everything further left is client-supplied and
-        // forgeable. Render and Vercel both put exactly one hop in front. Set 0
+        // forgeable. Verify the trusted hop count with the hosting provider. Set 0
         // when the app is exposed directly, and the header is then ignored.
         trusted_proxy_hops: envInt(1, 0, 5),
       })
@@ -95,6 +95,22 @@ const configSchema = z
             pool_limit: z.coerce.number().int().min(1).max(50).default(3),
           })
           .prefault({}),
+      })
+      .prefault({}),
+    cloudinary: z
+      .object({
+        cloud_name: z.preprocess(
+          (value) => process.env.CLOUDINARY_CLOUD_NAME ?? value,
+          z.string().trim().regex(/^[a-zA-Z0-9_-]*$/, "must contain only letters, digits, underscores or hyphens").default(""),
+        ),
+        api_key: z.preprocess(
+          (value) => process.env.CLOUDINARY_API_KEY ?? value,
+          z.string().trim().default(""),
+        ),
+        api_secret: z.preprocess(
+          (value) => process.env.CLOUDINARY_API_SECRET ?? value,
+          z.string().trim().default(""),
+        ),
       })
       .prefault({}),
     redis: z
@@ -195,9 +211,8 @@ const configSchema = z
         input: ctx.value.redis.url,
         path: ["redis", "url"],
         message:
-          "required when accounts.enabled is true and app.env is prod. On Render this comes " +
-          "from the organics-kv Key Value instance via fromService, so an empty value usually " +
-          "means the blueprint has not been applied since that service was added — sync it, or " +
+          "required when accounts.enabled is true and app.env is prod. Set REDIS_URL " +
+          "to the Redis service's private connection URL in the hosting dashboard, or " +
           "set ACCOUNTS_ENABLED=false to run the directory without buyer accounts",
       });
     }

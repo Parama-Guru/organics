@@ -16,7 +16,7 @@ import { format, localePath } from "@/lib/i18n/config";
 import { localised, regionLabel, unitLabel } from "@/lib/i18n/content";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
 import { formatMoney } from "@/lib/money";
-import { getMoreFromFarm, getProductBySlug } from "@/lib/products";
+import { getMoreFromFarm, getProductBySlug, productGalleryImages } from "@/lib/products";
 import { isProductSaved } from "@/lib/saved";
 
 export const dynamic = "force-dynamic";
@@ -71,7 +71,7 @@ export default async function ProductPage({ params }: PageProps<"/[lang]/product
 
       <div className="mt-6 grid animate-rise gap-8 lg:grid-cols-[1.12fr_0.88fr] lg:items-start lg:gap-10">
         <ProductGallery
-          images={product.images}
+          images={productGalleryImages(product)}
           name={name}
           emptyLabel={t.products.noPhotograph}
         />

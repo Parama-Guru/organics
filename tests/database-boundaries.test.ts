@@ -6,6 +6,7 @@ import { PrismaClient } from "@prisma/client";
 import { loadConfig } from "../conf/config";
 import { getFarmerBySlug, getVerifiedFarmers } from "../src/lib/farmers";
 import { getStoreBySlug, getVerifiedStores } from "../src/lib/stores";
+import { productGalleryImages } from "../src/lib/products";
 
 const configuredDatabase = loadConfig().database.postgres.url;
 process.env.DATABASE_URL ||= configuredDatabase;
@@ -14,6 +15,18 @@ const prisma = databaseAvailable ? new PrismaClient() : null;
 
 after(async () => {
   await prisma?.$disconnect();
+});
+
+test("product detail gallery leads with the current primary image without duplicates", () => {
+  const oldImage = { id: "old", url: "/products/old.webp", alt: "Old image" };
+  const imageUrl = "https://res.cloudinary.com/test-cloud/image/upload/v1/new.webp";
+  const product = { id: "test", imageUrl, images: [oldImage] };
+  assert.deepEqual(productGalleryImages(product).map((image) => image.url), [imageUrl, oldImage.url]);
+  assert.equal(productGalleryImages({ ...product, images: [] })[0].url, imageUrl);
+  const existing = { id: "new", url: imageUrl, alt: "Primary image" };
+  assert.deepEqual(productGalleryImages({ ...product, images: [oldImage, existing] }), [existing, oldImage]);
+  assert.deepEqual(productGalleryImages({ ...product, imageUrl: null }), [oldImage]);
+  assert.deepEqual(product.images, [oldImage]);
 });
 
 test("public farmer queries exclude pending and expired records", { skip: !databaseAvailable }, async () => {

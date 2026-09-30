@@ -19,6 +19,7 @@ import "../globals.css";
 // high-contrast editorial character, but under the OFL and free to ship.
 const display = Instrument_Serif({
   subsets: ["latin"],
+  preload: false,
   weight: "400",
   display: "swap",
   variable: "--font-display-family",
@@ -26,12 +27,14 @@ const display = Instrument_Serif({
 
 const body = DM_Sans({
   subsets: ["latin"],
+  preload: false,
   display: "swap",
   variable: "--font-body-family",
 });
 
 const mono = DM_Mono({
   subsets: ["latin"],
+  preload: false,
   weight: ["400", "500"],
   display: "swap",
   variable: "--font-mono-family",
@@ -42,12 +45,14 @@ const mono = DM_Mono({
 // falls through here.
 const displayTamil = Noto_Serif_Tamil({
   subsets: ["tamil"],
+  preload: false,
   display: "swap",
   variable: "--font-display-tamil",
 });
 
 const bodyTamil = Noto_Sans_Tamil({
   subsets: ["tamil"],
+  preload: false,
   display: "swap",
   variable: "--font-body-tamil",
 });

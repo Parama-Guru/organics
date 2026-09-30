@@ -149,16 +149,171 @@ remain disabled when it is absent.
 
 ## Deployment
 
-### Render
+### Railway
 
-`render.yaml` provisions the Docker web service and private Redis-compatible Key
-Value service. PostgreSQL is supplied separately through `DATABASE_URL` and
-`DIRECT_URL`. The container applies committed migrations before starting and
-the health check verifies PostgreSQL plus Redis when accounts are enabled.
+Create a Railway project from this GitHub repository and select `main`. Railway
+detects the root `Dockerfile`; leave build and start command overrides empty so
+the image's entrypoint applies committed migrations before starting Next.js.
+Use one app replica, disable Serverless sleeping for an always-on site, set the
+healthcheck path to `/api/health` with a 300-second timeout, and select an
+on-failure restart policy with a bounded retry count. Set spending alerts and
+resource limits before launch. Healthchecks gate deployment, not continuous uptime.
 
-Values marked `sync: false` must be supplied in the Render dashboard. Keep
-`BILLING_ENABLED=false` until Razorpay plans, hosted authorization, signed
-webhooks, cancellation, and renewal behavior have passed test mode end to end.
+Add a Redis service in the same project and region, with persistent storage.
+Use Railway's variable reference picker to connect the app's `REDIS_URL` to
+Redis's private connection URL; do not reuse the previous host's Redis URL.
+Keep the existing Supabase database and choose the nearest available app region.
+Back up the database before deploying schema changes; migrations must remain
+compatible with the old app during the transition. Do not run the sample seed.
+
+Configure these app service variables before the first deployment:
+
+| Variable | Value |
+| --- | --- |
+| `APP_ENV` | `prod` |
+| `PORT` | `3000` (also use 3000 as the public networking target port) |
+| `HOSTNAME` | `0.0.0.0` |
+| `NEXT_PUBLIC_SITE_URL` | `https://ossil.in` |
+| `NEXT_PUBLIC_CURRENCY` | `INR` |
+| `NEXT_PUBLIC_LOCALE` | `en-IN` |
+| `DATABASE_URL`, `DIRECT_URL` | Existing Supabase pooled and migration URLs |
+| `DATABASE_POOL_LIMIT` | `3` initially |
+| `REDIS_URL` | Reference to the new private Redis URL |
+| `ACCOUNTS_ENABLED` | `true` |
+| `ACCOUNTS_SESSION_SECRET`, `ADMIN_SESSION_SECRET` | Secure, independent secrets |
+| `ADMIN_PASSWORD_HASH` | Generated with `npm run admin:hash` |
+| `CONTACT_EMAIL` | A monitored mailbox, such as `hello@ossil.in` |
+| `BILLING_ENABLED` | `false` until payment testing is complete |
+| `SHOW_FARMER_PHONE` | `false` until seller consent is recorded |
+| `RUN_MIGRATIONS` | `true` |
+
+Transfer optional Google, SMTP and Razorpay settings securely as needed; the
+complete variable mapping is in `conf/config.example.yaml`. Never commit secrets.
+The Dockerfile declares the public build arguments Railway needs. Changes to
+`NEXT_PUBLIC_*` values require a rebuild. Set a Node heap cap only in conjunction
+with the chosen container memory limit, leaving room for native allocations.
+
+Generate a Railway domain and test `/en`, `/api/health`, login and portal routes.
+The health response must confirm database and Redis availability.
+Before launch, verify the trusted proxy hop count against Railway's request
+headers and set `TRUSTED_PROXY_HOPS` accordingly; test spoofed forwarding headers
+and rate limiting. Do not assume an additional CDN is a trusted proxy by default.
+Register any
+temporary Google callback used during testing; production uses
+`https://ossil.in/api/auth/google/callback`. Verify mail delivery separately.
+
+For the domain cutover, remove GoDaddy domain forwarding (including masking).
+Add `ossil.in` and `www.ossil.in` in Railway and copy its exact DNS records into
+GoDaddy. If the apex record type is unsupported, follow Railway's current DNS
+provider guidance; do not substitute an arbitrary IP. Preserve email MX/TXT
+records. Verify both domains and HTTPS, and test `/tj/login` on the custom domain.
+DNS mapping preserves URL paths; forwarding to a provider hostname does not.
+
+Keep the previous host until DNS has propagated and the new deployment is stable.
+New Redis means existing sessions and pending Redis tokens do not carry over.
+Avoid account/security mutations during the overlap because the hosts have
+independent sessions and rate limits. Then disable the old deployment and remove
+unused resources. Removing a repository deployment file does not delete services.
+
+Settings above are configured in Railway's dashboard. New services should not
+use the deprecated `railway.json`/`railway.toml` Config as Code format. If automated
+provisioning is needed later, import the configured project using Railway's current
+Infrastructure as Code tooling and review its plan before applying changes.
+
+### Cloudinary images
+
+PostgreSQL remains the database; Cloudinary stores public images, not application
+records. MongoDB is not required. Existing local images continue to work.
+
+Set `CLOUDINARY_CLOUD_NAME` in Railway before building. The Docker build uses
+this public account name to restrict Next.js image optimization and the browser
+image policy to that account's HTTPS upload URLs. Rebuild when it changes.
+
+For operator uploads, set `cloudinary.cloud_name`, `cloudinary.api_key` and
+`cloudinary.api_secret` in the ignored `conf/config.yaml`. Alternatively, set
+`CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY` and `CLOUDINARY_API_SECRET` in the
+operator's ignored `.env` file. Environment variables override the YAML values.
+Restart the local app after changing the cloud name. Do not put the key
+or secret in `NEXT_PUBLIC_*` variables or Docker build arguments. No unsigned
+upload preset or public upload endpoint is needed.
+
+Check account access and the upload credit budget without uploading an asset or
+opening a database connection:
+
+```sh
+npm run images:upload -- --check
+```
+
+Keep the API secret only in ignored local configuration or environment variables;
+rotate credentials shared in chat and update the private configuration afterward.
+The command reports safe errors without printing credentials. Missing credentials
+or unavailable usage data block uploads. Automated transport tests use a mocked
+Cloudinary SDK and do not prove that a real account is configured correctly.
+
+Run against the intended database, using an existing record's slug:
+
+```sh
+npm run images:upload -- --kind product --slug PRODUCT_SLUG --file ./photo.jpg
+npm run images:upload -- --kind farmer --slug FARMER_SLUG --file ./farm.webp
+npm run images:upload -- --kind store --slug STORE_SLUG --file ./store.png
+```
+
+The command accepts JPEG/PNG/WebP/AVIF sources up to 10 MB and 40 million pixels.
+Before uploading, it applies orientation, strips metadata (including GPS), and
+converts to WebP with a maximum 1600px side, preserving aspect ratio and avoiding
+upscaling. It tries quality 90, 85, then 80, accepting only outputs at most 200 KiB.
+Images still above that budget are rejected, not silently degraded
+further. Animated/multi-page sources are rejected. Compression is lossy; identical
+pixels or perceptually identical results cannot be guaranteed. The source file
+on your computer is not changed. Only the compressed buffer is uploaded.
+
+The command updates the record's primary image URL. Product detail pages show this
+image first and keep secondary gallery images, without duplicating the primary.
+It does not migrate existing files, edit gallery
+images, or upload private certificates. Previous assets are kept; failed database
+updates report the uploaded asset ID for manual recovery. Cached catalogue data
+refreshes within five minutes. Upload only images approved for public display.
+
+With the local app running, execute `npm run images:verify` for a live account test.
+It compresses a bundled illustration, checks credits, uploads one temporary image,
+verifies exact CDN bytes and local Next.js delivery, rejects other accounts, and
+deletes its test asset. It makes real API calls and consumes a small amount of
+usage. Catalogue records are never changed. Set `BASE_URL` for another local port.
+If cleanup fails, it reports the public asset ID for manual removal. Mocked tests
+remain separate from live verification. Business email, OAuth and other launch
+gates still apply; image verification does not certify the whole application.
+
+The Cloudinary Free plan has 25 shared monthly credits. Our planning ceiling is
+12.5 credits, not a guarantee: one credit covers 1 GB storage, 1 GB image bandwidth,
+or 1,000 transformations. Compression happens locally; Cloudinary transformations
+are not requested. Next.js caches optimized images for 30 days on the app's
+ephemeral disk. Deploys and cold cache misses can fetch sources again. Keep URLs
+versioned and unique; do not overwrite images at the same URL.
+
+Example: 10,000 browsers fetching five 200 KiB source images each is about
+10.24 GB before storage and other usage. Fifty such images per browser would
+be about 102.4 GB. Actual cache hits reduce origin bandwidth but cannot be
+assumed. A 200 KiB upload cap cannot guarantee half-plan usage or 10,000-user
+capacity. Each operator upload checks Cloudinary usage through its Admin API,
+and refuses uploads at 12 credits (or half the account allowance minus 0.5,
+whichever is lower), reserving headroom below 12.5. Unknown usage blocks uploads.
+This consumes one Admin API call per upload and is not a concurrent-upload lock
+or a delivery bandwidth cutoff. Review Admin API rate limits before bulk uploads.
+Monitor the Cloudinary dashboard at 10 credits, review unused assets,
+and reassess traffic before 12.5. Cached delivery shifts bandwidth and image
+processing costs to Railway; it does not eliminate hosting costs.
+
+### Visitor counters
+
+Apply committed migrations before running the new footer. Counts start from
+zero and mean approximate distinct browsers, not people or pageviews. An HttpOnly
+one-year cookie identifies the browser; only its hash and last India calendar day
+are stored, alongside durable PostgreSQL aggregate counts. Clearing cookies,
+multiple devices and bots can skew totals. Existing browsers count once per day;
+new browsers increment total once. Counters are unavailable if database access
+fails. DNT/GPC requests are not counted. Review analytics-cookie consent obligations
+for your audience before launch. The endpoint's per-process rate limit assumes
+one app replica; replace it with shared rate limiting before horizontal scaling.
 
 ### Vercel
 

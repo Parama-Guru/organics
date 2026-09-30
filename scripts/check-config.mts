@@ -4,7 +4,7 @@
 // This exists because the example file is the only config a hosted deploy has:
 // `${VAR}` substitution always produces strings, so a field typed as a boolean
 // or a number silently passed locally (where conf/config.yaml holds real types)
-// and threw on Render and in CI. Nothing else exercises that path.
+// and threw in hosted deployments and CI. Nothing else exercises that path.
 //
 // Run: npm run config:check
 process.env.CONFIG_PATH = "conf/config.example.yaml";

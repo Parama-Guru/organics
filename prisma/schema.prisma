@@ -14,6 +14,16 @@ datasource db {
   extensions = [pg_trgm]
 }
 
+model VisitorBrowser {
+  id      String @id
+  lastDay String
+}
+
+model VisitorCount {
+  key   String @id
+  count Int    @default(0)
+}
+
 model Category {
   id            String    @id @default(cuid())
   name          String    @unique

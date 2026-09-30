@@ -34,4 +34,4 @@ console.log("admin:");
 console.log(`  password_hash: "${hashPassphrase(passphrase)}"`);
 console.log(`  session_secret: "${randomBytes(32).toString("hex")}"`);
 console.log("  session_ttl_minutes: 480");
-console.log("\nOn Render, set ADMIN_PASSWORD_HASH and ADMIN_SESSION_SECRET instead.\n");
+console.log("\nFor hosted deployments, set ADMIN_PASSWORD_HASH and ADMIN_SESSION_SECRET instead.\n");

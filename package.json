@@ -25,6 +25,8 @@
     "verify:secrets": "node scripts/secret-scan.mjs",
     "data:inventory": "tsx scripts/data-inventory.mts",
     "data:purge": "tsx scripts/data-purge.mts",
+    "images:upload": "tsx scripts/upload-image.mts",
+    "images:verify": "tsx scripts/verify-cloudinary.mts",
     "test:api": "tsx scripts/api-test.mts"
   },
   "overrides": {
@@ -32,12 +34,14 @@
   },
   "dependencies": {
     "@prisma/client": "6.19.3",
+    "cloudinary": "^2.11.0",
     "ioredis": "^6.0.0",
-    "next": "16.3.2",
+    "next": "16.3.5",
     "nodemailer": "^9.0.5",
     "oauth4webapi": "^3.8.7",
     "react": "19.2.8",
     "react-dom": "19.2.8",
+    "sharp": "^0.35.4",
     "yaml": "2.9.0",
     "zod": "4.4.3"
   },
@@ -50,7 +54,7 @@
     "axe-core": "^4.13.0",
     "dotenv": "^17.4.2",
     "eslint": "^9",
-    "eslint-config-next": "16.3.2",
+    "eslint-config-next": "16.3.5",
     "prisma": "6.19.3",
     "server-only": "^0.0.1",
     "tailwindcss": "^4",

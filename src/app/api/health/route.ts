@@ -6,7 +6,7 @@ import { getRedis } from "@/lib/redis";
 
 export const dynamic = "force-dynamic";
 
-// Used by Render/Docker health checks. Verifies the dependencies round-trip, not
+// Used by hosting and Docker health checks. Verifies the dependencies round-trip, not
 // just that the process is alive.
 export async function GET() {
   const [database, redis] = await Promise.all([

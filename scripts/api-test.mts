@@ -235,7 +235,8 @@ async function rateLimitTests() {
     );
     const ok = codes.filter((c) => c === 200).length;
     const limited = codes.filter((c) => c === 429).length;
-    return { pass: limited > 0 && ok <= 60, detail: `${ok} allowed, ${limited} refused` };
+    const unexpected = codes.length - ok - limited;
+    return { pass: limited > 0 && ok <= 60 && unexpected === 0, detail: `${ok} allowed, ${limited} refused, ${unexpected} unexpected failures` };
   });
 
   await check(group, "a refusal carries Retry-After", async () => {
@@ -366,6 +367,10 @@ async function main() {
   console.log("\n--- Rate limits ---");
   await rateLimitTests();
   const load = await loadTests();
+  for (const result of load) {
+    record("Load", result.path, result.failed === 0 && result.rateLimited === 0 && result.ok === result.requests,
+      `${result.ok}/${result.requests} successful, ${result.failed} failed, ${result.rateLimited} rate limited`);
+  }
 
   const failures = results.filter((r) => !r.pass);
   const skipped = results.filter((r) => r.skipped);

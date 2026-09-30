@@ -1,6 +1,6 @@
 import { loadConfig } from "@conf/config";
 import { accountsEnabled } from "@/lib/customer-auth";
-import { getDictionary } from "@/lib/i18n/server";
+import { getDictionary, getLocale } from "@/lib/i18n/server";
 
 // Reads whether accounts are on, so the page cannot describe a feature the
 // deployment does not run.
@@ -13,6 +13,7 @@ export async function generateMetadata() {
 
 export default async function PrivacyPage() {
   const t = await getDictionary();
+  const locale = await getLocale();
   const contactEmail = loadConfig().app.contact_email;
 
   const sections = [
@@ -25,6 +26,12 @@ export default async function PrivacyPage() {
     { title: t.privacy.s4Title, body: t.privacy.s4Body },
     { title: t.privacy.s5Title, body: t.privacy.s5Body },
     { title: t.privacy.s6Title, body: t.privacy.s6Body },
+    {
+      title: locale === "ta" ? "பார்வையாளர் எண்ணிக்கை" : "Visitor counts",
+      body: locale === "ta"
+        ? "பார்வையாளர்களை எண்ண ஒரு வருடம் செல்லுபடியாகும் பெயரில்லா உலாவி குக்கியைப் பயன்படுத்துகிறோம். அதன் ஹாஷ் மற்றும் கடைசியாக வந்த இந்திய தேதியை சேமிக்கிறோம்; IP முகவரி அல்லது கணக்குடன் இணைக்கவில்லை. மொத்த எண்ணிக்கையும் தினசரி எண்ணிக்கையும் சேமிக்கப்படும். குக்கியை நீக்கினால் மீண்டும் எண்ணப்படலாம். Do Not Track மற்றும் Global Privacy Control கோரிக்கைகளை மதிக்கிறோம்."
+        : "We use a random browser cookie, renewed for one year, to estimate visitor counts. We retain its hash and last India calendar visit date for deduplication, plus daily and total aggregates. These records are not linked to an account and contain no IP address. Clearing the cookie or using another browser may count you again. We respect Do Not Track and Global Privacy Control; counts start when this feature launches, not from the site's creation.",
+    },
   ];
 
   return (
