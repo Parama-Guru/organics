@@ -9,6 +9,7 @@
  */
 
 export const MINIMUM_SCORE = 2;
+export const MINIMUM_PASSWORD_LENGTH = 9;
 
 export type StrengthScore = 0 | 1 | 2 | 3 | 4;
 
@@ -98,7 +99,7 @@ export function scorePassword(
   if (length === 0) return { score: 0, advice: "length" };
   if (COMMON.has(value.toLowerCase())) return { score: 0, advice: "common" };
   if (containsPersonal(value, personal)) return { score: 1, advice: "personal" };
-  if (length < 10) return { score: 0, advice: "length" };
+  if (length < MINIMUM_PASSWORD_LENGTH) return { score: 0, advice: "length" };
 
   let score = 1;
   if (length >= 12) score += 1;

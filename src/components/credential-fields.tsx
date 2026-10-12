@@ -4,7 +4,7 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 
 import { Field } from "@/components/ui/field";
 import { useI18n } from "@/lib/i18n/client";
-import { scorePassword, type StrengthAdvice, type StrengthScore } from "@/lib/password-strength";
+import { MINIMUM_PASSWORD_LENGTH, scorePassword, type StrengthAdvice, type StrengthScore } from "@/lib/password-strength";
 import { USERNAME_PATTERN, normalizeUsername } from "@/lib/username";
 
 type Availability = "idle" | "invalid" | "checking" | "free" | "taken" | "error";
@@ -175,7 +175,7 @@ export function PasswordField({
         onChange={handleChange}
         autoComplete="new-password"
         required
-        minLength={10}
+        minLength={MINIMUM_PASSWORD_LENGTH}
         maxLength={200}
         aria-describedby={meterId}
         invalid={invalid}

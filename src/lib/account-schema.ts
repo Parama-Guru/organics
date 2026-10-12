@@ -1,17 +1,17 @@
 import { z } from "zod";
 
-import { MINIMUM_SCORE, scorePassword } from "./password-strength";
+import { MINIMUM_PASSWORD_LENGTH, MINIMUM_SCORE, scorePassword } from "./password-strength";
 import { usernameSchema } from "./username";
 
 // Long over complex: length is what actually resists guessing, and character
 // rules mostly produce "Password1!" and a sticky note.
 const password = z
   .string()
-  .min(10, "use at least 10 characters")
+  .min(MINIMUM_PASSWORD_LENGTH, "use at least 9 characters")
   .max(200)
   // A 200-character cap is not enough on its own: scrypt cost is paid per
   // attempt, so the bound is what keeps a login cheap to serve.
-  .refine((value) => value.trim().length >= 10, "use at least 10 characters");
+  .refine((value) => value.trim().length >= MINIMUM_PASSWORD_LENGTH, "use at least 9 characters");
 
 /** The meter shown while typing is advice; this is the rule that is enforced. */
 function isStrongEnough(password: string, personal: readonly string[]): boolean {

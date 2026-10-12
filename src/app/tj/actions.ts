@@ -2,7 +2,7 @@
 
 import { randomBytes } from "node:crypto";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
 
 import { isSignedIn } from "@/lib/admin-auth";
@@ -164,7 +164,7 @@ export async function createFarmer(formData: FormData): Promise<ActionResult> {
     },
   });
 
-  revalidatePath("/tj");
+  revalidateProductViews();
   return { ok: true };
 }
 
@@ -491,11 +491,17 @@ export async function deleteFarmer(formData: FormData): Promise<ActionResult> {
 }
 
 function revalidateProductViews(): void {
+  updateTag("catalog");
   revalidatePath("/tj");
+  revalidatePath("/tj/overview");
+  revalidatePath("/tj/listings");
   revalidatePath("/tj/farmers");
   revalidatePath("/ta/products");
   revalidatePath("/ta/farmers");
   revalidatePath("/ta");
+  revalidatePath("/en/products");
+  revalidatePath("/en/farmers");
+  revalidatePath("/en");
 }
 
 // --------------------------------------------------------------------- stores
@@ -602,6 +608,7 @@ export async function deleteStore(formData: FormData): Promise<ActionResult> {
 }
 
 function revalidateStoreViews(): void {
+  updateTag("catalog");
   revalidatePath("/tj");
   revalidatePath("/tj/overview");
   revalidatePath("/tj/stores");
@@ -747,7 +754,7 @@ export async function updateFarmerEvidence(formData: FormData): Promise<ActionRe
       },
     }),
   ]);
-  revalidatePath("/tj");
+  revalidateProductViews();
   revalidatePath(`/tj/farmers/${input.farmerId}`);
   return { ok: true };
 }

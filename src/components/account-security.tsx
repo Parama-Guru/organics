@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { useI18n } from "@/lib/i18n/client";
 import { localePath } from "@/lib/i18n/config";
+import { MINIMUM_PASSWORD_LENGTH } from "@/lib/password-strength";
 
 export function PasswordForm({
   hasPassword,
@@ -58,7 +59,7 @@ function ChangePasswordForm() {
         type="password"
         autoComplete="new-password"
         required
-        minLength={10}
+        minLength={MINIMUM_PASSWORD_LENGTH}
         maxLength={200}
         invalid={bad.has("newPassword")}
         error={bad.has("newPassword") ? t.account.fieldPassword : undefined}
@@ -95,7 +96,7 @@ function GoogleSetPasswordForm({ invalid }: { invalid: boolean }) {
         type="password"
         autoComplete="new-password"
         required
-        minLength={10}
+        minLength={MINIMUM_PASSWORD_LENGTH}
         maxLength={200}
         invalid={invalid}
         error={invalid ? t.account.fieldPassword : undefined}

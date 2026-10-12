@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { CheckIcon } from "@/components/ui/icons";
 import { useI18n } from "@/lib/i18n/client";
+import { MINIMUM_PASSWORD_LENGTH } from "@/lib/password-strength";
 
 export function RequestResetForm() {
   const { locale, t } = useI18n();
@@ -66,7 +67,7 @@ export function ResetForm({ token }: { token: string }) {
         type="password"
         autoComplete="new-password"
         required
-        minLength={10}
+        minLength={MINIMUM_PASSWORD_LENGTH}
         maxLength={200}
         invalid={state.fields?.includes("password")}
         error={state.fields?.includes("password") ? t.account.fieldPassword : undefined}

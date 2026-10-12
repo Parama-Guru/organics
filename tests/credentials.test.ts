@@ -3,10 +3,24 @@ import test from "node:test";
 
 import { MINIMUM_SCORE, scorePassword } from "../src/lib/password-strength";
 import { isReservedUsername, normalizeUsername, usernameSchema } from "../src/lib/username";
+import { passwordChangeSchema, passwordSetSchema, signUpSchema } from "../src/lib/account-schema";
 
 test("length carries more weight than symbols", () => {
   assert.ok(scorePassword("kadalai-vayal-2026-thanjavur").score >= 3);
-  assert.ok(scorePassword("Aa1!Aa1!x").score < MINIMUM_SCORE);
+  assert.ok(scorePassword("Aa1!Aa1!").score < MINIMUM_SCORE);
+});
+
+test("customer signup, set and change accept strong nine-character passwords but reject eight", () => {
+  const signup = { name: "Meena", username: "meena_01", email: "meena@example.test" };
+  for (const password of ["R7!mQ2vZx", "R7!mQ2vZ"]) {
+    const expected = password.length === 9;
+    assert.equal(signUpSchema.safeParse({ ...signup, password }).success, expected);
+    assert.equal(passwordSetSchema.safeParse({ newPassword: password }).success, expected);
+    assert.equal(passwordChangeSchema.safeParse({ currentPassword: "existing", newPassword: password }).success, expected);
+    assert.equal(scorePassword(password).score >= MINIMUM_SCORE, expected);
+  }
+  assert.equal(passwordSetSchema.safeParse({ newPassword: "123456789" }).success, false);
+  assert.equal(passwordSetSchema.safeParse({ newPassword: " R7!mQ2vZ " }).success, false);
 });
 
 test("commonly guessed passwords score zero whatever their shape", () => {

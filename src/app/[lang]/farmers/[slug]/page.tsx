@@ -10,7 +10,7 @@ import { ProductCard } from "@/components/product-card";
 import { StickyCallBar } from "@/components/sticky-call-bar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowLeftIcon, ArrowRightIcon, MapPinIcon, PhoneIcon, ShieldCheckIcon, WhatsAppIcon } from "@/components/ui/icons";
+import { ArrowLeftIcon, MapPinIcon, PhoneIcon, ShieldCheckIcon, WhatsAppIcon } from "@/components/ui/icons";
 import { getFarmerBySlug } from "@/lib/farmers";
 import { isFarmerSaved } from "@/lib/saved";
 import { format, localePath } from "@/lib/i18n/config";
@@ -95,7 +95,7 @@ export default async function FarmerPage({ params }: PageProps<"/[lang]/farmers/
           />
         </div>
 
-        <div className="grid gap-8 p-6 sm:p-10 lg:grid-cols-[1fr_0.9fr] lg:p-12">
+        <div className="p-6 sm:p-10 lg:p-12">
           <div>
             <div className="flex flex-wrap items-center gap-2">
               {sponsored ? <Badge tone="marigold">{t.farmers.sponsored}</Badge> : null}
@@ -116,12 +116,6 @@ export default async function FarmerPage({ params }: PageProps<"/[lang]/farmers/
               <p className="mt-4 inline-flex flex-wrap items-center gap-2 rounded-xl bg-leaf-50 px-3 py-2 text-sm font-medium text-leaf-800 ring-1 ring-inset ring-leaf-300">
                 <ShieldCheckIcon className="text-base" />
                 {format(t.contact.checkedOn, { date: checkedOn(farmer.verifiedAt, locale) })}
-                <Link
-                  href={localePath(locale, "/how-we-check")}
-                  className="underline underline-offset-4"
-                >
-                  {t.product.howWeCheck}
-                </Link>
               </p>
             ) : null}
 
@@ -160,50 +154,6 @@ export default async function FarmerPage({ params }: PageProps<"/[lang]/farmers/
               </div>
             )}
           </div>
-
-            {/* "Certified organic" is a regulated claim, so the scheme, the number
-                and the expiry are printed rather than implied by a green tick. */}
-            {farmer.certifier ? (
-              <dl className="h-fit grid gap-x-8 gap-y-5 rounded-[1.75rem] border border-leaf-200 bg-leaf-50 p-6 sm:grid-cols-2 lg:p-8">
-                <div className="sm:col-span-2">
-                  <p className="section-kicker">Verification dossier</p>
-                </div>
-                <div className="sm:col-span-2">
-                  <dt className="text-sm text-bark-600">{t.contact.certifier}</dt>
-                  <dd className="font-medium text-ink">{farmer.certifier}</dd>
-                </div>
-                {farmer.certificateNo ? (
-                  <div>
-                    <dt className="text-sm text-bark-600">{t.contact.certificateNo}</dt>
-                    <dd className="font-mono text-sm font-medium text-ink">
-                      {farmer.certificateNo}
-                    </dd>
-                  </div>
-                ) : null}
-                {farmer.certifiedUntil ? (
-                  <div>
-                    <dt className="text-sm text-bark-600">{t.contact.certifiedUntil}</dt>
-                    <dd className="font-medium text-ink">
-                      {checkedOn(farmer.certifiedUntil, locale)}
-                    </dd>
-                  </div>
-                ) : null}
-                {/* A number you cannot check is still only an assertion. When the
-                    farm has given us the document, link straight to it. */}
-                {farmer.certificateUrl ? (
-                  <div className="sm:col-span-2">
-                    <a
-                      href={farmer.certificateUrl}
-                      target="_blank"
-                      rel="noopener noreferrer nofollow"
-                      className="inline-flex min-h-11 items-center gap-1.5 font-semibold text-brand underline underline-offset-4"
-                    >
-                      {t.contact.viewCertificate} <ArrowRightIcon />
-                    </a>
-                  </div>
-                ) : null}
-              </dl>
-            ) : null}
 
         </div>
       </header>
