@@ -38,7 +38,7 @@ export function verifySnapshot(repository, revision) {
     if (revision) {
       const archive = path.join(temporary, "source.tar");
       command("git", ["archive", "--format=tar", `--output=${archive}`, revision], { cwd: repository });
-      command("tar", ["-xf", archive, "-C", snapshot]);
+      command("tar", ["-xf", "source.tar", "-C", "source"], { cwd: temporary });
     } else {
       const files = command("git", ["ls-files", "--cached", "--others", "--exclude-standard", "-z"], {
         cwd: repository, stdio: ["ignore", "pipe", "inherit"], encoding: "utf8",
