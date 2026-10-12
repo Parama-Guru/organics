@@ -230,7 +230,7 @@ export const en = {
 
   home: {
     badge: "Every farm checked",
-    titleLead: "Real food, grown the ",
+    titleLead: "Organic food, grown the ",
     titleAccent: "slow way",
     titleTail: ".",
     intro:

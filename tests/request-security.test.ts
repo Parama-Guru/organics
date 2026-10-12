@@ -45,3 +45,14 @@ test("same-origin writes accept local or absent origins and reject mismatches", 
   );
   assert.equal(isSameOrigin(request("{}", { host: "ossil.in", origin: "not a url" })), false);
 });
+
+test("same-origin checks tolerate TLS termination without trusting forwarded host headers", () => {
+  const proxied = new Request("http://0.0.0.0:3000/api/visitors", {
+    method: "POST",
+    headers: { host: "organics-production.up.railway.app", origin: "https://organics-production.up.railway.app" },
+  }) as NextRequest;
+  assert.equal(isSameOrigin(proxied), true);
+  proxied.headers.set("origin", "https://attacker.example");
+  proxied.headers.set("x-forwarded-host", "attacker.example");
+  assert.equal(isSameOrigin(proxied), false);
+});

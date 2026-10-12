@@ -3,12 +3,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { clientKeyFromHeaders, rateLimit } from "@/lib/rate-limit";
 import { recordVisitor, visitorDay } from "@/lib/visitor-counts";
+import { isSameOrigin } from "@/lib/same-origin";
 
 export const runtime = "nodejs";
 
 export async function POST(request: NextRequest) {
   const headers = { "Cache-Control": "private, no-store" };
-  if (request.headers.get("origin") !== request.nextUrl.origin || request.headers.get("x-ossil-visit") !== "1") {
+  if (!request.headers.get("origin") || !isSameOrigin(request) || request.headers.get("x-ossil-visit") !== "1") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403, headers });
   }
   if (request.headers.get("dnt") === "1" || request.headers.get("sec-gpc") === "1" ||

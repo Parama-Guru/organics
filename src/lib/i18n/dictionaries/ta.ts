@@ -236,7 +236,7 @@ export const ta = {
 
   home: {
     badge: "சரிபார்த்த பண்ணைகள்",
-    titleLead: "உண்மையான உணவு, ",
+    titleLead: "இயற்கை உணவு, ",
     titleAccent: "நிதானமாக",
     titleTail: ".",
     intro:

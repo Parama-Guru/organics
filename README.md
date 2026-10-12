@@ -146,6 +146,50 @@ remain disabled when it is absent.
 | `npm run db:deploy` | Apply committed migrations |
 | `npm run db:seed` | Load reference regions and sample directory data |
 | `npm run db:studio` | Open Prisma Studio |
+| `npm run preflight` | Check an isolated copy of current work, including a production build |
+| `npm run hooks:install` | Install this checkout's pre-push gate |
+
+## Safe push and deployment workflow
+
+Use Node 22 (matching CI and Docker), Git and `tar` on PATH. Run `npm ci` after
+cloning; its prepare step installs `.githooks/pre-push` using repository-local Git
+configuration. Run `npm run hooks:install` for an existing checkout. Existing
+custom hooks are not overwritten: merge the gate into them explicitly if needed.
+
+1. Make changes and run `npm run preflight` to validate the current working tree.
+2. Commit the completed feature with a concise message.
+3. Run `git push`. The hook exports each outgoing branch commit to an isolated
+  temporary directory, installs its locked dependencies, generates Prisma Client,
+  validates configuration, lints, tests, typechecks and builds for production.
+  Any failure exits nonzero and aborts the push. It tests the commit being sent,
+  not unrelated uncommitted edits. No successful-build cache can become stale.
+4. GitHub CI repeats validation on Linux with disposable PostgreSQL, applies and
+  checks migrations, seeds test data, runs integration tests, builds the Docker
+  image, then tests its real migration/startup path with PostgreSQL and Redis.
+5. Railway's GitHub trigger for `main` has **Wait for CI** enabled. It waits for
+  GitHub Actions before building the new commit, then requires `/api/health`
+  before switching traffic. A build or healthcheck failure does not replace a
+  healthy deployment. Database migrations still require backups and backwards
+  compatibility because a failed deployment cannot roll back a schema change.
+
+Local preflight uses the example config and a secret-free environment. It does
+not query production databases, seed data, or disturb the running development
+server. Database-dependent tests explicitly skip locally and run in CI instead.
+The local build requires network access for dependencies and Google fonts; offline
+failures block the push too. Deleting branches and pushing tags do not build code.
+
+Hooks are local safeguards, not access controls: `--no-verify`, disabling hooks,
+or another checkout can bypass them. For enforced main-branch protection, require
+pull requests and both GitHub status checks **Tests, lint, typecheck, build** and
+**Build Docker image**, with no bypass permission. These repository rules must be
+configured in GitHub settings by an administrator; YAML cannot enforce them.
+
+Keep the main CI workflow running on every push and do not automatically cancel
+its in-progress runs. Railway ignores skipped workflows and can ignore cancelled
+ones when another workflow succeeds. Manual Railway deploys and `railway up`
+bypass the GitHub trigger; use them only for deliberate recovery, not normal CD.
+Runtime secrets stay in Railway Variables, never in workflow files. This setup
+does not require a Railway token in GitHub Actions.
 
 ## Deployment
 

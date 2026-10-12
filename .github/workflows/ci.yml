@@ -8,15 +8,16 @@ on:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
 
 jobs:
   verify:
-    name: Lint, typecheck, build
+    name: Tests, lint, typecheck, build
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     services:
       postgres:
@@ -35,6 +36,9 @@ jobs:
 
     env:
       DATABASE_URL: postgresql://organics:organics@localhost:5432/organics?schema=public
+      DIRECT_URL: postgresql://organics:organics@localhost:5432/organics?schema=public
+      CONFIG_PATH: conf/config.example.yaml
+      APP_ENV: dev
       NEXT_TELEMETRY_DISABLED: "1"
 
     steps:
@@ -73,12 +77,24 @@ jobs:
       - run: npm run typecheck
 
       - run: npm run build
+        env:
+          NODE_ENV: production
 
   docker:
     name: Build Docker image
     runs-on: ubuntu-latest
+    timeout-minutes: 25
 
     services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
       postgres:
         image: postgres:16-alpine
         env:
@@ -115,13 +131,19 @@ jobs:
         run: |
           docker run -d --name organics --network host \
             -e RUN_MIGRATIONS=true \
+            -e APP_ENV=prod \
+            -e CONTACT_EMAIL=ci@example.test \
+            -e ACCOUNTS_ENABLED=true \
+            -e ACCOUNTS_SESSION_SECRET=ci-only-session-secret-not-for-production-0123456789 \
+            -e REDIS_URL=redis://127.0.0.1:6379 \
             -e DATABASE_URL='postgresql://organics:organics@127.0.0.1:5432/organics?schema=public' \
             -e DIRECT_URL='postgresql://organics:organics@127.0.0.1:5432/organics?schema=public' \
             organics:ci
           for i in $(seq 1 45); do
             code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/api/health || true)
             if [ "$code" = "200" ]; then
-              echo "Container is healthy and connected to the database"
+              curl --fail --silent http://localhost:3000/api/health | jq -e '.status == "ok" and .database == "ok" and .redis == "ok"'
+              echo "Container is healthy and connected to PostgreSQL and Redis"
               docker logs organics
               exit 0
             fi
@@ -130,3 +152,7 @@ jobs:
           echo "Container failed to become healthy"
           docker logs organics
           exit 1
+
+      - name: Remove smoke-test container
+        if: always()
+        run: docker rm -f organics || true

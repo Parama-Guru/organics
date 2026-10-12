@@ -3,7 +3,6 @@ import Link from "next/link";
 
 import { FeaturedProductStory } from "@/components/featured-product-story";
 import { IndexBoard } from "@/components/index-board";
-import { PhoneSoonNotice } from "@/components/phone-soon-notice";
 import { Reveal } from "@/components/reveal";
 import { Button } from "@/components/ui/button";
 import {
@@ -51,13 +50,6 @@ export default async function HomePage({ searchParams }: PageProps<"/[lang]">) {
     { icon: ShieldCheckIcon, title: t.how.step1Title, body: t.how.step1Body },
     { icon: MapPinIcon, title: t.how.step2Title, body: t.how.step2Body },
     { icon: PhoneIcon, title: t.how.step3Title, body: t.how.step3Body },
-  ];
-
-  const ledger = [
-    { value: "100%", label: t.home.statChecked },
-    { value: "0%", label: t.home.statCommission },
-    { value: String(counts.farmers), label: t.home.statFarms },
-    { value: String(counts.stores), label: t.home.communityStores },
   ];
 
   const members = [
@@ -184,22 +176,6 @@ export default async function HomePage({ searchParams }: PageProps<"/[lang]">) {
       ) : null}
 
       <div className="mx-auto max-w-[90rem] px-4 sm:px-6">
-        <PhoneSoonNotice className="mx-auto mt-8 max-w-5xl" />
-
-        {/* ---- Proof ledger. ---------------------------------------------- */}
-        <Reveal className="mt-16 sm:mt-24">
-          <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-[1.5rem] border border-bark-200 bg-bark-200 lg:grid-cols-4">
-            {ledger.map((entry) => (
-              <div key={entry.label} className="bg-paper p-6 sm:p-8">
-                <dt className="rule-label text-bark-600">{entry.label}</dt>
-                <dd className="mt-3 font-display text-4xl leading-none text-bark-900 sm:text-5xl">
-                  {entry.value}
-                </dd>
-              </div>
-            ))}
-          </dl>
-        </Reveal>
-
         {/* ---- Featured produce. ------------------------------------------ */}
         <section className="mt-20 sm:mt-32">
           <Reveal>
