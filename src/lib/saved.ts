@@ -1,6 +1,7 @@
 import "server-only";
 
 import { prisma } from "./prisma";
+import { publicFarmerWhere } from "./farmer-certification";
 import { productSummarySelect, publicProductWhere } from "./products";
 
 /**
@@ -23,7 +24,7 @@ export async function getSavedFarmers(customerId: string) {
   const rows = await prisma.savedFarmer.findMany({
     where: {
       customerId,
-      farmer: { status: "VERIFIED", certifiedUntil: { gte: new Date() } },
+      farmer: publicFarmerWhere(),
     },
     select: {
       farmer: {

@@ -14,7 +14,7 @@ export default async function NewProductPage() {
 
   const [categories, regions] = await Promise.all([
     prisma.category.findMany({
-      select: { id: true, name: true, nameTa: true },
+      select: { id: true, slug: true, name: true, nameTa: true },
       orderBy: { name: "asc" },
     }),
     listRegions(),

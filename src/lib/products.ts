@@ -5,6 +5,7 @@ import { cache } from "react";
 import { DEFAULT_LOCALE, type Locale } from "./i18n/config";
 import type { ProductSort } from "./product-query-schema";
 import { prisma } from "./prisma";
+import { publicFarmerWhere } from "./farmer-certification";
 
 // A listing is public only if its farm has passed verification. Every product has
 // a farm, so there is no first-party escape hatch: a pending or suspended farm
@@ -12,10 +13,7 @@ import { prisma } from "./prisma";
 export function publicProductWhere(now = new Date()): Prisma.ProductWhereInput {
   return {
     isActive: true,
-    farmer: {
-      status: "VERIFIED",
-      certifiedUntil: { gte: now },
-    },
+    farmer: publicFarmerWhere(now),
   };
 }
 
@@ -104,7 +102,7 @@ export const getFeaturedProducts = unstable_cache(
 /** Other listings from the same farm, so a product page is not a dead end. */
 export function getMoreFromFarm(farmerSlug: string, excludeSlug: string, limit = 4) {
   return prisma.product.findMany({
-    where: { ...publicProductWhere(), farmer: { slug: farmerSlug }, slug: { not: excludeSlug } },
+    where: { ...publicProductWhere(), farmer: { ...publicFarmerWhere(), slug: farmerSlug }, slug: { not: excludeSlug } },
     select: productSummarySelect,
     orderBy: { name: "asc" },
     take: limit,
@@ -154,6 +152,7 @@ async function searchProductIds(term: string): Promise<string[]> {
 }
 
 export async function getProducts(options: {
+  produceItemId?: string;
   categorySlug?: string;
   region?: string;
   search?: string;
@@ -169,11 +168,11 @@ export async function getProducts(options: {
   //
   // Safe to cache because the only Date in productSummarySelect is
   // farmer.verifiedAt, and checkedOn takes the string that survives JSON.
-  if (!categorySlug && !region && !search?.trim() && sort === "name" && limit === 60) {
+  if (!options.produceItemId && !categorySlug && !region && !search?.trim() && sort === "name" && limit === 60) {
     return listProductsCached(locale);
   }
 
-  return listProducts({ categorySlug, region, search, sort, limit, locale });
+  return listProducts({ categorySlug, region, search, sort, limit, locale, produceItemId: options.produceItemId });
 }
 
 const listProductsCached = unstable_cache(
@@ -183,6 +182,7 @@ const listProductsCached = unstable_cache(
 );
 
 async function listProducts(options: {
+  produceItemId?: string;
   categorySlug?: string;
   region?: string;
   search?: string;
@@ -218,6 +218,7 @@ async function listProducts(options: {
   return prisma.product.findMany({
     where: {
       ...publicProductWhere(),
+      ...(options.produceItemId ? { produceItemId: options.produceItemId } : {}),
       ...(categorySlug ? { category: { slug: categorySlug } } : {}),
       ...(region ? { region: { slug: region } } : {}),
       ...(searchIds ? { id: { in: searchIds } } : {}),

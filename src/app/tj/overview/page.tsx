@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { isSignedIn } from "@/lib/admin-auth";
 import { farmerPortalEnabled } from "@/lib/farmer-auth";
 import { prisma } from "@/lib/prisma";
+import { publicFarmerWhere } from "@/lib/farmer-certification";
 import { storePortalEnabled } from "@/lib/store-auth";
 import { publicStoreWhere } from "@/lib/stores";
 
@@ -92,18 +93,18 @@ export default async function AdminOverview() {
   ] = await Promise.all([
     prisma.farmer.count({ where: { status: "PENDING" } }),
     prisma.farmer.count({ where: { flaggedAt: { not: null } } }),
-    prisma.farmer.count({ where: { status: "VERIFIED", certifiedUntil: { gte: now } } }),
+    prisma.farmer.count({ where: publicFarmerWhere(now) }),
     prisma.farmer.count({
       where: {
         status: "VERIFIED",
-        OR: [{ certifiedUntil: null }, { certifiedUntil: { lt: now } }],
+        NOT: publicFarmerWhere(now),
       },
     }),
     prisma.farmer.count({ where: { status: { in: ["SUSPENDED", "REJECTED"] } } }),
     prisma.product.count({
       where: {
         isActive: true,
-        farmer: { status: "VERIFIED", certifiedUntil: { gte: now } },
+        farmer: publicFarmerWhere(now),
         stock: { gt: 0 },
       },
     }),
@@ -113,11 +114,7 @@ export default async function AdminOverview() {
     prisma.product.count({
       where: {
         isActive: true,
-        OR: [
-          { farmer: { status: { not: "VERIFIED" } } },
-          { farmer: { certifiedUntil: null } },
-          { farmer: { certifiedUntil: { lt: now } } },
-        ],
+        farmer: { NOT: publicFarmerWhere(now) },
       },
     }),
     // Live, visible, and publicly marked "not available now" because nothing is
@@ -125,7 +122,7 @@ export default async function AdminOverview() {
     prisma.product.count({
       where: {
         isActive: true,
-        farmer: { status: "VERIFIED", certifiedUntil: { gte: now } },
+        farmer: publicFarmerWhere(now),
         stock: 0,
       },
     }),
@@ -153,7 +150,7 @@ export default async function AdminOverview() {
         startsAt: { lte: now },
         endsAt: { gt: now },
         OR: [
-          { farmer: { status: "VERIFIED", certifiedUntil: { gte: now } } },
+          { farmer: publicFarmerWhere(now) },
           { store: publicStoreWhere(now) },
         ],
       },

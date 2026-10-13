@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { prisma } from "./prisma";
 import { regionIdFromExisting } from "./regions";
+import { findProduceItem, PRODUCE_TYPES } from "./produce-taxonomy";
 
 /**
  * Every function here takes `farmerId` and puts it in the WHERE clause, so a
@@ -27,6 +28,7 @@ export const farmerProductSchema = z.object({
     .regex(/^\d{1,7}(\.\d{1,2})?$/, "enter a price like 149 or 149.50"),
   unit: z.string().trim().min(1, "give a unit").max(40),
   categoryId: z.string().trim().min(1, "choose a category"),
+  produceItemId: z.string().max(80).refine((value) => !value || Boolean(findProduceItem(value)), "choose a listed item").optional(),
   // A district id from the list, never free text: hand-typed districts both
   // invented duplicate browsing facets and, in Tamil, crashed on a slug clash.
   regionId: z.string().trim().max(60).optional(),
@@ -42,6 +44,15 @@ export const farmerProductSchema = z.object({
 });
 
 export type FarmerProductInput = z.infer<typeof farmerProductSchema>;
+
+export async function validProductTaxonomy(input: FarmerProductInput): Promise<boolean> {
+  const category = await prisma.category.findUnique({ where: { id: input.categoryId }, select: { slug: true } });
+  if (!category) return false;
+  const type = PRODUCE_TYPES.find((entry) => entry.slug === category.slug);
+  if (!type) return !input.produceItemId;
+  const item = findProduceItem(input.produceItemId ?? "");
+  return item?.categorySlug === type.slug;
+}
 
 // The English columns are NOT NULL and feed English search, so a blank one
 // mirrors the Tamil rather than storing an empty string.
@@ -124,6 +135,7 @@ export function getFarmerProduct(farmerId: string, productId: string) {
       stock: true,
       isActive: true,
       categoryId: true,
+      produceItemId: true,
       regionId: true,
     },
   });
@@ -141,12 +153,13 @@ export async function createFarmerProduct(
       farmerId,
       slug: await uniqueSlug(englishName(input), farmSlug),
       name: englishName(input),
-      nameTa: input.nameTa,
+      nameTa: findProduceItem(input.produceItemId ?? "")?.nameTa ?? input.nameTa,
       description: englishDescription(input),
       descriptionTa: input.descriptionTa,
       priceCents: priceToPaise(input.price),
       unit: input.unit,
       categoryId: input.categoryId,
+      produceItemId: input.produceItemId || null,
       regionId,
       stock: stockOf(input),
       isActive: input.isActive === "on",
@@ -170,12 +183,13 @@ export async function updateFarmerProduct(
     where: { id: productId, farmerId },
     data: {
       name: englishName(input),
-      nameTa: input.nameTa,
+      nameTa: findProduceItem(input.produceItemId ?? "")?.nameTa ?? input.nameTa,
       description: englishDescription(input),
       descriptionTa: input.descriptionTa,
       priceCents: priceToPaise(input.price),
       unit: input.unit,
       categoryId: input.categoryId,
+      produceItemId: input.produceItemId || null,
       regionId,
       stock: stockOf(input),
       isActive: input.isActive === "on",

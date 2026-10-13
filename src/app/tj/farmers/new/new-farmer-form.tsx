@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 
 import { createFarmer } from "@/app/tj/actions";
 import { Button } from "@/components/ui/button";
+import { ProduceSelect } from "@/components/produce-select";
 import { Field, TextareaField } from "@/components/ui/field";
 
 export function NewFarmerForm() {
@@ -62,30 +63,26 @@ export function NewFarmerForm() {
         maxLength={4}
         placeholder="1234"
       />
-      {/* Both are required by farmerApplicationSchema and both are published on
-          the farm's public page. Leaving them off the form made this page
-          impossible to submit: it failed with "check these fields: certifier,
-          certificateNo" against fields that were not on screen. */}
+        <ProduceSelect />
       <Field
         label="Certified by"
-        hint="the certifying body"
+        hint="optional; complete all certificate fields if supplied"
         name="certifier"
-        required
         maxLength={160}
         placeholder="Indian Organic Certification Agency"
       />
       <Field
         label="Certificate number"
+        hint="optional"
         name="certificateNo"
-        required
         maxLength={80}
         placeholder="IOCA/2026/00123"
       />
       <Field
         label="Certificate valid until"
+        hint="optional"
         name="certifiedUntil"
         type="date"
-        required
       />
       <Field
         label="Organic certificate link"

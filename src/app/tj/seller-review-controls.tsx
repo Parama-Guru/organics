@@ -141,16 +141,16 @@ export function FarmerEvidenceForm({
         <input name="govtIdLast4" inputMode="numeric" required pattern="[0-9]{4}" maxLength={4} defaultValue={initial.govtIdLast4} className={field} />
       </label>
       <label className="text-sm font-medium text-bark-900">
-        Valid until
-        <input name="certifiedUntil" type="date" required defaultValue={initial.certifiedUntil} className={field} />
+        Valid until (optional certificate)
+        <input name="certifiedUntil" type="date" defaultValue={initial.certifiedUntil} className={field} />
       </label>
       <label className="text-sm font-medium text-bark-900 sm:col-span-2">
-        Certification scheme and body
-        <input name="certifier" required minLength={3} maxLength={160} defaultValue={initial.certifier} className={field} />
+        Certification scheme and body (optional)
+        <input name="certifier" minLength={3} maxLength={160} defaultValue={initial.certifier} className={field} />
       </label>
       <label className="text-sm font-medium text-bark-900">
-        Certificate number
-        <input name="certificateNo" required minLength={3} maxLength={80} defaultValue={initial.certificateNo} className={field} />
+        Certificate number (optional)
+        <input name="certificateNo" minLength={3} maxLength={80} defaultValue={initial.certificateNo} className={field} />
       </label>
       <label className="text-sm font-medium text-bark-900">
         Certificate URL

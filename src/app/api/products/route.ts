@@ -54,6 +54,7 @@ export async function GET(request: NextRequest) {
   try {
     const products = await getProducts({
       categorySlug: parsed.data.category,
+      produceItemId: parsed.data.item,
       region: parsed.data.region,
       search: parsed.data.search,
       sort: allowedSort(parsed.data.sort ?? "name", priceVisible),

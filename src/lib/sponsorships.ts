@@ -3,6 +3,7 @@ import "server-only";
 import { prisma } from "./prisma";
 import type { ActiveSponsorship } from "./sponsorship-ranking";
 import { publicStoreWhere } from "./stores";
+import { publicFarmerWhere } from "./farmer-certification";
 
 export { sponsoredFirst } from "./sponsorship-ranking";
 
@@ -34,7 +35,7 @@ export async function activeSponsoredIds() {
       startsAt: { lte: now },
       endsAt: { gt: now },
       OR: [
-        { farmer: { status: "VERIFIED", certifiedUntil: { gte: now } } },
+        { farmer: publicFarmerWhere(now) },
         { store: publicStoreWhere(now) },
       ],
     },
@@ -77,7 +78,7 @@ export function isFarmerSponsored(farmerId: string): Promise<boolean> {
         status: "ACTIVE",
         startsAt: { lte: now },
         endsAt: { gt: now },
-        farmer: { status: "VERIFIED", certifiedUntil: { gte: now } },
+        farmer: publicFarmerWhere(now),
       },
     })
     .then((count) => count > 0);

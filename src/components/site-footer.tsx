@@ -30,7 +30,7 @@ export async function SiteFooter() {
     { href: "/contact", label: t.footer.contact },
     { href: "/careers", label: t.footer.careers },
     { href: "/sell", label: t.nav.sell },
-    { href: "/stores/register", label: t.footer.joinAsStore },
+    { href: "/sell?type=store", label: t.footer.joinAsStore },
   ];
 
   // Every account is being opened as the site launches. Each icon is a real

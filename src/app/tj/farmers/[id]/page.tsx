@@ -14,6 +14,7 @@ import { farmerPortalEnabled, inviteIsOutstanding } from "@/lib/farmer-auth";
 import { indiaDateKey } from "@/lib/india-date";
 import { formatMoney } from "@/lib/money";
 import { prisma } from "@/lib/prisma";
+import { hasAcceptableFarmerCertificate } from "@/lib/farmer-certification";
 
 export const dynamic = "force-dynamic";
 
@@ -51,6 +52,7 @@ export default async function AdminFarmPage({ params }: PageProps<"/tj/farmers/[
       status: true,
       about: true,
       aboutTa: true,
+      produceItem: { select: { nameTa: true, category: { select: { nameTa: true } } } },
       govtIdLast4: true,
       certifier: true,
       certificateNo: true,
@@ -88,9 +90,7 @@ export default async function AdminFarmPage({ params }: PageProps<"/tj/farmers/[
   if (!farmer) notFound();
 
   const live = farmer.products.filter((product) => product.isActive).length;
-  const certificateCurrent = Boolean(
-    farmer.certifiedUntil && farmer.certifiedUntil >= new Date(),
-  );
+  const certificateCurrent = hasAcceptableFarmerCertificate(farmer);
 
   return (
     <>
@@ -137,8 +137,8 @@ export default async function AdminFarmPage({ params }: PageProps<"/tj/farmers/[
 
       {farmer.status === "VERIFIED" && !certificateCurrent ? (
         <p className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-          Public hold: this farm has VERIFIED status but no current certificate. Its farm page
-          and listings remain hidden until the evidence below has a future expiry.
+          Public hold: the supplied certificate is incomplete or expired. Complete it with
+          a future expiry, or clear all certificate fields if no certificate is supplied.
         </p>
       ) : null}
 
@@ -151,6 +151,8 @@ export default async function AdminFarmPage({ params }: PageProps<"/tj/farmers/[
           <div><dt className="text-bark-600">Last changed</dt><dd>{farmer.updatedAt.toISOString()}</dd></div>
           <div><dt className="text-bark-600">Last approved</dt><dd>{farmer.verifiedAt?.toISOString() ?? "—"}</dd></div>
           <div><dt className="text-bark-600">Listings</dt><dd>{farmer.products.length}</dd></div>
+          <div><dt className="text-bark-600">Produce type</dt><dd lang="ta">{farmer.produceItem?.category.nameTa ?? "—"}</dd></div>
+          <div><dt className="text-bark-600">Produce item</dt><dd lang="ta">{farmer.produceItem?.nameTa ?? "—"}</dd></div>
         </dl>
         {farmer.about ? <p className="mt-4 leading-relaxed text-bark-700">{farmer.about}</p> : null}
         {farmer.aboutTa ? <p className="mt-3 leading-relaxed text-bark-700" lang="ta">{farmer.aboutTa}</p> : null}

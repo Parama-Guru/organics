@@ -64,13 +64,13 @@ export default async function HomePage({ searchParams }: PageProps<"/[lang]">) {
       label: counts.customers === 1 ? t.home.communityCustomersOne : t.home.communityCustomers,
       // With accounts switched off there is nothing to join, so the card points
       // at the produce instead of a route that 404s.
-      href: accountsOn ? "/account/sign-up" : "/products",
+      href: accountsOn ? "/account/sign-in" : "/products",
       cta: accountsOn ? t.home.communityJoinCustomer : t.home.browse,
     },
     {
       count: counts.stores,
       label: counts.stores === 1 ? t.home.communityStoresOne : t.home.communityStores,
-      href: "/stores/register",
+      href: "/sell?type=store",
       cta: t.home.communityJoinStore,
     },
   ];

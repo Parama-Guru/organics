@@ -13,9 +13,6 @@ export const en = {
     storesTitle: "Organic stores",
     storesDescription:
       "Checked shops that stock organic produce, listed by district with the person to ask for.",
-    storeRegisterTitle: "Register your organic store",
-    storeRegisterDescription:
-      "List your shop alongside the farms we check, so buyers looking for organic produce nearby can find you.",
     contactTitle: "Contact us",
     contactDescription:
       "Tell us whether you are a buyer, a farmer or an organic store, and we will answer accordingly.",
@@ -275,7 +272,7 @@ export const en = {
   how: {
     heading: "How it works",
     step1Title: "We check the farm",
-    step1Body: "Details and certificates are checked and the farmer is called. Nothing is listed before that.",
+    step1Body: "Farm details and any supplied certificates are checked, and the farmer is called. Nothing is listed before review.",
     step2Title: "You see who grew it",
     step2Body: "Every listing carries the farm name, the district and the person to ask for.",
     step3Title: "You call them",
@@ -361,7 +358,7 @@ export const en = {
     intro:
       "We check a farm's details before any of its listings go live. Call them directly from any product page.",
     introSoon:
-      "We check a farm's details before any of its listings go live. Certificates are on show now; phone numbers open shortly.",
+      "We review a farm's details before its listings go live. Certificates are optional; phone numbers open shortly.",
     none: "No farms listed yet",
     applyToList: "List your farm",
     listingCount: "{count} listing",
@@ -656,9 +653,9 @@ export const en = {
     check1Title: "We speak to the farmer",
     check1Body:
       "Every application gets a phone call on the number given. If the number does not connect, the listing does not go live.",
-    check2Title: "We check the organic certificate",
+    check2Title: "We review available evidence",
     check2Body:
-      "We ask for the certificate and the certifying body, and confirm the name on it matches the farm applying.",
+      "A certificate is optional for farmers. When supplied, we check the certifying body, the farm name and expiry. Staff approval is not a claim of organic certification.",
     check3Title: "We confirm the land and the crop",
     check3Body:
       "District, rough acreage and what is actually growing this season. A farm that lists produce it does not grow is removed.",
@@ -701,7 +698,7 @@ export const en = {
       "An account unlocks checked seller details, a private shortlist and private enquiries. We store your email, name, a one-way password hash, and the phone number and district if you choose to give them. Google sign-in stores Google's durable account identifier and the verified email seen when you link it, but no Google token or profile photo. An enquiry sends your name and message to the selected seller; your email becomes Reply-To only when you explicitly choose that option after verification. We store the enquiry for delivery and staff follow-up. Signing in sets an HTTP-only session cookie, which is revoked when you sign out.",
     s2Title: "Farmers and organic stores who apply",
     s2Body:
-      "We collect the farm or store name, contact name, phone, email, district, description and verification evidence to review and publish the directory entry. Farms provide organic certificate details and the last four Aadhaar digits; stores provide FSSAI and optional organic certificate details. We never ask for the full Aadhaar number. Contact email and government-ID digits stay private. Public name, district, description, address where relevant, and current verification details are shown; phone numbers are shown only after consent and launch approval. Invited sellers receive a private portal session so they can manage permitted public details and read enquiries; legal identity and verification evidence remain staff-controlled.",
+      "We collect the farm or store name, contact name, phone, email, district, description and verification evidence to review and publish the directory entry. Farms provide their produce type and item and the last four Aadhaar digits; organic certificate details are optional. Stores provide FSSAI and optional organic certificate details. We never ask for the full Aadhaar number. Contact email and government-ID digits stay private. Public name, district, description and address where relevant are shown; phone numbers are shown only after consent and launch approval. Invited sellers receive a private portal session so they can manage permitted public details and read enquiries; legal identity and verification evidence remain staff-controlled.",
     s3Title: "How long we keep it",
     s3Body:
       "Applications and contact messages are kept while review or support work requires them; you can ask us to correct or delete them. A seller listing is removed on a verified request. Deleting a buyer account removes its profile, sign-in identities, shortlist, enquiries and subscription record. If payments are enabled, limited provider event IDs, amounts, currency and processing results may remain without the customer relation for fraud, accounting and webhook audit; no card details are stored.",

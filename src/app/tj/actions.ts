@@ -7,6 +7,7 @@ import { z } from "zod";
 
 import { isSignedIn } from "@/lib/admin-auth";
 import { farmerApplicationSchema } from "@/lib/farmer-application-schema";
+import { farmerCertificateFields, hasAcceptableFarmerCertificate, publicFarmerWhere, validateFarmerCertificate } from "@/lib/farmer-certification";
 import { deliverPrivateEnquiry, safeDeliveryError } from "@/lib/enquiry-delivery";
 import { FARMER_PORTAL, cancelFarmerInvite, farmerPortalEnabled, issueFarmerInvite } from "@/lib/farmer-auth";
 import { mailConfigured } from "@/lib/mail";
@@ -67,14 +68,15 @@ export async function decideFarmer(
 
   const current = await prisma.farmer.findUnique({
     where: { id: parsed.data.farmerId },
-    select: { status: true, certifiedUntil: true },
+    select: { status: true, certifier: true, certificateNo: true, certificateUrl: true, certifiedUntil: true },
   });
   if (!current) return { ok: false, message: "That farm no longer exists." };
   if (status === "VERIFIED") {
-    if (!current.certifiedUntil || current.certifiedUntil <= new Date()) {
+    const hasCertificate = Boolean(current.certifier || current.certificateNo || current.certificateUrl || current.certifiedUntil);
+    if (hasCertificate && (!current.certifier || !current.certificateNo || !current.certifiedUntil || current.certifiedUntil <= new Date())) {
       return {
         ok: false,
-        message: "Record a future certificate expiry before approving this farm.",
+        message: "Complete the optional certificate with a future expiry, or clear all certificate fields before approval.",
       };
     }
   }
@@ -143,9 +145,10 @@ export async function createFarmer(formData: FormData): Promise<ActionResult> {
       // Collected by the form and published on the farm's page, so they have to
       // be written here too — otherwise every directly added farm went live
       // reading "Certificate —" on the very claim the site is built on.
-      certifier: input.certifier,
-      certificateNo: input.certificateNo,
-      certifiedUntil: endOfIndiaDate(input.certifiedUntil)!,
+      produceItemId: input.produceItemId,
+      certifier: input.certifier || null,
+      certificateNo: input.certificateNo || null,
+      certifiedUntil: input.certifiedUntil ? endOfIndiaDate(input.certifiedUntil) : null,
       certificateUrl: input.certificateUrl || null,
       // Added by an admin who has already done the checking, so it goes live.
       status: "VERIFIED",
@@ -702,19 +705,9 @@ export async function setStoreFlag(flagged: boolean, formData: FormData): Promis
 const farmerEvidenceSchema = z.object({
   farmerId: z.string().min(1).max(60),
   govtIdLast4: z.string().trim().regex(/^\d{4}$/),
-  certifier: z.string().trim().min(3).max(160),
-  certificateNo: z.string().trim().min(3).max(80),
-  certifiedUntil: z.string().transform((value, ctx) => {
-    const date = endOfIndiaDate(value);
-    if (!date || date <= new Date()) {
-      ctx.addIssue({ code: "custom", message: "future date required" });
-      return z.NEVER;
-    }
-    return date;
-  }),
-  certificateUrl: z.union([z.url().max(500), z.literal("")]),
+  ...farmerCertificateFields,
   note: z.string().trim().max(500).optional(),
-});
+}).superRefine(validateFarmerCertificate);
 
 export async function updateFarmerEvidence(formData: FormData): Promise<ActionResult> {
   if (!(await isSignedIn())) return NOT_SIGNED_IN;
@@ -739,9 +732,9 @@ export async function updateFarmerEvidence(formData: FormData): Promise<ActionRe
       where: { id: input.farmerId },
       data: {
         govtIdLast4: input.govtIdLast4,
-        certifier: input.certifier,
-        certificateNo: input.certificateNo,
-        certifiedUntil: input.certifiedUntil,
+        certifier: input.certifier || null,
+        certificateNo: input.certificateNo || null,
+        certifiedUntil: input.certifiedUntil ? endOfIndiaDate(input.certifiedUntil) : null,
         certificateUrl: input.certificateUrl || null,
         ...(input.note ? { reviewNote: input.note } : {}),
       },
@@ -902,14 +895,14 @@ export async function retryEnquiryDelivery(formData: FormData): Promise<ActionRe
     where: { id: parsed.data.id },
     include: {
       customer: { select: { name: true } },
-      farmer: { select: { status: true, certifiedUntil: true } },
+      farmer: { select: { status: true, certifiedUntil: true, certifier: true, certificateNo: true, certificateUrl: true } },
       store: { select: { status: true } },
     },
   });
   if (!enquiry) return { ok: false, message: "That enquiry no longer exists." };
   const recipientStillValid = enquiry.farmer
     ? enquiry.farmer.status === "VERIFIED" &&
-      Boolean(enquiry.farmer.certifiedUntil && enquiry.farmer.certifiedUntil > new Date())
+      hasAcceptableFarmerCertificate(enquiry.farmer)
     : Boolean(
         enquiry.store &&
           (await prisma.organicStore.count({
@@ -989,8 +982,7 @@ export async function createSponsoredPlacement(formData: FormData): Promise<Acti
     ? await prisma.farmer.count({
         where: {
           id: input.targetId,
-          status: "VERIFIED",
-          certifiedUntil: { gte: new Date() },
+          ...publicFarmerWhere(),
         },
       })
     : await prisma.organicStore.count({ where: { id: input.targetId, ...publicStoreWhere() } });

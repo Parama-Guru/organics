@@ -1,6 +1,8 @@
 import Link from "next/link";
 
 import { FilterChip } from "@/components/filter-chip";
+import { ProduceSelect } from "@/components/produce-select";
+import { PRODUCE_TYPES, findProduceItem } from "@/lib/produce-taxonomy";
 import { PhoneSoonNotice } from "@/components/phone-soon-notice";
 import { ProductCard } from "@/components/product-card";
 import { Button } from "@/components/ui/button";
@@ -21,7 +23,7 @@ export async function generateMetadata() {
   return { title: t.meta.shopTitle, description: t.meta.shopDescription };
 }
 
-type Filters = { category?: string; region?: string; search?: string; sort?: string };
+type Filters = { category?: string; item?: string; region?: string; search?: string; sort?: string };
 
 function firstValue(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
@@ -30,9 +32,10 @@ function firstValue(value: string | string[] | undefined): string | undefined {
 // Filters compose, so every link has to carry the ones it is not changing.
 function hrefWith(base: string, current: Filters, patch: Filters): string {
   const next = { ...current, ...patch };
+  if ("category" in patch && patch.category !== current.category) next.item = undefined;
   const query = new URLSearchParams();
 
-  for (const key of ["category", "region", "search", "sort"] as const) {
+  for (const key of ["category", "item", "region", "search", "sort"] as const) {
     const value = next[key];
     if (value) query.set(key, value);
   }
@@ -53,6 +56,7 @@ export default async function ProductsPage({ searchParams }: PageProps<"/[lang]/
   );
   const filters: Filters = {
     category: firstValue(params.category)?.slice(0, 100),
+    item: firstValue(params.item)?.slice(0, 80),
     region: firstValue(params.region)?.slice(0, 100),
     search: firstValue(params.search)?.slice(0, 100),
     sort: sort === "name" ? undefined : sort,
@@ -61,6 +65,7 @@ export default async function ProductsPage({ searchParams }: PageProps<"/[lang]/
   const [products, categories, regions, locale, t] = await Promise.all([
     getProducts({
       categorySlug: filters.category,
+      produceItemId: filters.item,
       region: filters.region,
       search: filters.search,
       sort,
@@ -81,7 +86,7 @@ export default async function ProductsPage({ searchParams }: PageProps<"/[lang]/
     : new Set<string>();
   const activeCategory = categories.find((category) => category.slug === filters.category);
   const activeRegion = regions.find((region) => region.slug === filters.region);
-  const isFiltered = Boolean(filters.category || filters.region || filters.search);
+  const isFiltered = Boolean(filters.category || filters.item || filters.region || filters.search);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-20">
@@ -151,6 +156,7 @@ export default async function ProductsPage({ searchParams }: PageProps<"/[lang]/
           <input type="hidden" name="category" value={filters.category} />
         ) : null}
         {filters.region ? <input type="hidden" name="region" value={filters.region} /> : null}
+        {filters.item ? <input type="hidden" name="item" value={filters.item} /> : null}
         <input
           type="search"
           name="search"
@@ -167,6 +173,17 @@ export default async function ProductsPage({ searchParams }: PageProps<"/[lang]/
         <Button type="submit" variant="dark">
           {t.products.search}
         </Button>
+      </form>
+
+      <form method="get" className="mt-5 grid gap-4 sm:grid-cols-2">
+        <ProduceSelect key={`${filters.category ?? ""}:${filters.item ?? ""}`} tamil={locale === "ta"} required={false}
+          typeName="category" itemName="item"
+          initialType={PRODUCE_TYPES.some((type) => type.slug === filters.category) ? filters.category : ""}
+          initialItem={findProduceItem(filters.item ?? "") ? filters.item : ""} />
+        {filters.region ? <input type="hidden" name="region" value={filters.region} /> : null}
+        {filters.search ? <input type="hidden" name="search" value={filters.search} /> : null}
+        {filters.sort ? <input type="hidden" name="sort" value={filters.sort} /> : null}
+        <Button type="submit" variant="dark" className="justify-self-start">{t.products.search}</Button>
       </form>
 
       {/* These used to be a horizontal scroll rail on phones. At 390px the

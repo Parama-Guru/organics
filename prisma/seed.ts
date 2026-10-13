@@ -2,6 +2,7 @@ import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 
 import { endOfIndiaDate } from "../src/lib/india-date";
+import { PRODUCE_TYPES } from "../src/lib/produce-taxonomy";
 
 import { loadConfig } from "../conf/config";
 
@@ -961,7 +962,7 @@ async function main() {
     const ta = categoryTa[categoryData.slug];
     const data = {
       ...categoryData,
-      nameTa: ta?.name ?? null,
+      nameTa: PRODUCE_TYPES.find((type) => type.slug === categoryData.slug)?.nameTa ?? ta?.name ?? null,
       descriptionTa: ta?.description ?? null,
     };
 

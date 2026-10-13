@@ -1,5 +1,6 @@
 import type { Prisma } from "@prisma/client";
 import { unstable_cache } from "next/cache";
+import { publicFarmerWhere } from "./farmer-certification";
 
 import { prisma } from "./prisma";
 import { decodeSlug } from "./products";
@@ -114,7 +115,7 @@ export const getRegisteredCounts = unstable_cache(
   async () => {
     const [farmers, customers, stores] = await Promise.all([
       prisma.farmer.count({
-        where: { status: "VERIFIED", certifiedUntil: { gte: new Date() } },
+        where: publicFarmerWhere(),
       }),
       prisma.customer.count({ where: { status: "ACTIVE" } }),
       prisma.organicStore.count({ where: publicStoreWhere() }),

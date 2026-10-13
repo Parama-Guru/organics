@@ -2,6 +2,7 @@ import type { Prisma } from "@prisma/client";
 
 import { prisma } from "./prisma";
 import { publicProductWhere, productSummarySelect, decodeSlug } from "./products";
+import { publicFarmerWhere } from "./farmer-certification";
 
 const farmerCardSelect = () => ({
   id: true,
@@ -25,12 +26,7 @@ export type FarmerCard = Prisma.FarmerGetPayload<{
   select: ReturnType<typeof farmerCardSelect>;
 }>;
 
-const publicFarmerWhere = (now = new Date()): Prisma.FarmerWhereInput => ({
-  status: "VERIFIED",
-  certifiedUntil: { gte: now },
-});
-
-// Only VERIFIED farms with a current certificate are ever listed. Search is
+// Only staff-approved farms with absent or current certificate evidence are listed. Search is
 // deliberately limited to public fields; private email and phone data never
 // become a discovery API while contact details are gated.
 //
@@ -44,11 +40,11 @@ export function getVerifiedFarmers(query = "") {
       ...publicFarmerWhere(),
       ...(term
         ? {
-            OR: [
+            AND: [{ OR: [
               { farmName: { contains: term, mode: "insensitive" } },
               { region: { name: { contains: term, mode: "insensitive" } } },
               { region: { nameTa: { contains: term, mode: "insensitive" } } },
-            ],
+            ] }],
           }
         : {}),
     },
@@ -69,7 +65,7 @@ export async function getFarmerBySlug(rawSlug: string) {
   if (!farmer) return null;
 
   const products = await prisma.product.findMany({
-    where: { ...publicProductWhere(), farmer: { slug } },
+    where: { ...publicProductWhere(), farmer: { ...publicFarmerWhere(), slug } },
     select: productSummarySelect,
     orderBy: [{ category: { name: "asc" } }, { name: "asc" }],
   });

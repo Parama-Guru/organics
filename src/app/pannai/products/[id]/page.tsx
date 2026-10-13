@@ -20,7 +20,7 @@ export default async function EditProductPage({
   const [product, categories, regions] = await Promise.all([
     getFarmerProduct(farmer.id, id),
     prisma.category.findMany({
-      select: { id: true, name: true, nameTa: true },
+      select: { id: true, slug: true, name: true, nameTa: true },
       orderBy: { name: "asc" },
     }),
     listRegions(),

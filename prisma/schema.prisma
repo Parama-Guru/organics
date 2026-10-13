@@ -34,6 +34,7 @@ model Category {
   nameTa        String?
   descriptionTa String?
   products      Product[]
+  produceItems  ProduceItem[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -44,6 +45,17 @@ model Category {
 // A district. Was a free-text column repeated on Farmer and Product, with the
 // Tamil spelling hard-coded in a TypeScript map — so a typo produced a silent
 // second "region" in the filters and Tamil silently fell back to English.
+model ProduceItem {
+  id         String @id
+  nameTa     String
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  farmers    Farmer[]
+  products   Product[]
+
+  @@unique([categoryId, nameTa])
+}
+
 model Region {
   id        String    @id @default(cuid())
   slug      String    @unique
@@ -86,6 +98,8 @@ model Farmer {
   about          String?
   aboutTa        String?
   photoUrl       String?
+  produceItemId  String?
+  produceItem    ProduceItem? @relation(fields: [produceItemId], references: [id], onDelete: Restrict)
   // Seeded demonstration data. Real applications default to false, so the
   // launch cleanup is `where: { isSample: true }` rather than a list of slugs.
   isSample       Boolean      @default(false)
@@ -159,12 +173,15 @@ model Product {
   farmer        Farmer         @relation(fields: [farmerId], references: [id], onDelete: Restrict)
   categoryId    String
   category      Category       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  produceItemId String?
+  produceItem   ProduceItem?   @relation(fields: [produceItemId], references: [id], onDelete: Restrict)
   images        ProductImage[]
   savedBy       SavedProduct[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
   @@index([categoryId])
+  @@index([produceItemId])
   @@index([slug])
   @@index([isActive, isFeatured])
   @@index([regionId])

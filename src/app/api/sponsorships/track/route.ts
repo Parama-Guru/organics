@@ -8,6 +8,7 @@ import { readBoundedJson } from "@/lib/request-body";
 import { isSameOrigin } from "@/lib/same-origin";
 import { consumeRateLimit } from "@/lib/session-store";
 import { publicStoreWhere } from "@/lib/stores";
+import { publicFarmerWhere } from "@/lib/farmer-certification";
 
 export const dynamic = "force-dynamic";
 
@@ -49,7 +50,7 @@ export async function POST(request: NextRequest) {
       startsAt: { lte: now },
       endsAt: { gt: now },
       OR: [
-        { farmer: { status: "VERIFIED", certifiedUntil: { gte: now } } },
+        { farmer: publicFarmerWhere(now) },
         { store: publicStoreWhere(now) },
       ],
     },

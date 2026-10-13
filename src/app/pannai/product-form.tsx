@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
+import { PRODUCE_ITEMS, PRODUCE_TYPES, findProduceItem } from "@/lib/produce-taxonomy";
 
 import {
   createProductAction,
@@ -8,7 +9,7 @@ import {
   type PortalState,
 } from "@/app/pannai/actions";
 
-type Category = { id: string; name: string; nameTa: string | null };
+type Category = { id: string; slug: string; name: string; nameTa: string | null };
 type Region = { id: string; name: string; nameTa: string | null };
 
 type Existing = {
@@ -22,6 +23,7 @@ type Existing = {
   stock: number;
   isActive: boolean;
   categoryId: string;
+  produceItemId: string | null;
   regionId: string | null;
 };
 
@@ -64,6 +66,7 @@ const ERRORS: Record<string, string> = {
   unit: "அளவைக் கொடுங்கள் — 1 கிலோ, 500 கிராம்.",
   stock: "எண்ணாக மட்டும் கொடுங்கள்.",
   categoryId: "ஒரு வகையைத் தேர்ந்தெடுங்கள்.",
+  produceItemId: "தேர்ந்தெடுத்த வகையிலிருந்து பொருளைத் தேர்ந்தெடுங்கள்.",
 };
 
 export function ProductForm({
@@ -81,6 +84,10 @@ export function ProductForm({
   const [state, formAction, pending] = useActionState<PortalState, FormData>(action, {});
   const bad = new Set(state.fields ?? []);
   const kept = state.values ?? {};
+  const [categoryId, setCategoryId] = useState(existing?.categoryId ?? "");
+  const [itemId, setItemId] = useState(existing?.produceItemId ?? "");
+  const selectedType = PRODUCE_TYPES.find((entry) => entry.slug === categories.find((category) => category.id === categoryId)?.slug);
+  const selectedItem = findProduceItem(itemId);
 
   const price = existing ? (existing.priceCents / 100).toFixed(2).replace(/\.00$/, "") : "";
 
@@ -89,7 +96,9 @@ export function ProductForm({
       <Field label="பொருளின் பெயர்" name="nameTa" bad={bad} error={ERRORS.nameTa}>
         <input
           name="nameTa"
-          defaultValue={kept.nameTa ?? existing?.nameTa ?? ""}
+          key={itemId}
+          defaultValue={selectedItem?.nameTa ?? kept.nameTa ?? existing?.nameTa ?? ""}
+          readOnly={Boolean(selectedItem)}
           required
           minLength={2}
           maxLength={120}
@@ -164,18 +173,30 @@ export function ProductForm({
       <Field label="வகை" name="categoryId" bad={bad} error={ERRORS.categoryId}>
         <select
           name="categoryId"
-          defaultValue={kept.categoryId ?? existing?.categoryId ?? ""}
+          value={categoryId}
+          onChange={(event) => { setCategoryId(event.target.value); setItemId(""); }}
           required
           className={control}
         >
           <option value="">—</option>
           {categories.map((category) => (
             <option key={category.id} value={category.id}>
-              {category.nameTa ?? category.name}
+              {PRODUCE_TYPES.find((type) => type.slug === category.slug)?.nameTa ?? category.nameTa ?? category.name}
             </option>
           ))}
         </select>
       </Field>
+
+      {selectedType ? (
+        <Field label="பொருள்" name="produceItemId" bad={bad} error={ERRORS.produceItemId}>
+          <select name="produceItemId" required value={itemId} onChange={(event) => setItemId(event.target.value)} className={control}>
+            <option value="">—</option>
+            {PRODUCE_ITEMS.filter((item) => item.categorySlug === selectedType.slug).map((item) => (
+              <option key={item.id} value={item.id}>{item.nameTa}</option>
+            ))}
+          </select>
+        </Field>
+      ) : null}
 
       {/* A list, not a text box: a typed district used to create a duplicate
           browsing filter, and a Tamil one crashed the save outright. */}

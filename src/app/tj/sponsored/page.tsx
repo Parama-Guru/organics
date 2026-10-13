@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { isSignedIn } from "@/lib/admin-auth";
 import { indiaDateInputValue, indiaDateKey } from "@/lib/india-date";
 import { prisma } from "@/lib/prisma";
+import { publicFarmerWhere } from "@/lib/farmer-certification";
 import { publicStoreWhere } from "@/lib/stores";
 
 export const dynamic = "force-dynamic";
@@ -18,7 +19,7 @@ export default async function SponsoredAdminPage() {
 
   const [farmers, stores, placements] = await Promise.all([
     prisma.farmer.findMany({
-      where: { status: "VERIFIED", certifiedUntil: { gte: now } },
+      where: publicFarmerWhere(now),
       select: { id: true, farmName: true },
       orderBy: { farmName: "asc" },
     }),

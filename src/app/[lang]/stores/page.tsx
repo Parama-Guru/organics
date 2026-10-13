@@ -137,7 +137,7 @@ export default async function StoresPage({ searchParams }: PageProps<"/[lang]/st
       {stores.length === 0 ? (
         <div className="glass mt-8 rounded-3xl p-12 text-center">
           <p className="font-display text-xl">{query ? t.stores.emptySearch : t.stores.empty}</p>
-          <Button as={Link} href={localePath(locale, "/stores/register")} className="mt-5">
+          <Button as={Link} href={localePath(locale, "/sell?type=store")} className="mt-5">
             {t.stores.registerCtaButton}
           </Button>
         </div>
@@ -231,7 +231,7 @@ export default async function StoresPage({ searchParams }: PageProps<"/[lang]/st
         <h2 className="mt-5 font-display text-4xl text-white">{t.stores.registerCta}</h2>
         <p className="mt-3 max-w-2xl leading-relaxed text-bark-100">{t.stores.registerCtaBody}</p>
         </div>
-        <Button as={Link} href={localePath(locale, "/stores/register")} className="mt-5">
+        <Button as={Link} href={localePath(locale, "/sell?type=store")} className="mt-5">
           {t.stores.registerCtaButton}
           <ArrowRightIcon />
         </Button>

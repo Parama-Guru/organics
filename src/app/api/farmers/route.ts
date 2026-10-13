@@ -93,9 +93,10 @@ export async function POST(request: NextRequest) {
         regionId: await regionIdForName(input.region),
         about: input.about,
         govtIdLast4: input.govtIdLast4,
-        certifier: input.certifier,
-        certificateNo: input.certificateNo,
-        certifiedUntil: endOfIndiaDate(input.certifiedUntil)!,
+        produceItemId: input.produceItemId,
+        certifier: input.certifier || null,
+        certificateNo: input.certificateNo || null,
+        certifiedUntil: input.certifiedUntil ? endOfIndiaDate(input.certifiedUntil) : null,
         certificateUrl: input.certificateUrl || null,
         // Status is never taken from the request; an admin promotes to VERIFIED.
         status: "PENDING",

@@ -18,6 +18,7 @@ import {
   farmerProductSchema,
   setFarmerProductActive,
   updateFarmerProduct,
+  validProductTaxonomy,
 } from "@/lib/farmer-products";
 import { fakeVerify, hashPassword, verifyPassword } from "@/lib/password";
 import { prisma } from "@/lib/prisma";
@@ -52,6 +53,7 @@ const PRODUCT_FIELDS = [
   "unit",
   "stock",
   "categoryId",
+  "produceItemId",
   "regionId",
 ];
 
@@ -65,6 +67,7 @@ function productFields(form: FormData) {
     unit: form.get("unit"),
     stock: form.get("stock") ?? "",
     categoryId: form.get("categoryId"),
+    produceItemId: form.get("produceItemId") ?? "",
     regionId: form.get("regionId") ?? "",
     isActive: form.get("isActive") ?? "",
   };
@@ -191,6 +194,9 @@ export async function createProductAction(
     };
   }
 
+  if (!(await validProductTaxonomy(parsed.data))) {
+    return { error: "invalid", fields: ["categoryId", "produceItemId"], values: textValues(form, PRODUCT_FIELDS) };
+  }
   await createFarmerProduct(farmer.id, farmer.slug, parsed.data);
   revalidatePath(FARMER_PORTAL);
   redirect(`${FARMER_PORTAL}?added=1`);
@@ -214,6 +220,9 @@ export async function updateProductAction(
     };
   }
 
+  if (!(await validProductTaxonomy(parsed.data))) {
+    return { error: "invalid", fields: ["categoryId", "produceItemId"], values: textValues(form, PRODUCT_FIELDS) };
+  }
   const changed = await updateFarmerProduct(farmer.id, productId, parsed.data);
   if (!changed) return { error: "notYours" };
 

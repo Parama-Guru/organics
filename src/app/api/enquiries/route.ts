@@ -12,6 +12,7 @@ import { clientKeyFromHeaders, rateLimit } from "@/lib/rate-limit";
 import { isSameOrigin } from "@/lib/same-origin";
 import { consumeRateLimit } from "@/lib/session-store";
 import { publicStoreWhere } from "@/lib/stores";
+import { publicFarmerWhere } from "@/lib/farmer-certification";
 
 export const dynamic = "force-dynamic";
 
@@ -81,8 +82,7 @@ export async function POST(request: NextRequest) {
       ? await prisma.farmer.findFirst({
           where: {
             id: input.recipientId,
-            status: "VERIFIED",
-            certifiedUntil: { gte: new Date() },
+            ...publicFarmerWhere(),
           },
           select: { id: true, email: true, farmName: true },
         })

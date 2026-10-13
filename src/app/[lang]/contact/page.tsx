@@ -28,7 +28,7 @@ export default async function ContactPage({ searchParams }: PageProps<"/[lang]/c
     {
       label: t.contactPage.storeShortcut,
       link: t.contactPage.storeShortcutLink,
-      href: "/stores/register",
+      href: "/sell?type=store",
     },
   ];
 

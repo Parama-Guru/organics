@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { findProduceItem } from "./produce-taxonomy";
 
 export const PRODUCT_SORTS = ["name", "price-asc", "price-desc"] as const;
 export type ProductSort = (typeof PRODUCT_SORTS)[number];
@@ -15,6 +16,7 @@ export function allowedSort(sort: ProductSort, priceVisible: boolean): ProductSo
 // cart was removed; buyers now contact the farmer directly.
 export const productQuerySchema = z.object({
   category: z.string().trim().max(100).optional(),
+  item: z.string().max(80).refine((value) => !value || Boolean(findProduceItem(value)), "unknown produce item").optional(),
   region: z.string().trim().max(100).optional(),
   search: z.string().trim().max(100).optional(),
   sort: z.enum(PRODUCT_SORTS).optional(),

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { ProduceSelect } from "@/components/produce-select";
 import { Field, TextareaField } from "@/components/ui/field";
 import { useI18n } from "@/lib/i18n/client";
 import { apiErrorMessage } from "@/lib/i18n/api-error";
@@ -112,9 +113,8 @@ export function FarmerApplicationForm() {
       />
       <Field
         label={t.application.certifier}
-        hint={t.application.certifierHint}
+        hint={t.application.optional}
         name="certifier"
-        required
         minLength={3}
         maxLength={160}
         placeholder={t.application.certifierPlaceholder}
@@ -122,16 +122,16 @@ export function FarmerApplicationForm() {
       />
       <Field
         label={t.application.certificateNo}
+        hint={t.application.optional}
         name="certificateNo"
-        required
         minLength={3}
         maxLength={80}
       />
       <Field
         label={t.application.certifiedUntil}
+        hint={t.application.optional}
         name="certifiedUntil"
         type="date"
-        required
       />
       <Field
         label={t.application.certificate}
@@ -141,6 +141,7 @@ export function FarmerApplicationForm() {
         maxLength={500}
         placeholder="https://…"
       />
+      <ProduceSelect tamil={locale === "ta"} />
       <TextareaField
         label={t.application.about}
         hint={t.application.aboutHint}
