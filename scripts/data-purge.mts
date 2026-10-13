@@ -1,5 +1,5 @@
 /**
- * Removes demonstration data and, optionally, buyer accounts.
+ * Removes selected seller/catalogue data or buyer accounts.
  *
  * Nothing is deleted without an explicit flag, because both of these are
  * irreversible against a shared cloud database.
@@ -7,6 +7,7 @@
  *   npm run data:purge -- --customers          buyer accounts and their data
  *   npm run data:purge -- --samples            seeded farms, shops and listings
  *   npm run data:purge -- --customers --samples
+ *   npm run data:purge -- --farmers            all farms, products and related image rows; keeps shops and buyers
  *
  * Add --dry-run to print what would go without touching anything.
  */
@@ -25,6 +26,16 @@ const args = new Set(process.argv.slice(2));
 const dryRun = args.has("--dry-run");
 const purgeCustomers = args.has("--customers");
 const purgeSamples = args.has("--samples");
+const purgeFarmers = args.has("--farmers");
+
+async function reportFarmers() {
+  const [farmers, products, images] = await Promise.all([
+    prisma.farmer.count(),
+    prisma.product.count(),
+    prisma.productImage.count(),
+  ]);
+  console.log(`farmers=${farmers} products=${products} productImages=${images}`);
+}
 
 async function reportCustomers() {
   const [customers, identities, saved, savedFarms, enquiries, subs, attempts] = await Promise.all([
@@ -54,8 +65,8 @@ async function reportSamples() {
 }
 
 async function main() {
-  if (!purgeCustomers && !purgeSamples) {
-    console.log("Nothing selected. Pass --customers and/or --samples, optionally with --dry-run.\n");
+  if (!purgeCustomers && !purgeSamples && !purgeFarmers) {
+    console.log("Nothing selected. Pass --customers, --samples or --farmers, optionally with --dry-run.\n");
     console.log("Current state:");
     await reportCustomers();
     await reportSamples();
@@ -129,6 +140,19 @@ async function main() {
       ]);
       console.log("Sample data after:");
       await reportSamples();
+    }
+  }
+
+  if (purgeFarmers) {
+    console.log("Farmer and product data before (stores, customers and reference data are retained):");
+    await reportFarmers();
+    if (!dryRun) {
+      await prisma.$transaction([
+        prisma.product.deleteMany({}),
+        prisma.farmer.deleteMany({}),
+      ]);
+      console.log("Farmer and product data after:");
+      await reportFarmers();
     }
   }
 

@@ -26,7 +26,7 @@ import { passwordSetSchema } from "@/lib/account-schema";
 import { hashPassword, verifyPassword } from "@/lib/password";
 import { prisma } from "@/lib/prisma";
 import { clientKeyFromHeaders, rateLimit } from "@/lib/rate-limit";
-import { isSameOrigin } from "@/lib/same-origin";
+import { hasCanonicalHost, isSameOrigin } from "@/lib/same-origin";
 import { consumeRateLimit } from "@/lib/session-store";
 
 export const dynamic = "force-dynamic";
@@ -45,16 +45,16 @@ function requestDestination(request: NextRequest): { locale: Locale; next: strin
   return { locale, next };
 }
 
-function accountRedirect(request: NextRequest, locale: Locale, query: string) {
+function accountRedirect(locale: Locale, query: string) {
   return NextResponse.redirect(
-    new URL(`${localePath(locale, "/account")}?${query}`, request.url),
+    new URL(`${localePath(locale, "/account")}?${query}`, loadConfig().app.site_url),
     303,
   );
 }
 
 function canonicalRequest(request: NextRequest): NextResponse | null {
   const canonical = new URL(loadConfig().app.site_url);
-  if (request.nextUrl.origin === canonical.origin) return null;
+  if (hasCanonicalHost(request, canonical.href)) return null;
   const target = new URL(request.nextUrl.pathname + request.nextUrl.search, canonical);
   return NextResponse.redirect(target, 307);
 }
@@ -160,21 +160,21 @@ export async function POST(request: NextRequest) {
   if (!customer) {
     const next = encodeURIComponent(localePath(locale, "/account"));
     return NextResponse.redirect(
-      new URL(`${localePath(locale, "/account/sign-in")}?next=${next}`, request.url),
+      new URL(`${localePath(locale, "/account/sign-in")}?next=${next}`, loadConfig().app.site_url),
       303,
     );
   }
 
   const gate = await consumeRateLimit(`google-operation:${customer.id}`, 10, 900);
   if (!gate.allowed) {
-    return accountRedirect(request, locale, "oauth=rateLimited");
+    return accountRedirect(locale, "oauth=rateLimited");
   }
 
   const form = await request.formData().catch(() => null);
   const operation = String(form?.get("operation") ?? "");
 
   if (operation === "link") {
-    if (customer.googleLinked) return accountRedirect(request, locale, "linked=1");
+    if (customer.googleLinked) return accountRedirect(locale, "linked=1");
     const currentPassword = String(form?.get("currentPassword") ?? "");
     const row = await prisma.customer.findUnique({
       where: { id: customer.id },
@@ -185,7 +185,7 @@ export async function POST(request: NextRequest) {
       row.sessionVersion !== customer.sessionVersion ||
       !(await verifyPassword(currentPassword, row.passwordHash))
     ) {
-      return accountRedirect(request, locale, "oauth=badCurrentPassword");
+      return accountRedirect(locale, "oauth=badCurrentPassword");
     }
     return beginGoogleAuthorization(request, {
       intent: "LINK",
@@ -196,7 +196,7 @@ export async function POST(request: NextRequest) {
 
   if (operation === "unlink") {
     if (!customer.googleLinked || !customer.hasPassword) {
-      return accountRedirect(request, locale, "oauth=lastSignInMethod");
+      return accountRedirect(locale, "oauth=lastSignInMethod");
     }
     return beginGoogleAuthorization(request, {
       intent: "UNLINK",
@@ -207,10 +207,10 @@ export async function POST(request: NextRequest) {
 
   if (operation === "set-password") {
     if (!customer.googleLinked || customer.hasPassword) {
-      return accountRedirect(request, locale, "oauth=invalid");
+      return accountRedirect(locale, "oauth=invalid");
     }
     const parsed = passwordSetSchema.safeParse({ newPassword: form?.get("newPassword") });
-    if (!parsed.success) return accountRedirect(request, locale, "password=invalid");
+    if (!parsed.success) return accountRedirect(locale, "password=invalid");
 
     return beginGoogleAuthorization(request, {
       intent: "SET_PASSWORD",
@@ -220,10 +220,10 @@ export async function POST(request: NextRequest) {
   }
 
   if (operation === "delete") {
-    if (!customer.googleLinked) return accountRedirect(request, locale, "oauth=invalid");
+    if (!customer.googleLinked) return accountRedirect(locale, "oauth=invalid");
     const typed = String(form?.get("confirm") ?? "").trim().toLowerCase();
     if (typed !== "delete" && typed !== "நீக்கு") {
-      return accountRedirect(request, locale, "problem=confirm");
+      return accountRedirect(locale, "problem=confirm");
     }
     return beginGoogleAuthorization(request, {
       intent: "DELETE",
@@ -232,5 +232,5 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  return accountRedirect(request, locale, "oauth=invalid");
+  return accountRedirect(locale, "oauth=invalid");
 }

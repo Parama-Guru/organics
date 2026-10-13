@@ -3,7 +3,6 @@ import Link from "next/link";
 import { StoreApplicationForm } from "@/components/store-application-form";
 import { FarmerApplicationForm } from "@/components/farmer-application-form";
 import { showFarmerPhone } from "@/components/farmer-contact";
-import { PhoneSoonNotice } from "@/components/phone-soon-notice";
 import { localePath } from "@/lib/i18n/config";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
 
@@ -68,7 +67,6 @@ export default async function SellPage({ searchParams }: PageProps<"/[lang]/sell
           {isStore ? t.storeApplication.intro : phoneShown ? t.sell.intro : t.sell.introSoon}
         </p>
 
-        {isStore ? null : <PhoneSoonNotice className="mt-4 max-w-2xl" />}
       </header>
 
       <fieldset className="mt-10">

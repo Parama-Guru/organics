@@ -37,7 +37,7 @@ test("public farmer queries exclude pending and expired records", { skip: !datab
   if (pending) assert.equal(await getFarmerBySlug(pending.slug), null);
 
   const farmers = await getVerifiedFarmers();
-  assert.ok(farmers.length > 0, "seed should publish at least one current farm");
+  assert.equal(farmers.length, await prisma!.farmer.count({ where: publicFarmerWhere() }));
   assert.ok(farmers.every((farmer) => hasAcceptableFarmerCertificate(farmer)));
 });
 
@@ -69,9 +69,13 @@ test("approved uncertified farms publish and taxonomy items filter listings with
 });
 
 test("public farmer search matches a public district", { skip: !databaseAvailable }, async () => {
+  const all = await getVerifiedFarmers();
+  const expected = all.filter((farmer) =>
+    [farmer.farmName, farmer.region.name, farmer.region.nameTa ?? ""]
+      .some((value) => value.toLowerCase().includes("erode")),
+  );
   const farmers = await getVerifiedFarmers("Erode");
-  assert.ok(farmers.length > 0);
-  assert.ok(farmers.every((farmer) => farmer.region.name === "Erode" || farmer.farmName.toLowerCase().includes("erode")));
+  assert.deepEqual(farmers.map((farmer) => farmer.id).sort(), expected.map((farmer) => farmer.id).sort());
 });
 
 test("public store queries exclude unverified records and support search", { skip: !databaseAvailable }, async () => {

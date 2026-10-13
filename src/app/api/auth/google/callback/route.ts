@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import * as oauth from "oauth4webapi";
 
+import { loadConfig } from "@conf/config";
 import { deleteCustomerAccount } from "@/lib/customer-delete";
 import { endSession, getCustomer, startSession } from "@/lib/customer-auth";
 import {
@@ -29,7 +30,6 @@ function finish(response: NextResponse): NextResponse {
 }
 
 function authError(
-  request: NextRequest,
   locale: Locale = DEFAULT_LOCALE,
   code = "invalid",
   next?: string,
@@ -38,7 +38,7 @@ function authError(
   if (intent !== "SIGN_IN" && code !== "session") {
     return finish(
       NextResponse.redirect(
-        new URL(`${localePath(locale, "/account")}?oauth=${encodeURIComponent(code)}`, request.url),
+        new URL(`${localePath(locale, "/account")}?oauth=${encodeURIComponent(code)}`, loadConfig().app.site_url),
         303,
       ),
     );
@@ -48,7 +48,7 @@ function authError(
   if (next) query.set("next", next);
   return finish(
     NextResponse.redirect(
-      new URL(`${localePath(locale, "/account/sign-in")}?${query}`, request.url),
+      new URL(`${localePath(locale, "/account/sign-in")}?${query}`, loadConfig().app.site_url),
       303,
     ),
   );
@@ -60,18 +60,17 @@ function isStepUpIntent(intent: GoogleOAuthIntent): boolean {
 
 export async function GET(request: NextRequest) {
   const state = request.nextUrl.searchParams.get("state");
-  if (!state) return authError(request);
+  if (!state) return authError();
 
   const binding = request.cookies.get(GOOGLE_OAUTH_COOKIE)?.value;
-  if (!validGoogleOAuthBrowserBinding(state, binding)) return authError(request);
+  if (!validGoogleOAuthBrowserBinding(state, binding)) return authError();
 
   const stored = await consumeGoogleOAuthState(state).catch(() => null);
-  if (!stored) return authError(request);
+  if (!stored) return authError();
 
   const credentials = getGoogleCredentials();
   if (!credentials) {
     return authError(
-      request,
       stored.locale,
       "unavailable",
       stored.next,
@@ -110,7 +109,6 @@ export async function GET(request: NextRequest) {
     const email = typeof claims?.email === "string" ? claims.email.trim().toLowerCase() : "";
     if (!subject || !email || claims?.email_verified !== true) {
       return authError(
-        request,
         stored.locale,
         "unverified",
         stored.next,
@@ -125,7 +123,7 @@ export async function GET(request: NextRequest) {
         current.id !== stored.customerId ||
         current.sessionVersion !== stored.sessionVersion)
     ) {
-      return authError(request, stored.locale, "session", stored.next, stored.intent);
+      return authError(stored.locale, "session", stored.next, stored.intent);
     }
 
     if (isStepUpIntent(stored.intent) && current) {
@@ -140,7 +138,6 @@ export async function GET(request: NextRequest) {
       });
       if (identity?.customerId !== current.id) {
         return authError(
-          request,
           stored.locale,
           "wrongGoogle",
           stored.next,
@@ -155,7 +152,6 @@ export async function GET(request: NextRequest) {
         );
         if (!deleted.ok) {
           return authError(
-            request,
             stored.locale,
             "billing",
             stored.next,
@@ -165,7 +161,7 @@ export async function GET(request: NextRequest) {
         await endSession();
         return finish(
           NextResponse.redirect(
-            new URL(`${localePath(stored.locale, "/")}?deleted=1`, request.url),
+            new URL(`${localePath(stored.locale, "/")}?deleted=1`, loadConfig().app.site_url),
             303,
           ),
         );
@@ -174,7 +170,7 @@ export async function GET(request: NextRequest) {
       if (stored.intent === "SET_PASSWORD") {
         if (!stored.pendingPasswordHash ||
             !/^scrypt:[0-9a-f]{32}:[0-9a-f]{128}$/.test(stored.pendingPasswordHash)) {
-          return authError(request, stored.locale, "invalid", stored.next, stored.intent);
+          return authError(stored.locale, "invalid", stored.next, stored.intent);
         }
 
         const changed = await prisma.customer.updateMany({
@@ -191,7 +187,7 @@ export async function GET(request: NextRequest) {
           },
         });
         if (changed.count !== 1) {
-          return authError(request, stored.locale, "invalid", stored.next, stored.intent);
+          return authError(stored.locale, "invalid", stored.next, stored.intent);
         }
 
         const updated = await prisma.customer.findUniqueOrThrow({
@@ -202,7 +198,7 @@ export async function GET(request: NextRequest) {
         await startSession(current.id, updated.sessionVersion);
         return finish(
           NextResponse.redirect(
-            new URL(`${localePath(stored.locale, "/account")}?passwordAdded=1`, request.url),
+            new URL(`${localePath(stored.locale, "/account")}?passwordAdded=1`, loadConfig().app.site_url),
             303,
           ),
         );
@@ -211,7 +207,6 @@ export async function GET(request: NextRequest) {
       if (stored.intent === "UNLINK") {
         if (!current.hasPassword) {
           return authError(
-            request,
             stored.locale,
             "lastSignInMethod",
             stored.next,
@@ -243,13 +238,13 @@ export async function GET(request: NextRequest) {
           });
         }).catch(() => null);
         if (!updated) {
-          return authError(request, stored.locale, "invalid", stored.next, stored.intent);
+          return authError(stored.locale, "invalid", stored.next, stored.intent);
         }
         await endSession();
         await startSession(current.id, updated.sessionVersion);
         return finish(
           NextResponse.redirect(
-            new URL(`${localePath(stored.locale, "/account")}?unlinked=1`, request.url),
+            new URL(`${localePath(stored.locale, "/account")}?unlinked=1`, loadConfig().app.site_url),
             303,
           ),
         );
@@ -272,7 +267,6 @@ export async function GET(request: NextRequest) {
     if (existingIdentity) {
       if (stored.intent === "LINK" && existingIdentity.customerId !== stored.customerId) {
         return authError(
-          request,
           stored.locale,
           "alreadyLinked",
           stored.next,
@@ -296,7 +290,6 @@ export async function GET(request: NextRequest) {
       });
       if (emailOwner && emailOwner.id !== stored.customerId) {
         return authError(
-          request,
           stored.locale,
           "emailInUse",
           stored.next,
@@ -325,7 +318,7 @@ export async function GET(request: NextRequest) {
         });
       }).catch(() => null);
       if (!linked) {
-        return authError(request, stored.locale, "invalid", stored.next, stored.intent);
+        return authError(stored.locale, "invalid", stored.next, stored.intent);
       }
     } else {
       const byEmail = await prisma.customer.findUnique({
@@ -336,7 +329,6 @@ export async function GET(request: NextRequest) {
         // Email equality is not consent to change an existing account's sign-in
         // methods. Sign in with its password first, then use Link Google.
         return authError(
-          request,
           stored.locale,
           "emailInUse",
           stored.next,
@@ -382,7 +374,6 @@ export async function GET(request: NextRequest) {
     });
     if (!customer) {
       return authError(
-        request,
         stored.locale,
         "unavailable",
         stored.next,
@@ -410,13 +401,12 @@ export async function GET(request: NextRequest) {
           ? `${localePath(stored.locale, "/account")}?linked=1`
           : stored.next;
 
-    return finish(NextResponse.redirect(new URL(destination, request.url), 303));
+    return finish(NextResponse.redirect(new URL(destination, loadConfig().app.site_url), 303));
   } catch (error) {
     console.error(
       `[auth] Google callback failed: ${error instanceof Error ? error.name : "UnknownError"}`,
     );
     return authError(
-      request,
       stored.locale,
       "invalid",
       stored.next,

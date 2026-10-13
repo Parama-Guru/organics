@@ -16,6 +16,7 @@ const { prisma } = await import("../src/lib/prisma");
 async function main() {
   const [
     categories,
+    produceItems,
     regions,
     farmers,
     sampleFarmers,
@@ -36,8 +37,11 @@ async function main() {
     subscriptions,
     subscriptionAttempts,
     paymentEvents,
+    visitorBrowsers,
+    visitorCounts,
   ] = await Promise.all([
     prisma.category.count(),
+    prisma.produceItem.count(),
     prisma.region.count(),
     prisma.farmer.count(),
     prisma.farmer.count({ where: { isSample: true } }),
@@ -58,10 +62,13 @@ async function main() {
     prisma.customerSubscription.count(),
     prisma.subscriptionAttempt.count(),
     prisma.paymentEvent.count(),
+    prisma.visitorBrowser.count(),
+    prisma.visitorCount.count(),
   ]);
 
   const rows = [
     ["Category", categories, ""],
+    ["ProduceItem", produceItems, ""],
     ["Region", regions, ""],
     ["Farmer", farmers, `${sampleFarmers} sample`],
     ["Product", products, `${sampleProducts} sample`],
@@ -79,6 +86,8 @@ async function main() {
     ["CustomerSubscription", subscriptions, ""],
     ["SubscriptionAttempt", subscriptionAttempts, ""],
     ["PaymentEvent", paymentEvents, ""],
+    ["VisitorBrowser", visitorBrowsers, ""],
+    ["VisitorCount", visitorCounts, ""],
   ] as const;
 
   const width = Math.max(...rows.map(([name]) => name.length));

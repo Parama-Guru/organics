@@ -4,7 +4,7 @@ import test from "node:test";
 import type { NextRequest } from "next/server";
 
 import { readBoundedJson } from "../src/lib/request-body";
-import { isSameOrigin } from "../src/lib/same-origin";
+import { hasCanonicalHost, isSameOrigin } from "../src/lib/same-origin";
 
 function request(body: string, headers: Record<string, string> = {}): NextRequest {
   return new Request("https://ossil.in/api/test", {
@@ -55,4 +55,41 @@ test("same-origin checks tolerate TLS termination without trusting forwarded hos
   proxied.headers.set("origin", "https://attacker.example");
   proxied.headers.set("x-forwarded-host", "attacker.example");
   assert.equal(isSameOrigin(proxied), false);
+});
+
+test("canonical host checks tolerate TLS termination without trusting forwarded hosts", () => {
+  const canonical = "https://www.ossil.in";
+  const proxied = new Request("http://0.0.0.0:3000/api/auth/google", {
+    headers: { host: "www.ossil.in" },
+  }) as NextRequest;
+  assert.equal(hasCanonicalHost(proxied, canonical), true);
+  assert.equal(hasCanonicalHost(request("{}", { host: "www.ossil.in" }), canonical), true);
+  proxied.headers.set("host", "ossil.in");
+  assert.equal(hasCanonicalHost(proxied, canonical), false);
+  proxied.headers.set("host", "attacker.example");
+  proxied.headers.set("x-forwarded-host", "www.ossil.in");
+  assert.equal(hasCanonicalHost(proxied, canonical), false);
+  proxied.headers.delete("host");
+  assert.equal(hasCanonicalHost(proxied, canonical), false);
+  proxied.headers.set("host", "localhost:3000");
+  assert.equal(hasCanonicalHost(proxied, "http://localhost:3000"), true);
+  assert.equal(hasCanonicalHost(proxied, "http://localhost:3001"), false);
+});
+
+test("Google callback errors use the configured public origin behind a proxy", async () => {
+  const { NextRequest } = await import("next/server");
+  const { loadConfig } = await import("../conf/config");
+  const { GET } = await import("../src/app/api/auth/google/callback/route");
+  const canonical = new URL(loadConfig().app.site_url);
+
+  for (const query of ["", "?state=invalid"]) {
+    const response = await GET(new NextRequest(`http://0.0.0.0:3000/api/auth/google/callback${query}`, {
+      headers: { host: canonical.host },
+    }));
+    assert.equal(response.status, 303);
+    const target = new URL(response.headers.get("location")!);
+    assert.equal(target.origin, canonical.origin);
+    assert.match(target.pathname, /^\/(ta|en)\/account\/sign-in$/);
+    assert.equal(target.searchParams.get("oauth"), "invalid");
+  }
 });

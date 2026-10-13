@@ -168,8 +168,9 @@ export async function getProducts(options: {
   //
   // Safe to cache because the only Date in productSummarySelect is
   // farmer.verifiedAt, and checkedOn takes the string that survives JSON.
-  if (!options.produceItemId && !categorySlug && !region && !search?.trim() && sort === "name" && limit === 60) {
-    return listProductsCached(locale);
+  if (!options.produceItemId && !categorySlug && !region && !search?.trim() && sort === "name" && Number.isInteger(limit) && limit > 0 && limit <= 60) {
+    const products = await listProductsCached(locale);
+    return products.slice(0, limit);
   }
 
   return listProducts({ categorySlug, region, search, sort, limit, locale, produceItemId: options.produceItemId });

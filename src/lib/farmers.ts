@@ -1,8 +1,9 @@
 import type { Prisma } from "@prisma/client";
+import { unstable_cache } from "next/cache";
 
 import { prisma } from "./prisma";
 import { publicProductWhere, productSummarySelect, decodeSlug } from "./products";
-import { publicFarmerWhere } from "./farmer-certification";
+import { hasAcceptableFarmerCertificate, publicFarmerWhere } from "./farmer-certification";
 
 const farmerCardSelect = () => ({
   id: true,
@@ -51,6 +52,23 @@ export function getVerifiedFarmers(query = "") {
     select: farmerCardSelect(),
     orderBy: { farmName: "asc" },
   });
+}
+
+const listHomeFarmersCached = unstable_cache(
+  () => getVerifiedFarmers(),
+  ["home-farmers"],
+  { revalidate: 120, tags: ["catalog"] },
+);
+
+export async function getHomeFarmers() {
+  const farmers = await listHomeFarmersCached();
+  return farmers
+    .map((farmer) => ({
+      ...farmer,
+      verifiedAt: farmer.verifiedAt ? new Date(farmer.verifiedAt) : null,
+      certifiedUntil: farmer.certifiedUntil ? new Date(farmer.certifiedUntil) : null,
+    }))
+    .filter((farmer) => hasAcceptableFarmerCertificate(farmer));
 }
 
 export async function getFarmerBySlug(rawSlug: string) {

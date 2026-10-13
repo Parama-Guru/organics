@@ -3,7 +3,6 @@ import Link from "next/link";
 import { ImageField } from "@/components/image-field";
 import { dialNumber, showFarmerPhone } from "@/components/farmer-contact";
 import { GlassPanel } from "@/components/glass-panel";
-import { PhoneSoonNotice } from "@/components/phone-soon-notice";
 import { SaveButton } from "@/components/save-button";
 import { SponsoredCardTracker } from "@/components/sponsored-card-tracker";
 import { Reveal } from "@/components/reveal";
@@ -89,7 +88,6 @@ export default async function FarmersPage({ searchParams }: PageProps<"/[lang]/f
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-bark-600 sm:text-xl">
             {phoneShown ? t.farmers.intro : t.farmers.introSoon}
           </p>
-          <PhoneSoonNotice className="mt-4 max-w-2xl" />
           <dl className="mt-8 grid max-w-2xl grid-cols-3 border-y border-bark-200 py-5">
             <div>
               <dt className="text-sm text-bark-600">{t.home.statFarms}</dt>

@@ -3,7 +3,6 @@ import Link from "next/link";
 import { ImageField } from "@/components/image-field";
 import { dialNumber, showFarmerPhone } from "@/components/farmer-contact";
 import { GlassPanel } from "@/components/glass-panel";
-import { PhoneSoonNotice } from "@/components/phone-soon-notice";
 import { SponsoredCardTracker } from "@/components/sponsored-card-tracker";
 import { Reveal } from "@/components/reveal";
 import { StorefrontPlaceholder } from "@/components/storefront-placeholder";
@@ -72,7 +71,6 @@ export default async function StoresPage({ searchParams }: PageProps<"/[lang]/st
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-bark-600 sm:text-xl">
             {phoneShown ? t.stores.intro : t.stores.introSoon}
           </p>
-          <PhoneSoonNotice className="mt-5 max-w-2xl" />
         </div>
       </header>
 

@@ -3,7 +3,6 @@ import Link from "next/link";
 import { FilterChip } from "@/components/filter-chip";
 import { ProduceSelect } from "@/components/produce-select";
 import { PRODUCE_TYPES, findProduceItem } from "@/lib/produce-taxonomy";
-import { PhoneSoonNotice } from "@/components/phone-soon-notice";
 import { ProductCard } from "@/components/product-card";
 import { Button } from "@/components/ui/button";
 import { BasketIcon, SearchIcon } from "@/components/ui/icons";
@@ -111,7 +110,6 @@ export default async function ProductsPage({ searchParams }: PageProps<"/[lang]/
         </div>
       </header>
 
-      <PhoneSoonNotice className="mt-4" />
 
       {/* A live reading of what the current filters actually return. It counts
           the rows on screen rather than the whole table, so a filtered view

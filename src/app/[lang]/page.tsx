@@ -13,7 +13,7 @@ import {
   ShieldCheckIcon,
 } from "@/components/ui/icons";
 import { accountsEnabled } from "@/lib/customer-auth";
-import { getVerifiedFarmers } from "@/lib/farmers";
+import { getHomeFarmers } from "@/lib/farmers";
 import { format, localePath } from "@/lib/i18n/config";
 import { localised, regionLabel } from "@/lib/i18n/content";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
@@ -27,7 +27,7 @@ export default async function HomePage({ searchParams }: PageProps<"/[lang]">) {
   const [featured, categories, farmers, counts, locale, t, params] = await Promise.all([
     getFeaturedProducts(3),
     getCategories(),
-    getVerifiedFarmers(),
+    getHomeFarmers(),
     getRegisteredCounts(),
     getLocale(),
     getDictionary(),

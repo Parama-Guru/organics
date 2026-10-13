@@ -1,5 +1,9 @@
 import type { NextRequest } from "next/server";
 
+export function hasCanonicalHost(request: NextRequest, siteUrl: string): boolean {
+  return request.headers.get("host") === new URL(siteUrl).host;
+}
+
 /**
  * Reject a cross-origin write.
  *
