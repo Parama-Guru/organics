@@ -125,20 +125,21 @@ export default async function StorePage({ params }: PageProps<"/[lang]/stores/[s
                 <Button as="a" href={`tel:${dialNumber(store.phone)}`} size="lg"><PhoneIcon /> {store.phone}</Button>
                 <Button as="a" href={`https://wa.me/${whatsappNumber(store.phone)}`} target="_blank" rel="noopener noreferrer" variant="secondary" size="lg"><WhatsAppIcon /> {t.contact.whatsapp}</Button>
               </div>
-            ) : (
-              <div className="mt-8 max-w-2xl rounded-2xl border border-bark-200 bg-canvas-2 p-5">
-                <p className="font-semibold text-ink">{t.contact.phoneSoon}</p>
-                <p className="mt-1 leading-relaxed text-bark-600">{t.contact.phoneSoonNote}</p>
-              </div>
-            )}
+            ) : null}
           </div>
 
           <div className="h-fit rounded-[1.75rem] border border-leaf-200 bg-leaf-50 p-6 lg:p-8">
-            <p className="section-kicker">Local store dossier</p>
+            <p className="section-kicker">{t.stores.heading}</p>
             <section className="mt-6 border-t border-leaf-200 pt-5">
               <h2 className="font-display text-2xl">{t.stores.addressHeading}</h2>
               <p className="mt-3 leading-relaxed text-ink">{store.addressLine}</p>
               <p className="text-bark-600">{regionLabel(locale, store.region)}</p>
+              {store.openingHours ? (
+                <dl className="mt-4">
+                  <dt className="font-semibold text-bark-900">{t.stores.openingHours}</dt>
+                  <dd className="mt-1 whitespace-pre-line text-bark-600">{store.openingHours}</dd>
+                </dl>
+              ) : null}
               <a href={`https://www.google.com/maps/search/?api=1&query=${mapsQuery}`} target="_blank" rel="noreferrer" className="mt-3 inline-flex min-h-11 items-center gap-1.5 font-semibold text-brand underline underline-offset-4">{t.stores.openInMaps} <ArrowRightIcon /></a>
             </section>
             {store.fssaiNumber || store.certifier ? (

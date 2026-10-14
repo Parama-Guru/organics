@@ -1,13 +1,13 @@
 import { loadConfig } from "@/../conf/config";
 import { ShieldCheckIcon } from "@/components/ui/icons";
-import { format } from "@/lib/i18n/config";
-import { getDictionary } from "@/lib/i18n/server";
+import { format, publicPageMetadata } from "@/lib/i18n/config";
+import { getDictionary, getLocale } from "@/lib/i18n/server";
 
 export const dynamic = "force-static";
 
 export async function generateMetadata() {
   const t = await getDictionary();
-  return { title: t.trust.heading, description: t.trust.intro };
+  return publicPageMetadata(await getLocale(), "/how-we-check", t.trust.heading, t.trust.intro);
 }
 
 export default async function HowWeCheckPage() {
@@ -28,7 +28,7 @@ export default async function HowWeCheckPage() {
           <span className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-inverse text-2xl text-marigold-400">
             <ShieldCheckIcon />
           </span>
-          <p className="section-kicker mt-5">Verification field guide</p>
+          <p className="section-kicker mt-5">{t.footer.howWeCheck}</p>
         </div>
         <div>
           <h1 className="editorial-heading">{t.trust.heading}</h1>
@@ -47,7 +47,6 @@ export default async function HowWeCheckPage() {
       </ol>
 
       <section className="mt-16 rounded-[2rem] bg-inverse p-7 text-white sm:p-10 lg:p-14">
-      <p className="section-kicker section-kicker--dark">The boundary</p>
       <h2 className="mt-5 font-display text-4xl text-white sm:text-5xl">{t.trust.limitsHeading}</h2>
       <p className="mt-5 max-w-3xl text-lg leading-relaxed text-bark-100">{t.trust.limitsBody}</p>
 

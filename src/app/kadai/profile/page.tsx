@@ -21,6 +21,7 @@ export default async function StoreProfilePage({ searchParams }: PageProps<"/kad
         region: { select: { name: true, nameTa: true } },
         phone: true,
         addressLine: true,
+        openingHours: true,
         about: true,
         aboutTa: true,
       },
@@ -53,6 +54,7 @@ export default async function StoreProfilePage({ searchParams }: PageProps<"/kad
         initial={{
           phone: details.phone,
           addressLine: details.addressLine,
+          openingHours: details.openingHours ?? "",
           about: details.about ?? "",
           aboutTa: details.aboutTa ?? "",
         }}

@@ -2,7 +2,6 @@ import Link from "next/link";
 import { VisitorCounters } from "@/components/visitor-counters";
 
 import { loadConfig } from "@conf/config";
-import { showFarmerPhone } from "@/components/farmer-contact";
 import {
   FacebookIcon,
   InstagramIcon,
@@ -33,10 +32,6 @@ export async function SiteFooter() {
     { href: "/sell?type=store", label: t.footer.joinAsStore },
   ];
 
-  // Every account is being opened as the site launches. Each icon is a real
-  // link once its URL is configured and a dimmed, unclickable one until then:
-  // an icon that quietly appears on the day the handle is created is easy to
-  // miss, whereas a greyed-out row is a standing reminder of what is left.
   const socials = [
     { name: "Instagram", href: social.instagram, Icon: InstagramIcon },
     { name: "Facebook", href: social.facebook, Icon: FacebookIcon },
@@ -65,7 +60,7 @@ export async function SiteFooter() {
               {app.name}
             </p>
             <p className="mt-3 max-w-sm text-sm leading-relaxed text-bark-600">
-              {showFarmerPhone() ? t.footer.blurb : t.footer.blurbSoon}
+              {t.footer.blurb}
             </p>
             {app.contact_place ? (
               <p className="mt-3 inline-flex items-center gap-1.5 text-sm text-bark-600">
@@ -75,9 +70,8 @@ export async function SiteFooter() {
 
             <h2 className={`mt-6 ${columnHeading}`}>{t.footer.followHeading}</h2>
             <ul className="mt-1.5 flex flex-wrap gap-0.5">
-              {socials.map(({ name, href, Icon }) => (
+              {socials.filter(({ href }) => Boolean(href)).map(({ name, href, Icon }) => (
                 <li key={name}>
-                  {href ? (
                     <a
                       href={href}
                       target="_blank"
@@ -87,19 +81,6 @@ export async function SiteFooter() {
                     >
                       <Icon />
                     </a>
-                  ) : (
-                    // Not a link and not a button: there is nothing to open yet.
-                    // role="img" with one label is what keeps a screen reader from
-                    // announcing the name and the same text again as content.
-                    <span
-                      role="img"
-                      aria-label={format(t.footer.soon, { network: name })}
-                      title={format(t.footer.soon, { network: name })}
-                      className="inline-flex h-11 w-11 cursor-default items-center justify-center rounded-full text-lg text-bark-600/35"
-                    >
-                      <Icon />
-                    </span>
-                  )}
                 </li>
               ))}
             </ul>

@@ -8,6 +8,7 @@ export const storeProfileSchema = z.object({
     .max(20)
     .regex(/^[+0-9][0-9 ()-]{5,19}$/, "enter a reachable phone number"),
   addressLine: z.string().trim().min(6).max(240),
+  openingHours: z.string().trim().max(160).default(""),
   about: z.string().trim().min(20).max(1000),
   aboutTa: z.union([z.string().trim().max(1000), z.literal("")]).optional(),
 });

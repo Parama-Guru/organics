@@ -45,7 +45,6 @@ export function AccountShell({
         </aside>
 
         <section className="order-first bg-paper p-7 sm:p-10 lg:order-last lg:p-14">
-          <p className="section-kicker">Private member notebook</p>
           <h1 className="mt-6 font-display text-4xl font-medium leading-none sm:text-5xl">{title}</h1>
           <p className="mt-4 max-w-lg text-lg leading-relaxed text-bark-600">{intro}</p>
           {children}

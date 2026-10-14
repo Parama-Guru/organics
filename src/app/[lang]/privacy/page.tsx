@@ -1,6 +1,7 @@
 import { loadConfig } from "@conf/config";
 import { accountsEnabled } from "@/lib/customer-auth";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
+import { publicPageMetadata } from "@/lib/i18n/config";
 
 // Reads whether accounts are on, so the page cannot describe a feature the
 // deployment does not run.
@@ -8,7 +9,7 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata() {
   const t = await getDictionary();
-  return { title: t.privacy.heading, description: t.privacy.intro };
+  return publicPageMetadata(await getLocale(), "/privacy", t.privacy.heading, t.privacy.intro);
 }
 
 export default async function PrivacyPage() {
@@ -37,7 +38,7 @@ export default async function PrivacyPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-20">
       <header className="border-b border-bark-200 pb-10 sm:pb-14">
-      <p className="section-kicker">Legal field note</p>
+      <p className="section-kicker">{t.footer.privacy}</p>
       <h1 className="editorial-heading mt-6">{t.privacy.heading}</h1>
       <p className="mt-6 max-w-2xl text-lg leading-relaxed text-bark-600 sm:text-xl">{t.privacy.intro}</p>
       </header>

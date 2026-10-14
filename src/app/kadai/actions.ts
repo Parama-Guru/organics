@@ -145,6 +145,7 @@ export async function updateStoreProfileAction(
   const values = {
     phone: String(form.get("phone") ?? ""),
     addressLine: String(form.get("addressLine") ?? ""),
+    openingHours: String(form.get("openingHours") ?? ""),
     about: String(form.get("about") ?? ""),
     aboutTa: String(form.get("aboutTa") ?? ""),
   };
@@ -162,6 +163,7 @@ export async function updateStoreProfileAction(
     data: {
       phone: parsed.data.phone,
       addressLine: parsed.data.addressLine,
+      openingHours: parsed.data.openingHours || null,
       about: parsed.data.about,
       aboutTa: parsed.data.aboutTa || null,
     },

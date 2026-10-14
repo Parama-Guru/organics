@@ -3,6 +3,7 @@ import { DM_Mono, DM_Sans, Instrument_Serif, Noto_Sans_Tamil, Noto_Serif_Tamil }
 
 import { loadConfig } from "@conf/config";
 import { CursorCompanion } from "@/components/cursor-companion";
+import { JsonLd } from "@/components/json-ld";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { accountsEnabled, getCustomer } from "@/lib/customer-auth";
@@ -90,6 +91,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function RootLayout({ children }: LayoutProps<"/[lang]">) {
+  const { app, social } = loadConfig();
   const locale = await getLocale();
   const t = await getDictionary();
   const accountsOn = accountsEnabled();
@@ -110,6 +112,13 @@ export default async function RootLayout({ children }: LayoutProps<"/[lang]">) {
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
       <body className="flex min-h-full flex-col">
+        <JsonLd data={{
+          "@context": "https://schema.org",
+          "@graph": [
+            { "@type": "Organization", "@id": `${app.site_url}/#organization`, name: app.name, url: app.site_url, email: app.contact_email || undefined, sameAs: Object.values(social).filter(Boolean), areaServed: "Tamil Nadu, India" },
+            { "@type": "WebSite", "@id": `${app.site_url}/#website`, name: app.name, url: app.site_url, inLanguage: ENABLED_LOCALES.map((code) => HTML_LANG[code]), publisher: { "@id": `${app.site_url}/#organization` } },
+          ],
+        }} />
         <I18nProvider locale={locale} t={t}>
           <a
             href="#main"

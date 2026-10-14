@@ -218,6 +218,7 @@ model OrganicStore {
   region         Region      @relation(fields: [regionId], references: [id], onDelete: Restrict)
   // Street address; the district lives on the region relation, as everywhere else.
   addressLine    String
+  openingHours   String?
   about          String?
   aboutTa        String?
   photoUrl       String?

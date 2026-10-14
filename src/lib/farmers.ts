@@ -34,11 +34,12 @@ export type FarmerCard = Prisma.FarmerGetPayload<{
 // Deliberately uncached: tests/database-boundaries.test.ts calls this directly
 // to prove the boundary, and unstable_cache needs a request context it does not
 // have. Caching here would mean testing a wrapper instead of the query.
-export function getVerifiedFarmers(query = "") {
+export function getVerifiedFarmers(query = "", regionSlug = "") {
   const term = query.trim();
   return prisma.farmer.findMany({
     where: {
       ...publicFarmerWhere(),
+      ...(regionSlug ? { region: { slug: regionSlug } } : {}),
       ...(term
         ? {
             AND: [{ OR: [

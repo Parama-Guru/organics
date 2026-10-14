@@ -38,7 +38,7 @@ export function SiteHeader({
     { path: "/stores", label: t.nav.stores },
   ];
 
-  // Rendered twice: inline from `md`, on its own rail below it. Only one is ever
+  // Rendered twice: inline from `lg`, in a wrapping row below it. Only one is ever
   // displayed, so only one reaches the accessibility tree.
   const navLinks = navigation.map((item) => {
     const href = localePath(locale, item.path);
@@ -92,7 +92,7 @@ export function SiteHeader({
 
           <nav
             aria-label="Main"
-            className="no-scrollbar hidden min-w-0 flex-1 items-center gap-5 overflow-x-auto md:flex"
+            className="hidden min-w-0 flex-1 flex-wrap items-center gap-x-5 lg:flex"
           >
             {navLinks}
           </nav>
@@ -139,7 +139,7 @@ export function SiteHeader({
 
         <nav
           aria-label="Main"
-          className="no-scrollbar rail-fade mx-auto flex max-w-[90rem] items-center gap-5 overflow-x-auto border-t border-bark-200/70 px-3 md:hidden"
+          className="mx-auto flex max-w-[90rem] flex-wrap items-center gap-x-4 border-t border-bark-200/70 px-3 lg:hidden"
         >
           {navLinks}
         </nav>

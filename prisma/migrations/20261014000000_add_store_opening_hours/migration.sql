@@ -1,0 +1,1 @@
+ALTER TABLE "OrganicStore" ADD COLUMN "openingHours" TEXT;

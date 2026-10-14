@@ -3,12 +3,12 @@ import Link from "next/link";
 import { loadConfig } from "@conf/config";
 import { ContactForm } from "@/components/contact-form";
 import { ArrowRightIcon, MapPinIcon, PhoneIcon } from "@/components/ui/icons";
-import { localePath } from "@/lib/i18n/config";
+import { localePath, publicPageMetadata } from "@/lib/i18n/config";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
 
 export async function generateMetadata() {
   const t = await getDictionary();
-  return { title: t.meta.contactTitle, description: t.meta.contactDescription };
+  return publicPageMetadata(await getLocale(), "/contact", t.meta.contactTitle, t.meta.contactDescription);
 }
 
 export default async function ContactPage({ searchParams }: PageProps<"/[lang]/contact">) {
@@ -46,7 +46,7 @@ export default async function ContactPage({ searchParams }: PageProps<"/[lang]/c
         <ContactForm initialRole={initialRole} />
 
         <aside className="rounded-[2rem] bg-inverse p-7 text-white lg:sticky lg:top-28">
-          <p className="font-mono text-xs uppercase tracking-[0.12em] text-marigold-400">Contact ledger</p>
+          <p className="font-mono text-xs uppercase tracking-[0.12em] text-marigold-400">{t.contactPage.badge}</p>
           <h2 className="mt-4 font-display text-3xl text-white">{t.contactPage.reachHeading}</h2>
           <dl className="mt-4 space-y-4 text-sm">
             {app.contact_email ? (

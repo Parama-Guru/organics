@@ -69,6 +69,12 @@ test("store portal profile permits only bounded public fields", () => {
   );
 });
 
+test("store opening hours are optional, trimmed and bounded", () => {
+  assert.equal(storeProfileSchema.parse(store).openingHours, "");
+  assert.equal(storeProfileSchema.parse({ ...store, openingHours: "  Mon-Sat 09:00-18:00  " }).openingHours, "Mon-Sat 09:00-18:00");
+  assert.equal(storeProfileSchema.safeParse({ ...store, openingHours: "x".repeat(161) }).success, false);
+});
+
 test("store publication accepts FSSAI-only resellers but rejects stale certificate claims", () => {
   const now = new Date("2026-09-02T00:00:00.000Z");
   assert.equal(

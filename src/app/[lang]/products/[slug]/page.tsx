@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeftIcon, BookmarkIcon, LeafMark, LockIcon, MapPinIcon, PhoneIcon, ShieldCheckIcon } from "@/components/ui/icons";
 import { accountsEnabled, getCustomer } from "@/lib/customer-auth";
 import { getCustomerAccess } from "@/lib/customer-access";
-import { format, localePath } from "@/lib/i18n/config";
+import { format, localePath, publicPageMetadata } from "@/lib/i18n/config";
 import { localised, regionLabel, unitLabel } from "@/lib/i18n/content";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
 import { formatMoney } from "@/lib/money";
@@ -31,10 +31,7 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/products/[
 
   if (!product) return { title: t.meta.productNotFound };
 
-  return {
-    title: localised(locale, product.name, product.nameTa),
-    description: localised(locale, product.description, product.descriptionTa),
-  };
+  return publicPageMetadata(locale, `/products/${product.slug}`, localised(locale, product.name, product.nameTa), localised(locale, product.description, product.descriptionTa));
 }
 
 export default async function ProductPage({ params }: PageProps<"/[lang]/products/[slug]">) {

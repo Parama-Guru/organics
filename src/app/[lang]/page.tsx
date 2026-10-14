@@ -133,6 +133,9 @@ export default async function HomePage({ searchParams }: PageProps<"/[lang]">) {
             <Button as={Link} href={localePath(locale, "/farmers")} size="lg" variant="secondary">
               {t.home.meetFarmers}
             </Button>
+            <Button as={Link} href={localePath(locale, "/how-we-check")} variant="ghost">
+              <ShieldCheckIcon /> {t.product.howWeCheck}
+            </Button>
           </div>
         </div>
 
@@ -176,6 +179,30 @@ export default async function HomePage({ searchParams }: PageProps<"/[lang]">) {
       ) : null}
 
       <div className="mx-auto max-w-[90rem] px-4 sm:px-6">
+        <section aria-labelledby="how" className="mt-12 sm:mt-16">
+          <Reveal>
+            <p className="section-kicker">{t.product.howWeCheck}</p>
+            <h2 id="how" className="editorial-heading mt-5 max-w-3xl">{t.how.heading}</h2>
+          </Reveal>
+          <ol className="mt-8 border-t border-bark-200">
+            {steps.map((step, index) => (
+              <li key={step.title}>
+                <Reveal delay={index * 80}>
+                  <div className="grid grid-cols-[minmax(0,1fr)] gap-4 border-b border-bark-200 py-6 sm:grid-cols-[5rem_minmax(0,1fr)]">
+                    <span className="rule-label text-marigold-600">0{index + 1}</span>
+                    <div className="grid grid-cols-[minmax(0,1fr)] gap-3 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
+                      <h3 className="flex items-start gap-3 font-display text-2xl text-bark-900 sm:text-3xl"><step.icon className="mt-1 shrink-0 text-leaf-600" /> {step.title}</h3>
+                      <p className="leading-relaxed text-bark-600">{step.body}</p>
+                    </div>
+                  </div>
+                </Reveal>
+              </li>
+            ))}
+          </ol>
+          <Link href={localePath(locale, "/how-we-check")} className="mt-4 inline-flex min-h-11 items-center gap-2 font-semibold text-leaf-700 underline underline-offset-4">
+            {t.product.howWeCheck} <ArrowRightIcon />
+          </Link>
+        </section>
         {/* ---- Featured produce. ------------------------------------------ */}
         <section className="mt-20 sm:mt-32">
           <Reveal>
@@ -194,11 +221,14 @@ export default async function HomePage({ searchParams }: PageProps<"/[lang]">) {
           </Reveal>
 
           {featured.length === 0 ? (
-            <p className="editorial-panel mt-8 rounded-3xl p-10 text-center text-bark-600">
-              {t.home.emptyBefore}
-              <code className="font-mono">npm run db:seed</code>
-              {t.home.emptyAfter}
-            </p>
+            <div className="mt-8 border-y border-bark-200 py-8">
+              <h3 className="font-display text-2xl text-bark-900">{t.home.emptyTitle}</h3>
+              <p className="mt-3 max-w-2xl leading-relaxed text-bark-600">{t.home.emptyBody}</p>
+              <div className="mt-5 flex flex-wrap gap-3">
+                <Button as={Link} href={localePath(locale, "/sell")}><ArrowRightIcon /> {t.home.communityJoinFarmer}</Button>
+                <Button as={Link} href={localePath(locale, "/stores")} variant="secondary"><MapPinIcon /> {t.nav.stores}</Button>
+              </div>
+            </div>
           ) : (
             <div className="mt-8 grid grid-cols-[minmax(0,1fr)] gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {featured.map((product, index) => (
@@ -208,33 +238,6 @@ export default async function HomePage({ searchParams }: PageProps<"/[lang]">) {
               ))}
             </div>
           )}
-        </section>
-
-        {/* ---- How the check works, as a ruled ledger rather than a dark slab. */}
-        <section aria-labelledby="how" className="mt-20 sm:mt-32">
-          <Reveal>
-            <p className="section-kicker">01 — 03</p>
-            <h2 id="how" className="editorial-heading mt-5 max-w-3xl">
-              {t.how.heading}
-            </h2>
-          </Reveal>
-          <ol className="mt-10 border-t border-bark-200">
-            {steps.map((step, index) => (
-              <li key={step.title}>
-                <Reveal delay={index * 80}>
-                  <div className="grid grid-cols-[minmax(0,1fr)] gap-4 border-b border-bark-200 py-8 sm:grid-cols-[5rem_minmax(0,1fr)] sm:py-10">
-                    <span className="rule-label text-marigold-600">0{index + 1}</span>
-                    <div className="grid grid-cols-[minmax(0,1fr)] gap-3 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
-                      <h3 className="flex items-start gap-3 font-display text-2xl text-bark-900 sm:text-3xl">
-                        <step.icon className="mt-1 shrink-0 text-leaf-600" /> {step.title}
-                      </h3>
-                      <p className="leading-relaxed text-bark-600">{step.body}</p>
-                    </div>
-                  </div>
-                </Reveal>
-              </li>
-            ))}
-          </ol>
         </section>
 
         {/* ---- Crop index. ------------------------------------------------ */}

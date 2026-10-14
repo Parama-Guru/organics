@@ -3,12 +3,12 @@ import Link from "next/link";
 import { loadConfig } from "@conf/config";
 import { Button } from "@/components/ui/button";
 import { ArrowRightIcon } from "@/components/ui/icons";
-import { localePath } from "@/lib/i18n/config";
+import { localePath, publicPageMetadata } from "@/lib/i18n/config";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
 
 export async function generateMetadata() {
   const t = await getDictionary();
-  return { title: t.meta.careersTitle, description: t.meta.careersDescription };
+  return publicPageMetadata(await getLocale(), "/careers", t.meta.careersTitle, t.meta.careersDescription);
 }
 
 export default async function CareersPage() {

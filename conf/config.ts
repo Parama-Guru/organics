@@ -54,7 +54,7 @@ const configSchema = z
         contact_hours: z.string().default(""),
         // Publishing the farm's number is the whole point of the directory, but
         // it stays off until the farms have agreed to it. While false, every
-        // call and WhatsApp button becomes a "details coming soon" note.
+        // call and WhatsApp button is hidden; enquiries remain available.
         show_farmer_phone: envBool(false),
         // How many proxies of ours sit in front of the app. Rate limiting reads
         // the client address this many entries in from the right of

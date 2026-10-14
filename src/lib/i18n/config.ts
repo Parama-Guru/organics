@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+
 export const LOCALES = ["ta", "en"] as const;
 
 export type Locale = (typeof LOCALES)[number];
@@ -56,6 +58,21 @@ export function isLocale(value: unknown): value is Locale {
 /** Prefix an app-relative path with a locale: ("ta", "/products") -> "/ta/products". */
 export function localePath(locale: Locale, path: string): string {
   return path === "/" ? `/${locale}` : `/${locale}${path}`;
+}
+
+export function publicPageMetadata(locale: Locale, path: string, title: string, description: string): Metadata {
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: localePath(locale, path),
+      languages: {
+        ...Object.fromEntries(ENABLED_LOCALES.map((code) => [HTML_LANG[code], localePath(code, path)])),
+        "x-default": localePath(DEFAULT_LOCALE, path),
+      },
+    },
+    openGraph: { title, description, url: localePath(locale, path), locale: HTML_LANG[locale].replace("-", "_"), type: "website" },
+  };
 }
 
 /**

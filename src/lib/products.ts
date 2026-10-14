@@ -262,6 +262,12 @@ export const getLocatedRegions = unstable_cache(
   { revalidate: 300, tags: ["catalog"] },
 );
 
+export const getDirectoryRegions = unstable_cache(
+  () => prisma.region.findMany({ select: { slug: true, name: true, nameTa: true }, orderBy: { name: "asc" } }),
+  ["directory-regions"],
+  { revalidate: 300, tags: ["catalog"] },
+);
+
 /**
  * Route params arrive percent-encoded, unlike search params. An ASCII slug is
  * unchanged by encoding, so this went unnoticed until a Tamil slug existed:

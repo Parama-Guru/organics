@@ -2,24 +2,18 @@ import Link from "next/link";
 
 import { StoreApplicationForm } from "@/components/store-application-form";
 import { FarmerApplicationForm } from "@/components/farmer-application-form";
-import { showFarmerPhone } from "@/components/farmer-contact";
-import { localePath } from "@/lib/i18n/config";
+import { localePath, publicPageMetadata } from "@/lib/i18n/config";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
 
 export async function generateMetadata() {
   const t = await getDictionary();
-  return { title: t.meta.sellTitle, description: t.meta.sellDescription };
+  return publicPageMetadata(await getLocale(), "/sell", t.meta.sellTitle, t.meta.sellDescription);
 }
 
 export default async function SellPage({ searchParams }: PageProps<"/[lang]/sell">) {
   const [t, locale, params] = await Promise.all([getDictionary(), getLocale(), searchParams]);
   const requested = Array.isArray(params.type) ? params.type[0] : params.type;
   const isStore = requested === "store";
-
-  // This page recruits farmers on the promise that buyers will ring them. While
-  // numbers are withheld that promise has a caveat, and the farmer is the person
-  // who most deserves to hear it before applying.
-  const phoneShown = showFarmerPhone();
 
   const steps = isStore
     ? [
@@ -30,7 +24,7 @@ export default async function SellPage({ searchParams }: PageProps<"/[lang]/sell
     : [
         { title: t.sell.step1Title, body: t.sell.step1Body },
         { title: t.sell.step2Title, body: t.sell.step2Body },
-        { title: t.sell.step3Title, body: phoneShown ? t.sell.step3Body : t.sell.step3BodySoon },
+        { title: t.sell.step3Title, body: t.sell.step3Body },
       ];
 
   // Links rather than client state: the choice survives a reload, can be shared,
@@ -64,7 +58,7 @@ export default async function SellPage({ searchParams }: PageProps<"/[lang]/sell
           {isStore ? t.storeApplication.titleTail : t.sell.titleTail}
         </h1>
         <p className="mt-6 max-w-2xl text-lg leading-relaxed text-bark-600 sm:text-xl">
-          {isStore ? t.storeApplication.intro : phoneShown ? t.sell.intro : t.sell.introSoon}
+          {isStore ? t.storeApplication.intro : t.sell.intro}
         </p>
 
       </header>

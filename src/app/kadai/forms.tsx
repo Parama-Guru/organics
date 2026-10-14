@@ -144,7 +144,7 @@ export function AcceptStoreInviteForm({
 export function StoreProfileForm({
   initial,
 }: {
-  initial: { phone: string; addressLine: string; about: string; aboutTa: string };
+  initial: { phone: string; addressLine: string; openingHours: string; about: string; aboutTa: string };
 }) {
   const [state, formAction, pending] = useActionState<StorePortalState, FormData>(
     updateStoreProfileAction,
@@ -155,6 +155,10 @@ export function StoreProfileForm({
 
   return (
     <form action={formAction} className="mt-6 grid gap-4 rounded-2xl border border-bark-200 bg-paper p-5">
+      <label className="block">
+        <span className="text-sm font-semibold text-bark-900">கடை திறந்திருக்கும் நேரம் (விருப்பம்)</span>
+        <input name="openingHours" defaultValue={value("openingHours")} aria-invalid={invalid("openingHours")} maxLength={160} className={field} />
+      </label>
       <label className="block">
         <span className="text-sm font-semibold text-bark-900">தொலைபேசி</span>
         <input

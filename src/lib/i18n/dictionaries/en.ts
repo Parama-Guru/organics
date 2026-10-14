@@ -1,8 +1,8 @@
 export const en = {
   meta: {
-    title: "Organic produce, straight from the farm",
+    title: "Organic farmers and stores in Tamil Nadu",
     description:
-      "Browse organic produce and call the farm yourself. Every farm is checked before its listings go live.",
+      "Find organic farmers, vegetables, millets, traditional rice and organic stores in Tamil Nadu. A reviewed directory connecting buyers and sellers directly.",
     shopTitle: "Shop",
     shopDescription: "Everything our checked farms have listed right now.",
     farmersTitle: "Our farmers",
@@ -237,8 +237,8 @@ export const en = {
     shopByCategory: "Shop by category",
     weeklyPick: "This week's pick",
     viewAll: "View all",
-    emptyBefore: "The catalogue is empty. Run ",
-    emptyAfter: " to load sample produce.",
+    emptyTitle: "Be among the first farms on OSSIL",
+    emptyBody: "No produce is listed right now. Apply to list your farm, or explore the stores in the directory. Every farm is reviewed before its listings are published.",
     statFarms: "farms listed",
     statChecked: "checked before listing",
     statCommission: "commission taken",
@@ -257,7 +257,7 @@ export const en = {
     // rather than numerous.
     communityHeading: "Who is on OSSIL",
     communityIntro:
-      "Everyone counted here has been through the same check. The numbers are exactly what is on the site today.",
+      "Approved farms and stores, and registered buyers. These counts reflect the directory today.",
     communityFarmers: "farmers registered",
     communityCustomers: "buyers registered",
     communityStores: "organic stores registered",
@@ -331,13 +331,9 @@ export const en = {
     eyebrow: "Talk to the farm directly",
     verified: "Checked farm",
     checkedOn: "Checked by OSSIL on {date}",
-    callWindow: "Best 7am–10am",
     callNow: "Call the farm",
     callShort: "Call",
     whatsapp: "WhatsApp",
-    phoneSoon: "Contact details coming soon",
-    phoneSoonNote:
-      "We are still confirming with each farm before we publish their number. The listings and the checks are real; the phone line is not open yet.",
     certifier: "Certified under",
     certificateNo: "Certificate number",
     certifiedUntil: "Valid until",
@@ -356,9 +352,7 @@ export const en = {
     sponsored: "Sponsored",
     title: "Our farmers",
     intro:
-      "We check a farm's details before any of its listings go live. Call them directly from any product page.",
-    introSoon:
-      "We review a farm's details before its listings go live. Certificates are optional; phone numbers open shortly.",
+      "Explore farms by district and what they grow. We review each farm before its listings are published; organic certificates are optional.",
     none: "No farms listed yet",
     applyToList: "List your farm",
     listingCount: "{count} listing",
@@ -402,17 +396,13 @@ export const en = {
     titleAccent: "without a middleman",
     titleTail: ".",
     intro:
-      "We list organic farms only. Buyers see your farm name, your region and your phone number, and call you directly. We never handle the money.",
-    introSoon:
-      "We list organic farms only. Your farm name and region go live now. Your phone number goes live only with your say-so, shortly. We never handle the money.",
+      "Introduce your farm, your district and what you grow. After review, buyers can discover your produce and contact you directly. We never handle the money.",
     step1Title: "Apply",
-    step1Body: "Tell us about the farm, what you grow and how it is certified.",
+    step1Body: "Tell us about your farm, what you grow and your farming practices. Add a certificate if you have one.",
     step2Title: "We check",
     step2Body: "We go through your details and call you. Nothing goes live until that is done.",
-    step3Title: "Buyers call you",
-    step3Body: "Your produce appears in the shop with your number on it. You take it from there.",
-    step3BodySoon:
-      "Your produce appears in the shop. We ring you to confirm before your number goes live, and buyers contact you directly after that.",
+    step3Title: "Connect with buyers",
+    step3Body: "Your approved produce appears in the directory. You and the buyer agree on availability, price and collection directly.",
     applyHeading: "Apply to list",
     chooseLabel: "What are you registering?",
     chooseFarm: "I grow it",
@@ -443,7 +433,7 @@ export const en = {
     optional: "optional",
     about: "About the farm",
     aboutHint: "at least 20 characters",
-    aboutPlaceholder: "What you grow, how long you have farmed it, and how it is certified.",
+    aboutPlaceholder: "What you grow, your farming practices and how long you have farmed here.",
     aadhaarNote: "We only ask for the last four digits. Never share the full number.",
     privacyLink: "What we do with these details",
     submit: "Send application",
@@ -459,9 +449,7 @@ export const en = {
     sponsored: "Sponsored",
     heading: "Organic stores",
     intro:
-      "Shops that stock certified organic produce. We check the licence and the certificate before a shop is listed, the same way we check a farm.",
-    introSoon:
-      "Shops that stock certified organic produce. We check the licence and the certificate before a shop is listed. Phone numbers open shortly.",
+      "Find organic stores by district. We review the food licence and any supplied organic certificates before publishing a store.",
     searchPlaceholder: "Shop name or district",
     search: "Search",
     verified: "Checked shop",
@@ -475,6 +463,7 @@ export const en = {
     viewStore: "View shop",
     backToAll: "All shops",
     addressHeading: "Where to find them",
+    openingHours: "Opening hours",
     openInMaps: "Open in Maps",
     registerCta: "Run an organic shop?",
     registerCtaBody:
@@ -626,9 +615,7 @@ export const en = {
   footer: {
     copyright: "© {year} OSSIL. A directory of checked organic farms.",
     blurb:
-      "We check organic farms and publish their number. Buyers call the farm directly — we never handle the order or the money.",
-    blurbSoon:
-      "We check organic farms and list them. Buyers will call the farm directly — numbers open shortly, and we never handle the order or the money.",
+      "A directory connecting buyers with reviewed farms and organic stores. Buyers and sellers arrange purchases directly; OSSIL takes no commission.",
     browseHeading: "Browse",
     trustHeading: "Trust",
     companyHeading: "Company",

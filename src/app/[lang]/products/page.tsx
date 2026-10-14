@@ -6,7 +6,7 @@ import { PRODUCE_TYPES, findProduceItem } from "@/lib/produce-taxonomy";
 import { ProductCard } from "@/components/product-card";
 import { Button } from "@/components/ui/button";
 import { BasketIcon, SearchIcon } from "@/components/ui/icons";
-import { format, localePath } from "@/lib/i18n/config";
+import { format, localePath, publicPageMetadata } from "@/lib/i18n/config";
 import { localised, localisedOrNull, regionLabel } from "@/lib/i18n/content";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
 import { getCategories, getProducts, getRegions } from "@/lib/products";
@@ -19,7 +19,7 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata() {
   const t = await getDictionary();
-  return { title: t.meta.shopTitle, description: t.meta.shopDescription };
+  return publicPageMetadata(await getLocale(), "/products", t.meta.shopTitle, t.meta.shopDescription);
 }
 
 type Filters = { category?: string; item?: string; region?: string; search?: string; sort?: string };

@@ -141,18 +141,11 @@ export default async function FarmerPage({ params }: PageProps<"/[lang]/farmers/
                   >
                     <WhatsAppIcon /> {t.contact.whatsapp}
                   </Button>
-                  <Badge tone="neutral">{t.contact.callWindow}</Badge>
                 </>
               ) : null}
               <SaveButton kind="farmer" id={farmer.id} initialSaved={saved} size="lg" />
             </div>
 
-            {showFarmerPhone() ? null : (
-              <div className="mt-6 max-w-2xl rounded-2xl border border-bark-200 bg-canvas-2 p-5">
-                <p className="font-semibold text-ink">{t.contact.phoneSoon}</p>
-                <p className="mt-1 leading-relaxed text-bark-600">{t.contact.phoneSoonNote}</p>
-              </div>
-            )}
           </div>
 
         </div>

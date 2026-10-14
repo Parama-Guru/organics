@@ -12,6 +12,7 @@ const storeCardSelect = {
   contactName: true,
   phone: true,
   addressLine: true,
+  openingHours: true,
   region: true,
   about: true,
   aboutTa: true,
@@ -71,12 +72,13 @@ export const publicStoreWhere = (now = new Date()): Prisma.OrganicStoreWhereInpu
  * invisible to the public, exactly as farms do — the status check lives here so
  * no caller can forget it.
  */
-export function getVerifiedStores(query = "") {
+export function getVerifiedStores(query = "", regionSlug = "") {
   const term = query.trim();
 
   return prisma.organicStore.findMany({
     where: {
       ...publicStoreWhere(),
+      ...(regionSlug ? { region: { slug: regionSlug } } : {}),
       ...(term
         ? {
             AND: [

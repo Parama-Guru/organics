@@ -14,9 +14,9 @@ import { NearMeButton } from "@/components/near-me-button";
 import { byDistanceFrom, roundedKm } from "@/lib/geo";
 import { accountsEnabled, getCustomer } from "@/lib/customer-auth";
 import { getCustomerAccess } from "@/lib/customer-access";
-import { getLocatedRegions } from "@/lib/products";
+import { getDirectoryRegions, getLocatedRegions } from "@/lib/products";
 import { prisma } from "@/lib/prisma";
-import { format, localePath } from "@/lib/i18n/config";
+import { format, localePath, publicPageMetadata } from "@/lib/i18n/config";
 import { localisedOrNull, regionLabel } from "@/lib/i18n/content";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
 import { activeSponsoredIds, sponsoredFirst } from "@/lib/sponsorships";
@@ -25,19 +25,21 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata() {
   const t = await getDictionary();
-  return { title: t.meta.farmersTitle, description: t.meta.farmersDescription };
+  return publicPageMetadata(await getLocale(), "/farmers", t.meta.farmersTitle, t.meta.farmersDescription);
 }
 
 export default async function FarmersPage({ searchParams }: PageProps<"/[lang]/farmers">) {
-  const [params, locale, t, sponsorships, locatedRegions] = await Promise.all([
+  const [params, locale, t, sponsorships, locatedRegions, districts] = await Promise.all([
     searchParams,
     getLocale(),
     getDictionary(),
     activeSponsoredIds(),
     getLocatedRegions(),
+    getDirectoryRegions(),
   ]);
   const query = (Array.isArray(params.q) ? params.q[0] : params.q)?.trim() ?? "";
-  const baseFarmers = await getVerifiedFarmers(query);
+  const regionSlug = (Array.isArray(params.region) ? params.region[0] : params.region)?.slice(0, 100) ?? "";
+  const baseFarmers = await getVerifiedFarmers(query, regionSlug);
 
   // A district slug, never coordinates. Unknown values fall through to the
   // normal listing rather than erroring.
@@ -86,9 +88,9 @@ export default async function FarmersPage({ searchParams }: PageProps<"/[lang]/f
           <p className="section-kicker"><CheckIcon /> {t.farmers.everyFarmVerified}</p>
           <h1 className="editorial-heading mt-6">{t.farmers.title}</h1>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-bark-600 sm:text-xl">
-            {phoneShown ? t.farmers.intro : t.farmers.introSoon}
+            {t.farmers.intro}
           </p>
-          <dl className="mt-8 grid max-w-2xl grid-cols-3 border-y border-bark-200 py-5">
+          {farmers.length > 0 ? <dl className="mt-8 grid max-w-2xl grid-cols-3 border-y border-bark-200 py-5">
             <div>
               <dt className="text-sm text-bark-600">{t.home.statFarms}</dt>
               <dd className="mt-1 font-display text-4xl text-brand">{farmers.length}</dd>
@@ -101,7 +103,7 @@ export default async function FarmersPage({ searchParams }: PageProps<"/[lang]/f
               <dt className="text-sm text-bark-600">{t.home.statCommission}</dt>
               <dd className="mt-1 font-display text-4xl text-brand">0%</dd>
             </div>
-          </dl>
+          </dl> : null}
         </div>
 
         <aside className="rounded-[2rem] bg-inverse p-7 text-white sm:p-9">
@@ -125,6 +127,14 @@ export default async function FarmersPage({ searchParams }: PageProps<"/[lang]/f
       </div>
 
       <form method="get" className="editorial-panel mt-8 flex flex-wrap gap-2 rounded-[1.75rem] p-4 sm:p-5">
+        {nearSlug ? <input type="hidden" name="near" value={nearSlug} /> : null}
+        <label className="min-w-0 w-full sm:w-60">
+          <span className="sr-only">{t.account.region}</span>
+          <select name="region" defaultValue={regionSlug} className="focus-ring min-h-12 w-full rounded-lg border border-bark-200 bg-canvas-2 px-3">
+            <option value="">{t.near.clear}</option>
+            {districts.map((district) => <option key={district.slug} value={district.slug}>{regionLabel(locale, district)}</option>)}
+          </select>
+        </label>
         <label className="min-w-0 flex-1 sm:max-w-md">
           <span className="sr-only">{t.farmers.searchPlaceholder}</span>
           <input
@@ -138,7 +148,7 @@ export default async function FarmersPage({ searchParams }: PageProps<"/[lang]/f
         <Button type="submit" variant="dark">
           {t.farmers.search}
         </Button>
-        {query ? (
+        {query || regionSlug ? (
           <Button as={Link} href={localePath(locale, "/farmers")} variant="secondary">
             {t.farmers.clear}
           </Button>
@@ -183,7 +193,7 @@ export default async function FarmersPage({ searchParams }: PageProps<"/[lang]/f
       {farmers.length === 0 ? (
         <div className="glass mt-10 rounded-3xl p-12 text-center">
           <p className="font-display text-xl">
-            {query ? t.farmers.emptySearch : t.farmers.none}
+            {query || regionSlug ? t.farmers.emptySearch : t.farmers.none}
           </p>
           <Button as={Link} href={localePath(locale, "/sell")} className="mt-5">
             {t.farmers.applyToList}

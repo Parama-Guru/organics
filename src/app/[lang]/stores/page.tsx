@@ -13,8 +13,8 @@ import { getCustomerAccess } from "@/lib/customer-access";
 import { accountsEnabled, getCustomer } from "@/lib/customer-auth";
 import { NearMeButton } from "@/components/near-me-button";
 import { byDistanceFrom, roundedKm } from "@/lib/geo";
-import { getLocatedRegions } from "@/lib/products";
-import { format, localePath } from "@/lib/i18n/config";
+import { getDirectoryRegions, getLocatedRegions } from "@/lib/products";
+import { format, localePath, publicPageMetadata } from "@/lib/i18n/config";
 import { localisedOrNull, regionLabel } from "@/lib/i18n/content";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
 import { getVerifiedStores } from "@/lib/stores";
@@ -24,17 +24,19 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata() {
   const t = await getDictionary();
-  return { title: t.meta.storesTitle, description: t.meta.storesDescription };
+  return publicPageMetadata(await getLocale(), "/stores", t.meta.storesTitle, t.meta.storesDescription);
 }
 
 export default async function StoresPage({ searchParams }: PageProps<"/[lang]/stores">) {
   const [params, locale, t] = await Promise.all([searchParams, getLocale(), getDictionary()]);
   const query = (Array.isArray(params.q) ? params.q[0] : params.q)?.trim() ?? "";
+  const regionSlug = (Array.isArray(params.region) ? params.region[0] : params.region)?.slice(0, 100) ?? "";
 
-  const [baseStores, sponsorships, locatedRegions] = await Promise.all([
-    getVerifiedStores(query),
+  const [baseStores, sponsorships, locatedRegions, districts] = await Promise.all([
+    getVerifiedStores(query, regionSlug),
     activeSponsoredIds(),
     getLocatedRegions(),
+    getDirectoryRegions(),
   ]);
 
   // A district slug, never coordinates.
@@ -69,7 +71,7 @@ export default async function StoresPage({ searchParams }: PageProps<"/[lang]/st
         <div>
           <h1 className="editorial-heading">{t.stores.heading}</h1>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-bark-600 sm:text-xl">
-            {phoneShown ? t.stores.intro : t.stores.introSoon}
+            {t.stores.intro}
           </p>
         </div>
       </header>
@@ -77,6 +79,14 @@ export default async function StoresPage({ searchParams }: PageProps<"/[lang]/st
       {/* A plain GET form: the result is a URL an admin or a buyer can share,
           and it works with JavaScript off. */}
       <form method="get" className="editorial-panel mt-8 flex flex-wrap gap-2 rounded-[1.75rem] p-4 sm:p-5">
+        {nearSlug ? <input type="hidden" name="near" value={nearSlug} /> : null}
+        <label className="min-w-0 w-full sm:w-60">
+          <span className="sr-only">{t.account.region}</span>
+          <select name="region" defaultValue={regionSlug} className="focus-ring min-h-12 w-full rounded-lg border border-bark-200 bg-canvas-2 px-3">
+            <option value="">{t.near.clear}</option>
+            {districts.map((district) => <option key={district.slug} value={district.slug}>{regionLabel(locale, district)}</option>)}
+          </select>
+        </label>
         <label className="min-w-0 flex-1 sm:max-w-md">
           <span className="sr-only">{t.stores.searchPlaceholder}</span>
           <input
@@ -90,7 +100,7 @@ export default async function StoresPage({ searchParams }: PageProps<"/[lang]/st
         <Button type="submit" variant="dark">
           {t.stores.search}
         </Button>
-        {query ? (
+        {query || regionSlug ? (
           <Button as={Link} href={localePath(locale, "/stores")} variant="secondary">
             {t.stores.clear}
           </Button>
@@ -134,7 +144,7 @@ export default async function StoresPage({ searchParams }: PageProps<"/[lang]/st
 
       {stores.length === 0 ? (
         <div className="glass mt-8 rounded-3xl p-12 text-center">
-          <p className="font-display text-xl">{query ? t.stores.emptySearch : t.stores.empty}</p>
+          <p className="font-display text-xl">{query || regionSlug ? t.stores.emptySearch : t.stores.empty}</p>
           <Button as={Link} href={localePath(locale, "/sell?type=store")} className="mt-5">
             {t.stores.registerCtaButton}
           </Button>

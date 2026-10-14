@@ -1,14 +1,14 @@
 import Link from "next/link";
 
 import { loadConfig } from "@conf/config";
-import { localePath } from "@/lib/i18n/config";
+import { localePath, publicPageMetadata } from "@/lib/i18n/config";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata() {
   const t = await getDictionary();
-  return { title: t.legal.refundsHeading, description: t.legal.refundsIntro };
+  return publicPageMetadata(await getLocale(), "/refunds", t.legal.refundsHeading, t.legal.refundsIntro);
 }
 
 export default async function RefundsPage() {
@@ -24,7 +24,7 @@ export default async function RefundsPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-20">
       <header className="border-b border-bark-200 pb-10 sm:pb-14">
-      <p className="section-kicker">Legal field note</p>
+      <p className="section-kicker">{t.footer.refunds}</p>
       <h1 className="editorial-heading mt-6">{t.legal.refundsHeading}</h1>
       <p className="mt-6 max-w-2xl text-lg leading-relaxed text-bark-600 sm:text-xl">{t.legal.refundsIntro}</p>
       <p className="mt-3 font-mono text-xs uppercase tracking-[0.1em] text-bark-600">{t.legal.effective}</p>
